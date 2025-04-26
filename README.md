@@ -1,0 +1,2 @@
+# newhotkey
+new hotkey!
