@@ -1,0 +1,14 @@
+# ホットキー設定ファイル
+# エスケープ文字 : [\], 対象文字 : [#,/]
+# 最初のコロンでホットキーとコマンド+引数に分解
+
+A ctrl shift : launch_app notepad.exe
+K ctrl alt   : open_url https://www.example.com
+VK_NUMPAD0 : volume_down
+VK_NUMPAD1 : volume_up
+
+# エスケープの例
+VK_F1 : open_url https://www.example.com/page\#section1
+
+# リマップ（将来対応予定）
+LWIN -> LCONTROL
