@@ -11,6 +11,7 @@
 #include <iomanip>  // 時間のフォーマットに使う
 #include <fstream>
 #include <sstream>
+#include <cassert>
 
 #define DEBUG_MODE 1
 
@@ -22,6 +23,15 @@ enum class LogLevel {
     Info,
     Warning,
     Error
+};
+enum class ProcessType{ // 命令のタイプ判別
+    Hotkey,
+    Remap
+};
+enum class ParsedLineType { // 読み込み行のタイプ判別
+    Hotkey,
+    Remap,
+    Invalid
 };
 
 LogLevel displaylevel = LogLevel::Info;
@@ -36,6 +46,13 @@ struct ParsedHotkey {
     bool ctrl;
     bool alt;
     bool win;
+};
+struct ParsedLine {
+    ParsedLineType type;
+    std::string key_part;
+    std::string action_part;
+    std::string from_key;
+    std::string to_key;
 };
 struct Hotkey {
     WORD key;
@@ -99,12 +116,30 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_map<Hotkey, bool
     os << "}";
     return os;
 }
+std::ostream& operator<<(std::ostream& os, const ParsedLineType& p){
+    os << "{";
+    switch(p){
+        case ParsedLineType::Hotkey:
+            os << "Hotkey";
+            break;
+        case ParsedLineType::Remap:
+            os << "Remap";
+            break;
+        case ParsedLineType::Invalid:
+            os << "Invalid";
+            break;
+    }
+    os << "}";
+    return os;
+}
+
 
 std::unordered_map<WORD, std::function<bool(bool keyDown)>> single_key_map; //単キー
 std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キー
 std::unordered_map<WORD, bool> suppress_keys;
 std::unordered_map<Hotkey, bool> suppress_hotkeys;
-std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys;
+std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
+std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
 std::atomic<bool> suppress_input = false;
 
 template<typename... Args>
@@ -229,10 +264,15 @@ WORD key_string_to_vk(const std::string& key_name) {
         {"VK_F10", VK_F10},
         {"VK_F11", VK_F11},
         {"VK_F12", VK_F12},
+        {"VK_LSHIFT", VK_LSHIFT},
+        {"VK_RSHIFT", VK_RSHIFT},
+        {"VK_LCONTROL", VK_LCONTROL},
+        {"VK_RCONTROL", VK_RCONTROL},
         {"VK_NONCONVERT", VK_NONCONVERT},
         {"VK_VOLUME_DOWN", VK_VOLUME_DOWN},
         {"VK_VOLUME_UP", VK_VOLUME_UP},
         {"VK_MEDIA_PLAY_PAUSE", VK_MEDIA_PLAY_PAUSE},
+        {"VK_ZENHANKAKU", 243}
     };
 
     // "VK_"で始まる名前ならテーブル検索
@@ -253,34 +293,56 @@ WORD key_string_to_vk(const std::string& key_name) {
     return 0;
 }
 
-bool parse_line(const std::string& line, std::string& key_part, std::string& action_part) {
+ParsedLine parse_line(const std::string& line) {
     bool escaped = false;
     bool found_colon = false;
-    key_part.clear();
-    action_part.clear();
+    bool found_arrow = false;
+    ParsedLine result;
+    result.type = ParsedLineType::Invalid;
+    std::string left, right;
+    // key_part.clear();
+    // action_part.clear();
 
     for (size_t i = 0; i < line.size(); ++i) {
         char c = line[i];
         if (escaped) {
-            if (!found_colon) key_part += c;
-            else action_part += c;
+            ((found_colon || found_arrow) ? right : left) += c;
             escaped = false;
         } else {
             if (c == '\\') {
                 escaped = true;
-            } else if (c == '#' && !found_colon) {
+            } else if (c == '#' && !found_colon && !found_arrow) {
                 break; // 非エスケープ#でコメント開始
-            } else if (c == ':' && !found_colon) {
+            } else if (c == ':' && !found_colon && !found_arrow) {
                 found_colon = true;
-            } else {
-                if (!found_colon) key_part += c;
-                else action_part += c;
+            } else if (c == '-' && i + 1 < line.size() && line[i + 1] == '>'
+                        && !found_colon && !found_arrow){
+                found_arrow = true;
+                i++;
+            }else {
+                ((found_colon || found_arrow) ? right : left) += c;
             }
         }
     }
+    // 空白トリム
+    auto trim = [](std::string& s) {
+        s.erase(0, s.find_first_not_of(" \t"));
+        s.erase(s.find_last_not_of(" \t") + 1);
+    };
+    trim(left);
+    trim(right);
 
-    // key_partが空なら無効な行
-    return !key_part.empty();
+    if (found_colon && !left.empty()) {
+        result.type = ParsedLineType::Hotkey;
+        result.key_part = left;
+        result.action_part = right;
+    } else if (found_arrow && !left.empty() && !right.empty()) {
+        result.type = ParsedLineType::Remap;
+        result.from_key = left;
+        result.to_key = right;
+    }
+
+    return result; // r.left = "A ctrl shift", r.right = "launch_app notepad.exe"
 }
 
 void load_hotkeys_from_file(const std::string& filename) {
@@ -298,29 +360,42 @@ void load_hotkeys_from_file(const std::string& filename) {
 
         if (line.empty() || line[0] == '#') continue; // 空行・コメント行はスキップ
 
-        std::string key_part, action_part;
-        if (!parse_line(line, key_part, action_part)) continue;
+        ParsedLine parsed = parse_line(line);
+        if (parsed.type == ParsedLineType::Invalid) continue;
 
-        // 前後の空白をさらに削除
-        key_part.erase(0, key_part.find_first_not_of(" \t"));
-        key_part.erase(key_part.find_last_not_of(" \t") + 1);
-        action_part.erase(0, action_part.find_first_not_of(" \t"));
-        action_part.erase(action_part.find_last_not_of(" \t") + 1);
+        // // 前後の空白をさらに削除
+        // hotkey用の変数宣言
+        std::istringstream action_stream(parsed.action_part);        
+        HotkeyCommandAction act;
+        std::string command, param;
 
-        // アクション部分を解析（最初の単語がコマンド、それ以降がパラメータ）
-        std::istringstream action_stream(action_part);
-        std::string command;
-        action_stream >> command;
-
-        std::string param;
-        std::getline(action_stream, param);
-        if (!param.empty() && param[0] == ' ') param.erase(0, 1);
-
-        HotkeyCommandAction act = {command, param};
-        loaded_hotkeys[key_part] = act;
+        switch (parsed.type) {
+            case ParsedLineType::Hotkey:
+                // アクション部分を解析（最初の単語がコマンド、それ以降がパラメータ）
+                action_stream >> command; // 空白までがcommandに入る
+                std::getline(action_stream, param); // actionのcommand以外がparamに入る
+                if (!param.empty() && param[0] == ' ') param.erase(0, 1);
+                act = {command, param};
+                loaded_hotkeys[parsed.key_part] = act;
+                break;
+            case ParsedLineType::Remap:
+                loaded_remaps[parsed.from_key] = parsed.to_key;
+                // loaded_remaps.push_back({parsed.from_key, parsed.to_key});
+                break;
+            case ParsedLineType::Invalid:
+                // 無視
+                break;
+        }
 
         // デバッグ出力
-        debug_log(LogLevel::Info,"Loaded: [", key_part, "] => [", command, "] [", param, "]");
+        switch(parsed.type){
+            case ParsedLineType::Hotkey:
+                debug_log(LogLevel::Info,"Loaded Hotkey: [", parsed.key_part, "] => [", command, "] [", param, "]");
+                break;
+            case ParsedLineType::Remap:
+                debug_log(LogLevel::Info,"Loaded Remap: [", parsed.from_key, "] -> [", parsed.to_key,"]");
+                break;
+        }
     }
 }
 
@@ -362,7 +437,6 @@ ParsedHotkey parse_key_with_modifiers(const std::string& key_str) {
     }
     return result;
 }
-
 
 void register_loaded_hotkeys() {
     for (auto& [key_str, action] : loaded_hotkeys) {
@@ -410,25 +484,6 @@ void register_loaded_hotkeys() {
     }
 }
 
-void processHotkey(WORD vk_code, bool keyDown) {
-    bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-    bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-    bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
-    bool win = (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
-
-    Hotkey current = { vk_code, shift, ctrl, alt, win };
-    debug_log(LogLevel::LogInfo, current);
-
-    auto sit = single_key_map.find(vk_code);
-    if (sit != single_key_map.end()) {
-        sit->second(keyDown); // 登録された関数を実行
-    }
-    auto it = hotkey_map.find(current);
-    if (it != hotkey_map.end()) {
-        it->second(keyDown); // 登録された関数を実行
-    }
-}
-
 void SendKeyboardInput(WORD key, bool keyDown) {
     suppress_input = true;
     INPUT input = {0};
@@ -440,6 +495,66 @@ void SendKeyboardInput(WORD key, bool keyDown) {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     suppress_input = false;
+}
+
+void register_remaps(){
+    for (auto& [from_key, to_key] : loaded_remaps) {
+        WORD vk_from_key, vk_to_key;
+        vk_from_key = key_string_to_vk(from_key);
+        vk_to_key = key_string_to_vk(to_key);
+
+        if (vk_from_key == 0) {
+            std::cerr << "Invalid input key: " << from_key << std::endl;
+            continue;
+        }
+        if (vk_to_key == 0) {
+            std::cerr << "Invalid output key: " << to_key << std::endl;
+            continue;
+        }
+        // ここでホットキー登録
+        register_single_key(vk_from_key,
+            HotkeyAction {
+                [vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, true);
+                    return true;}, // backspace押下
+                [vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, false);
+                    return true;}// backspace離す
+            },
+        true
+        );
+    }
+};
+
+
+void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
+    switch(p){
+        case ProcessType::Remap:{
+            auto sit = single_key_map.find(vk_code);
+            if (sit != single_key_map.end()) {
+                sit->second(keyDown); // 登録された関数を実行
+            }
+            break;
+        }
+        case ProcessType::Hotkey:{
+            auto it = hotkey_map.find(current);
+            if (it != hotkey_map.end()) {
+                it->second(keyDown); // 登録された関数を実行
+            }
+            break;
+        }
+    }
+}
+
+void processHotkey(WORD vk_code, bool keyDown) {
+    bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+    bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+    bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+    bool win = (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
+
+    Hotkey current = { vk_code, shift, ctrl, alt, win };
+    debug_log(LogLevel::LogInfo, current);
+
+    execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
+    execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
 }
 
 bool shouldSuppress(WORD vkCode, bool isKeyDown) {
@@ -479,77 +594,18 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-void setupHotkeys() {
-    register_hotkey('V', false, true, false, false, 
-        HotkeyAction {
-            []() -> bool {
-            debug_log(LogLevel::Info, "Ctrl + V pressed!");
-            return true;}
-        },
-        true
-    );
-
-    register_hotkey('D', false, true, false, false, 
-        HotkeyAction {
-            []() -> bool { 
-            debug_log(LogLevel::Info, "Ctrl + D pressed!"); 
-            return true;}
-        },
-        true
-    );
-
-    register_single_key(VK_NONCONVERT,
-        HotkeyAction {
-            []() -> bool { SendKeyboardInput(VK_BACK, true);
-                return true;}, // backspace押下
-            []() -> bool { SendKeyboardInput(VK_BACK, false);
-                return true;}// backspace離す
-        },
-        true
-    );
-
-    register_single_key(VK_LWIN,
-        HotkeyAction {
-            []() -> bool { SendKeyboardInput(VK_CONTROL, true);
-                return true;}, // Lctrl押下
-            []() -> bool { SendKeyboardInput(VK_CONTROL, false);
-                return true;}// Lctrl離す
-        }
-    );
-
-    register_single_key(VK_LCONTROL,
-        HotkeyAction {
-            []() -> bool { SendKeyboardInput(VK_LWIN, true);
-                return true;}, // Lwin押下
-            []() -> bool { SendKeyboardInput(VK_LWIN, false);
-                return true;}// Lwin離す
-        }
-    );
-
-    // register_hotkey(VK_LWIN, false, false, false, false, []() {
-    //     SendKeyboardInput(VK_LCONTROL, true);  // Lctrl押下
-    //     SendKeyboardInput(VK_LCONTROL, false); // Lctrl離す
-    //     std::cout << "Lcontrol pressed" << std::endl;
-    // });
-
-    // register_hotkey(VK_CAPITAL, false, false, false, false, []() {
-    //     SendKeyboardInput(244, true);  // 全角半角押下
-    //     SendKeyboardInput(244, false); // 全角半角離す
-    //     std::cout << "zenkaku pressed" << std::endl;
-    // });
-
-    // register_hotkey(244, false, false, false, false, []() {
-    //     SendKeyboardInput(VK_CAPITAL, true);  // caps押下
-    //     SendKeyboardInput(VK_CAPITAL, false); // caps離す
-    //     std::cout << "caps pressed" << std::endl;
-    // });
+void test_invalid_key(){
+    WORD unknown = key_string_to_vk("FAKEKEY");
+    assert(unknown == 0);
+}
+void run_all_tests(){
+    test_invalid_key();
+    debug_log(LogLevel::Info, "Passed all tests");
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     HHOOK hHook = NULL;
     #define HOTKEY_ID 1
-
-    setupHotkeys();
 
     // キーボードフック開始
     hHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, NULL, 0);
@@ -560,6 +616,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     std::string fileurl = "hotkeys.txt";
     load_hotkeys_from_file(fileurl);
     register_loaded_hotkeys();
+    register_remaps();
+
+    run_all_tests();
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
