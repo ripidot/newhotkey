@@ -277,14 +277,14 @@ void debug_log(LogLevel level, Args&&... args) {
     }
 }
 
-class AccessMap { // file access
+class FileAccess { // file access
     private:
         const std::string fileurl_;
         std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
         std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
     public:
-        AccessMap() : fileurl_(){}
-        AccessMap(std::string fileurl) : fileurl_(fileurl){}
+        FileAccess() : fileurl_(){}
+        FileAccess(std::string fileurl) : fileurl_(fileurl){}
 
         auto lhotkeys_getter(){
             return &loaded_hotkeys;
@@ -327,7 +327,6 @@ class AccessMap { // file access
                         break;
                     case ParsedLineType::Remap:
                         loaded_remaps[parsed.from_key] = parsed.to_key;
-                        // loaded_remaps.push_back({parsed.from_key, parsed.to_key});
                         break;
                     case ParsedLineType::Invalid:
                         // 無視
@@ -345,29 +344,75 @@ class AccessMap { // file access
                 }
             }
         }
-}; 
+};
+class KeyboardHookManager {
+    private:
+        static inline HHOOK hHook = nullptr;
+        static inline std::function<void(int)> keyDownHandler = nullptr;
+        static inline std::function<void(int)> keyUpHandler = nullptr;
 
-std::unordered_map<WORD, bool> suppress_keys;
-std::atomic<bool> suppress_input = false;
+    public:
+        KeyboardHookManager(){}
+        KeyboardHookManager(std::unordered_map<WORD, bool>* skeys){
+            suppress_keys = *skeys;
+        }
+        static inline std::unordered_map<WORD, bool> suppress_keys;
+        static inline std::atomic<bool> suppress_input = false;
+        static bool shouldSuppress(WORD vkCode, bool isKeyDown) {
+            auto it1 = suppress_keys.find(vkCode);
+            if (it1 != suppress_keys.end()) {
+                return it1->second;
+            }
+            return false;
+        }
+        static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
+            if (nCode == HC_ACTION && !suppress_input) {
+                const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+                int vkCode = p->vkCode;
+                bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+                bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
+    
+                if (isKeyDown && keyDownHandler) keyDownHandler(vkCode);
+                if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
+    
+                if (shouldSuppress(vkCode, isKeyDown)) return 1;
+            }
+            return CallNextHookEx(NULL, nCode, wParam, lParam);
+        }
+        void setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
+            debug_log(LogLevel::Warning, *skeys);
+            suppress_keys = move(*skeys);
+        }
+        void setKeyDownHandler(std::function<void(int)> handler) {
+            keyDownHandler = std::move(handler);
+        }
+        void setKeyUpHandler(std::function<void(int)> handler) {
+            keyUpHandler = std::move(handler);
+        }
+        void setHook() {
+            hHook = SetWindowsHookEx(WH_KEYBOARD_LL, HookProc, NULL, 0);
+        }
+        void removeHook() {
+            if (hHook) UnhookWindowsHookEx(hHook);
+            hHook = nullptr;
+        }
+};
+
 class MapLoader{
     private:
         std::string filename_;
-        AccessMap amap = AccessMap(filename_);
+        FileAccess amap = FileAccess(filename_);
         KeyMapLoader keymaploader = KeyMapLoader();
         std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
         std::unordered_map<WORD, std::function<bool(bool keyDown)>> remap_map; //単キーと関数の紐づけ
 
         std::unordered_map<Hotkey, bool> suppress_hotkeys;
-        // std::unordered_map<WORD, bool> suppress_keys;
-        // std::atomic<bool> suppress_input = false;
+        std::unordered_map<WORD, bool> suppress_keys;
     public:
         MapLoader(){}
         MapLoader(std::string filename) : filename_(filename){}
         auto skeys_getter(){
             return &suppress_keys;
-        }
-        auto sinput_getter(){
-            return &suppress_input;
         }
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str) {
             std::istringstream iss(key_str);
@@ -389,8 +434,7 @@ class MapLoader{
         }
         // remap用sendinput関数
         void SendKeyboardInput(WORD key, bool keyDown) { //key:vk_key
-            suppress_input = true;
-            // KeyboardHookManager::suppress_input = true;
+            KeyboardHookManager::suppress_input = true;
             INPUT input = {0};
             input.type = INPUT_KEYBOARD;
             input.ki.wVk = key;
@@ -399,8 +443,7 @@ class MapLoader{
             SendInput(1, &input, sizeof(INPUT));
 
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            suppress_input = false;
-            // KeyboardHookManager::suppress_input = false;
+            KeyboardHookManager::suppress_input = false;
         }
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress = true){
             suppress_keys[key] = suppress;
@@ -496,6 +539,13 @@ class MapLoader{
         
             }
         }
+        void load(){
+            amap.load_hotkeys_from_file();
+            register_loaded_hotkeys();
+            register_loaded_remaps();
+        }
+
+// アクションの実行
         void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
             switch(p){
                 case ProcessType::Remap:{
@@ -515,7 +565,7 @@ class MapLoader{
             }
         }
 
-        void processHotkey(WORD vk_code, bool keyDown) { // actionを実行
+        void execute(WORD vk_code, bool keyDown) { // actionを実行
             bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
             bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
             bool alt = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
@@ -527,11 +577,7 @@ class MapLoader{
             execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
             execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
         }
-        void execute(){
-            amap.load_hotkeys_from_file();
-            register_loaded_hotkeys();
-            register_loaded_remaps();
-        }
+// テストの実行
         void test_invalid_key(){
             WORD unknown = keymaploader.key_string_to_vk("FAKEKEY");
             assert(unknown == 0);
@@ -543,78 +589,21 @@ class MapLoader{
 };
 
 
-class KeyboardHookManager {
-    private:
-        static inline HHOOK hHook = nullptr;
-        static inline std::function<void(int)> keyDownHandler = nullptr;
-        static inline std::function<void(int)> keyUpHandler = nullptr;
-
-    public:
-        KeyboardHookManager(){}
-        // static inline std::unordered_map<WORD, bool> suppress_keys;
-        // static inline std::atomic<bool> suppress_input;
-        static bool shouldSuppress(WORD vkCode, bool isKeyDown) {
-            auto it1 = suppress_keys.find(vkCode);
-            if (it1 != suppress_keys.end()) {
-                return it1->second;
-            }
-            return false;
-        }
-        static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
-            if (nCode == HC_ACTION && !suppress_input) {
-                const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-                int vkCode = p->vkCode;
-                bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
-                bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
-    
-                if (isKeyDown && keyDownHandler) keyDownHandler(vkCode);
-                if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
-    
-                if (shouldSuppress(vkCode, isKeyDown)) return 1;
-            }
-            return CallNextHookEx(NULL, nCode, wParam, lParam);
-        }
-        void setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
-            debug_log(LogLevel::Warning, *skeys);
-            suppress_keys = move(*skeys);
-            // debug_log(LogLevel::Info, suppress_keys);
-        }
-        void setSuppressInput(std::atomic<bool>* sinput){
-            suppress_input = sinput;
-        }
-        void setKeyDownHandler(std::function<void(int)> handler) {
-            keyDownHandler = std::move(handler);
-        }
-        void setKeyUpHandler(std::function<void(int)> handler) {
-            keyUpHandler = std::move(handler);
-        }
-        void setHook() {
-            hHook = SetWindowsHookEx(WH_KEYBOARD_LL, HookProc, NULL, 0);
-        }
-        void removeHook() {
-            if (hHook) UnhookWindowsHookEx(hHook);
-            hHook = nullptr;
-        }
-};
-
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     #define HOTKEY_ID 1
-
-    KeyboardHookManager hook;
     const std::string hotkeyfileurl = "../data/hotkeys.txt";
     const std::string vkfileurl = "../data/vkmaps.txt";
     MapLoader maplod = MapLoader(hotkeyfileurl);
-    maplod.execute();
+    maplod.load();
     maplod.run_all_tests();
 
+    KeyboardHookManager hook(maplod.skeys_getter());
 
-    // hook.setSuppressKeys(maplod.skeys_getter());
-    // hook.setSuppressInput(maplod.sinput_getter());
     hook.setKeyDownHandler([&maplod](int vk) {
-        maplod.processHotkey(vk, true);
+        maplod.execute(vk, true);
     });
     hook.setKeyUpHandler([&maplod](int vk) {
-        maplod.processHotkey(vk, false);
+        maplod.execute(vk, false);
     });
     hook.setHook();
 
