@@ -201,6 +201,14 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_map<Hotkey, bool
     os << "}";
     return os;
 }
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<WORD, bool>& s){
+    os << "{";
+    for (const auto& elem : s){
+        os << elem.first << " ";
+    }
+    os << "}";
+    return os;
+}
 std::ostream& operator<<(std::ostream& os, const ParsedLineType& p){
     os << "{";
     switch(p){
@@ -269,73 +277,28 @@ void debug_log(LogLevel level, Args&&... args) {
     }
 }
 
-std::unordered_map<WORD, bool> suppress_keys;
-std::atomic<bool> suppress_input = false;
-
-class AccessMap{
-    private:
-        std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
-        std::unordered_map<WORD, std::function<bool(bool keyDown)>> remap_map; //単キーと関数の紐づけ
-        std::unordered_map<Hotkey, bool> suppress_hotkeys;
-    public:
-        AccessMap(){}
-
-        void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress = true){
-            suppress_keys[key] = suppress;
-            remap_map[key] = [hotkeyaction](bool keyDown){
-                auto& action = keyDown ? hotkeyaction.on_press : hotkeyaction.on_release;
-                if (action) return action();
-                return false;
-            };
-        }
-        void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
-            HotkeyAction hotkeyaction, bool suppress = true) {
-            Hotkey hk = { key, shift, ctrl, alt , win};
-            suppress_hotkeys[hk] = suppress;
-            hotkey_map[hk] = [hotkeyaction](bool keyDown) -> bool {
-                auto& action = keyDown ? hotkeyaction.on_press : hotkeyaction.on_release;
-                if (action) return action();  // trueなら抑制したい
-                return false;
-            };
-        }
-        void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
-            switch(p){
-                case ProcessType::Remap:{
-                    auto sit = remap_map.find(vk_code);
-                    if (sit != remap_map.end()) {
-                        sit->second(keyDown); // 登録された関数を実行
-                    }
-                    break;
-                }
-                case ProcessType::Hotkey:{
-                    auto it = hotkey_map.find(current);
-                    if (it != hotkey_map.end()) {
-                        it->second(keyDown); // 登録された関数を実行
-                    }
-                    break;
-                }
-            }
-        }
-};
-
-class MapLoader { // AccessMap wrapper関数
+class AccessMap { // file access
     private:
         const std::string fileurl_;
-        KeyMapLoader keymaploader = KeyMapLoader();
-        AccessMap db;
         std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
         std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
     public:
-        MapLoader(std::string fileurl) : fileurl_(fileurl){}
-        MapLoader() : fileurl_(){}
+        AccessMap() : fileurl_(){}
+        AccessMap(std::string fileurl) : fileurl_(fileurl){}
 
+        auto lhotkeys_getter(){
+            return &loaded_hotkeys;
+        }
+        auto lremaps_getter(){
+            return &loaded_remaps;
+        }
         void load_hotkeys_from_file() {
             std::ifstream infile(fileurl_);
             if (!infile) {
                 std::cerr << "Failed to open " << fileurl_ << std::endl;
                 return;
             }
-        
+
             std::string line;
             while (std::getline(infile, line)) {
                 // 前後の空白削除
@@ -382,6 +345,30 @@ class MapLoader { // AccessMap wrapper関数
                 }
             }
         }
+}; 
+
+std::unordered_map<WORD, bool> suppress_keys;
+std::atomic<bool> suppress_input = false;
+class MapLoader{
+    private:
+        std::string filename_;
+        AccessMap amap = AccessMap(filename_);
+        KeyMapLoader keymaploader = KeyMapLoader();
+        std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
+        std::unordered_map<WORD, std::function<bool(bool keyDown)>> remap_map; //単キーと関数の紐づけ
+
+        std::unordered_map<Hotkey, bool> suppress_hotkeys;
+        // std::unordered_map<WORD, bool> suppress_keys;
+        // std::atomic<bool> suppress_input = false;
+    public:
+        MapLoader(){}
+        MapLoader(std::string filename) : filename_(filename){}
+        auto skeys_getter(){
+            return &suppress_keys;
+        }
+        auto sinput_getter(){
+            return &suppress_input;
+        }
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str) {
             std::istringstream iss(key_str);
             std::string token;
@@ -400,7 +387,69 @@ class MapLoader { // AccessMap wrapper関数
             }
             return result;
         }
-        void register_loaded_hotkeys() {
+        // remap用sendinput関数
+        void SendKeyboardInput(WORD key, bool keyDown) { //key:vk_key
+            suppress_input = true;
+            // KeyboardHookManager::suppress_input = true;
+            INPUT input = {0};
+            input.type = INPUT_KEYBOARD;
+            input.ki.wVk = key;
+            input.ki.dwFlags = keyDown ? 0 : KEYEVENTF_KEYUP;
+
+            SendInput(1, &input, sizeof(INPUT));
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            suppress_input = false;
+            // KeyboardHookManager::suppress_input = false;
+        }
+        void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress = true){
+            suppress_keys[key] = suppress;
+            remap_map[key] = [hotkeyaction](bool keyDown){
+                auto& action = keyDown ? hotkeyaction.on_press : hotkeyaction.on_release;
+                if (action) return action();
+                return false;
+            };
+        }
+        void register_loaded_remaps(){
+            auto lremaps = *amap.lremaps_getter();
+            for (auto& [from_key, to_key] : lremaps) {
+                WORD vk_from_key, vk_to_key;
+                vk_from_key = keymaploader.key_string_to_vk(from_key);
+                vk_to_key = keymaploader.key_string_to_vk(to_key);
+        
+                if (vk_from_key == 0) {
+                    std::cerr << "Invalid input key: " << from_key << std::endl;
+                    continue;
+                }
+                if (vk_to_key == 0) {
+                    std::cerr << "Invalid output key: " << to_key << std::endl;
+                    continue;
+                }
+                // ここでホットキー登録
+                register_remap(vk_from_key,
+                    HotkeyAction {
+                        [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, true);
+                            return true;}, // backspace押下
+                        [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, false);
+                            return true;}// backspace離す
+                    },
+                true
+                );
+            }
+        }
+
+        void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
+            HotkeyAction hotkeyaction, bool suppress = true) {
+            Hotkey hk = { key, shift, ctrl, alt , win};
+            suppress_hotkeys[hk] = suppress;
+            hotkey_map[hk] = [hotkeyaction](bool keyDown) -> bool {
+                auto& action = keyDown ? hotkeyaction.on_press : hotkeyaction.on_release;
+                if (action) return action();  // trueなら抑制したい
+                return false;
+            };
+        }
+        void register_loaded_hotkeys(){
+            auto loaded_hotkeys = *amap.lhotkeys_getter();
             for (auto& [key_str, action] : loaded_hotkeys) {
                 ParsedHotkey parsed = parse_key_with_modifiers(key_str);
         
@@ -410,7 +459,7 @@ class MapLoader { // AccessMap wrapper関数
                 }
         
                 // ここでホットキー登録
-                db.register_hotkey(parsed.key, parsed.shift, parsed.ctrl, parsed.alt, parsed.win,
+                register_hotkey(parsed.key, parsed.shift, parsed.ctrl, parsed.alt, parsed.win,
                     HotkeyAction {
                         [action]() -> bool{
                             if (action.command == "launch_app") {
@@ -447,50 +496,25 @@ class MapLoader { // AccessMap wrapper関数
         
             }
         }
-        // remap用sendinput関数
-        void SendKeyboardInput(WORD key, bool keyDown) { //key:vk_key
-            suppress_input = true;
-            INPUT input = {0};
-            input.type = INPUT_KEYBOARD;
-            input.ki.wVk = key;
-            input.ki.dwFlags = keyDown ? 0 : KEYEVENTF_KEYUP;
-
-            SendInput(1, &input, sizeof(INPUT));
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            suppress_input = false;
-        }
-        void register_remaps(){
-            for (auto& [from_key, to_key] : loaded_remaps) {
-                WORD vk_from_key, vk_to_key;
-                vk_from_key = keymaploader.key_string_to_vk(from_key);
-                vk_to_key = keymaploader.key_string_to_vk(to_key);
-        
-                if (vk_from_key == 0) {
-                    std::cerr << "Invalid input key: " << from_key << std::endl;
-                    continue;
+        void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
+            switch(p){
+                case ProcessType::Remap:{
+                    auto sit = remap_map.find(vk_code);
+                    if (sit != remap_map.end()) {
+                        sit->second(keyDown); // 登録された関数を実行
+                    }
+                    break;
                 }
-                if (vk_to_key == 0) {
-                    std::cerr << "Invalid output key: " << to_key << std::endl;
-                    continue;
+                case ProcessType::Hotkey:{
+                    auto it = hotkey_map.find(current);
+                    if (it != hotkey_map.end()) {
+                        it->second(keyDown); // 登録された関数を実行
+                    }
+                    break;
                 }
-                // ここでホットキー登録
-                db.register_remap(vk_from_key,
-                    HotkeyAction {
-                        [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, true);
-                            return true;}, // backspace押下
-                        [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, false);
-                            return true;}// backspace離す
-                    },
-                true
-                );
             }
         }
-        void execute(){
-            load_hotkeys_from_file();
-            register_loaded_hotkeys();
-            register_remaps();
-        }
+
         void processHotkey(WORD vk_code, bool keyDown) { // actionを実行
             bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
             bool ctrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
@@ -500,11 +524,16 @@ class MapLoader { // AccessMap wrapper関数
             Hotkey current = { vk_code, shift, ctrl, alt, win };
             debug_log(LogLevel::LogInfo, current);
         
-            db.execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
-            db.execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
+            execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
+            execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
+        }
+        void execute(){
+            amap.load_hotkeys_from_file();
+            register_loaded_hotkeys();
+            register_loaded_remaps();
         }
         void test_invalid_key(){
-            WORD unknown = KeyMapLoader().key_string_to_vk("FAKEKEY");
+            WORD unknown = keymaploader.key_string_to_vk("FAKEKEY");
             assert(unknown == 0);
         }
         void run_all_tests(){
@@ -519,12 +548,16 @@ class KeyboardHookManager {
         static inline HHOOK hHook = nullptr;
         static inline std::function<void(int)> keyDownHandler = nullptr;
         static inline std::function<void(int)> keyUpHandler = nullptr;
+
+    public:
+        KeyboardHookManager(){}
+        // static inline std::unordered_map<WORD, bool> suppress_keys;
+        // static inline std::atomic<bool> suppress_input;
         static bool shouldSuppress(WORD vkCode, bool isKeyDown) {
             auto it1 = suppress_keys.find(vkCode);
             if (it1 != suppress_keys.end()) {
                 return it1->second;
             }
-        
             return false;
         }
         static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -541,7 +574,14 @@ class KeyboardHookManager {
             }
             return CallNextHookEx(NULL, nCode, wParam, lParam);
         }
-    public:
+        void setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
+            debug_log(LogLevel::Warning, *skeys);
+            suppress_keys = move(*skeys);
+            // debug_log(LogLevel::Info, suppress_keys);
+        }
+        void setSuppressInput(std::atomic<bool>* sinput){
+            suppress_input = sinput;
+        }
         void setKeyDownHandler(std::function<void(int)> handler) {
             keyDownHandler = std::move(handler);
         }
@@ -561,13 +601,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     #define HOTKEY_ID 1
 
     KeyboardHookManager hook;
-
     const std::string hotkeyfileurl = "../data/hotkeys.txt";
     const std::string vkfileurl = "../data/vkmaps.txt";
     MapLoader maplod = MapLoader(hotkeyfileurl);
     maplod.execute();
     maplod.run_all_tests();
 
+
+    // hook.setSuppressKeys(maplod.skeys_getter());
+    // hook.setSuppressInput(maplod.sinput_getter());
     hook.setKeyDownHandler([&maplod](int vk) {
         maplod.processHotkey(vk, true);
     });
