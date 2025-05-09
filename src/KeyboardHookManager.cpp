@@ -1,0 +1,52 @@
+#include "../include/KeyboardHookManager.hpp"
+#include "Logger.cpp"
+
+static inline HHOOK hHook = nullptr;
+static inline std::function<void(int)> keyDownHandler = nullptr;
+static inline std::function<void(int)> keyUpHandler = nullptr;
+
+
+KeyboardHookManager::KeyboardHookManager(){}
+KeyboardHookManager::KeyboardHookManager(std::unordered_map<WORD, bool>* skeys){
+    suppress_keys = *skeys;
+}
+static inline std::unordered_map<WORD, bool> suppress_keys;
+static inline std::atomic<bool> suppress_input = false;
+static bool shouldSuppress(WORD vkCode, bool isKeyDown) {
+    auto it1 = suppress_keys.find(vkCode);
+    if (it1 != suppress_keys.end()) {
+        return it1->second;
+    }
+    return false;
+}
+static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    if (nCode == HC_ACTION && !suppress_input) {
+        const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+        int vkCode = p->vkCode;
+        bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+        bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
+
+        if (isKeyDown && keyDownHandler) keyDownHandler(vkCode);
+        if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
+
+        if (shouldSuppress(vkCode, isKeyDown)) return 1;
+    }
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+void KeyboardHookManager::setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
+    debug_log(LogLevel::Warning, *skeys);
+    suppress_keys = move(*skeys);
+}
+void KeyboardHookManager::setKeyDownHandler(std::function<void(int)> handler) {
+    keyDownHandler = std::move(handler);
+}
+void KeyboardHookManager::setKeyUpHandler(std::function<void(int)> handler) {
+    keyUpHandler = std::move(handler);
+}
+void KeyboardHookManager::setHook() {
+    hHook = SetWindowsHookEx(WH_KEYBOARD_LL, HookProc, NULL, 0);
+}
+void KeyboardHookManager::removeHook() {
+    if (hHook) UnhookWindowsHookEx(hHook);
+    hHook = nullptr;
+}
