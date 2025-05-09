@@ -1,4 +1,4 @@
-#include "../include/KeyMapLoader.h"
+#include "../include/KeyMapLoader.hpp"
 
 const std::unordered_map<std::string, WORD> KeyMapLoader::vk_map_ = {
     {"VK_BACK", VK_BACK},
