@@ -1,10 +1,5 @@
 #include "../include/FileAccess.hpp"
-#include "../include/Utils.hpp"
-// #include "../include/DebugPrint.hpp"
-#include "Logger.cpp"
-#include <windows.h>
-#include <sstream>
-#include <iostream>
+
 
 const std::string fileurl_;
 std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
@@ -13,10 +8,10 @@ std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
 FileAccess::FileAccess() : fileurl_(){}
 FileAccess::FileAccess(std::string fileurl) : fileurl_(fileurl){}
 
-auto FileAccess::lhotkeys_getter(){
+std::unordered_map<std::string, HotkeyCommandAction>* FileAccess::lhotkeys_getter(){
     return &loaded_hotkeys;
 }
-auto FileAccess::lremaps_getter(){
+std::unordered_map<std::string, std::string>* FileAccess::lremaps_getter(){
     return &loaded_remaps;
 }
 void FileAccess::load_hotkeys_from_file() {

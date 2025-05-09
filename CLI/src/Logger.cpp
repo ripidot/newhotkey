@@ -1,8 +1,3 @@
-#pragma once
-#include <windows.h>
-#include <sstream>
-#include <chrono>
-#include <iostream>
 #include "../include/Logger.hpp"
 
 inline std::ostream& operator<<(std::ostream& os, const Hotkey& h){

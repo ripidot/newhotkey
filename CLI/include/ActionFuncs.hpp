@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <windows.h>
 // string用のsendinput関数
 void SendStringInput(const std::string& str);
 namespace ActionFuncs { // hotkeyに対してのアクションの関数

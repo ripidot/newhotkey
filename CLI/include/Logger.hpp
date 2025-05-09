@@ -1,4 +1,11 @@
-# include "Types.hpp"
+#pragma once
+#include "Types.hpp"
+#include <windows.h>
+#include <sstream>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <iomanip>  // 時間のフォーマットに使う
 
 inline std::ostream& operator<<(std::ostream& os, const Hotkey& h);
 inline std::ostream& operator<<(std::ostream& os, const std::unordered_map<WORD, bool>& s);
