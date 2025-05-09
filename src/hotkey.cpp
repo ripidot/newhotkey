@@ -1,78 +1,12 @@
-#include <windows.h>
-#include <string>
-#include <vector>
-#include <atomic>
-#include <thread>
-#include <iostream>
-#include <unordered_set>
-#include <unordered_map>
-#include <functional>
-#include <chrono>
 #include <iomanip>  // 時間のフォーマットに使う
-#include <fstream>
-#include <sstream>
-#include <cassert>
 #include "KeyMapLoader.cpp"
 #include "../include/Types.hpp"
 #include "Logger.cpp"
 #include "Utils.cpp"
 #include "ActionFuncs.cpp"
 #include "FileAccess.cpp"
-// #include "KeyboardHookManager.cpp"
-
-class KeyboardHookManager {
-    private:
-        static inline HHOOK hHook = nullptr;
-        static inline std::function<void(int)> keyDownHandler = nullptr;
-        static inline std::function<void(int)> keyUpHandler = nullptr;
-
-    public:
-        KeyboardHookManager(){}
-        KeyboardHookManager(std::unordered_map<WORD, bool>* skeys){
-            suppress_keys = *skeys;
-        }
-        static inline std::unordered_map<WORD, bool> suppress_keys;
-        static inline std::atomic<bool> suppress_input = false;
-        static bool shouldSuppress(WORD vkCode, bool isKeyDown) {
-            auto it1 = suppress_keys.find(vkCode);
-            if (it1 != suppress_keys.end()) {
-                return it1->second;
-            }
-            return false;
-        }
-        static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
-            if (nCode == HC_ACTION && !suppress_input) {
-                const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-                int vkCode = p->vkCode;
-                bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
-                bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
-    
-                if (isKeyDown && keyDownHandler) keyDownHandler(vkCode);
-                if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
-    
-                if (shouldSuppress(vkCode, isKeyDown)) return 1;
-            }
-            return CallNextHookEx(NULL, nCode, wParam, lParam);
-        }
-        void setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
-            debug_log(LogLevel::Warning, *skeys);
-            suppress_keys = move(*skeys);
-        }
-        void setKeyDownHandler(std::function<void(int)> handler) {
-            keyDownHandler = std::move(handler);
-        }
-        void setKeyUpHandler(std::function<void(int)> handler) {
-            keyUpHandler = std::move(handler);
-        }
-        void setHook() {
-            hHook = SetWindowsHookEx(WH_KEYBOARD_LL, HookProc, NULL, 0);
-        }
-        void removeHook() {
-            if (hHook) UnhookWindowsHookEx(hHook);
-            hHook = nullptr;
-        }
-};
-
+#include "KeyboardHookManager.cpp"
+#include "HotkeyAndRemapMapLoader.cpp"
 class MapLoader{
     private:
         std::string filename_;
@@ -268,7 +202,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     #define HOTKEY_ID 1
     const std::string hotkeyfileurl = "../data/hotkeys.txt";
     const std::string vkfileurl = "../data/vkmaps.txt";
-    MapLoader maplod = MapLoader(hotkeyfileurl);
+    HotkeyAndRemapMapLoader maplod = HotkeyAndRemapMapLoader(hotkeyfileurl);
     maplod.load();
     maplod.run_all_tests();
 
