@@ -1,10 +1,4 @@
-﻿#include "../include/Logger.hpp"
-#include "../include/Utils.hpp"
-#include "../include/HotkeyAndRemapMapLoader.hpp"
-#include "../include/ActionFuncs.hpp"
-#include "../include/FileAccess.hpp"
-#include "../include/KeyMapLoader.hpp"
-#include "../include/KeyboardHookManager.hpp"
+﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 #define HOTKEY_ID 1
 int main(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
