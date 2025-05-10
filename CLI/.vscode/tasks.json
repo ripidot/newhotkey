@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-hotkey",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-Iinclude",
+                "src/*.cpp",
+                "-o",
+                "hotkey_app"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build-cmake",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build"],
+            "group": {
+              "kind": "build",
+              "isDefault": true
+            }
+        }
+    ]
+}

@@ -1,10 +1,9 @@
-#pragma once
+﻿#pragma once
 #include <unordered_map>
 #include <string>
 #include <fstream>
-#include "Types.hpp"
 #include "Logger.hpp"
-#include "../include/Utils.hpp"
+#include "Utils.hpp"
 #include <windows.h>
 #include <sstream>
 #include <iostream>

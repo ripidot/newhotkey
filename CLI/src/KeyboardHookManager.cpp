@@ -1,4 +1,4 @@
-#include "../include/KeyboardHookManager.hpp"
+﻿#include "../include/KeyboardHookManager.hpp"
 
 
 KeyboardHookManager::KeyboardHookManager(){}
