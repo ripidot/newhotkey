@@ -1,0 +1,41 @@
+---
+title: Sample title
+---
+classDiagram
+direction TB
+    class FileAccess {
+	    ファイルのアクセス
+    }
+    class HotkeyAndRemapMapLoader {
+      hotkeyとremapのmappingの保持,実行
+    }
+    class KeyMapLoader {
+      vkとキーネームのmap
+    }
+    class KeyboardHookManager {
+      フックの処理
+    }
+    class ActionFuncs {
+      hotkeyの実行関数定義
+    }
+    class Logger {
+      debug関数の定義
+    }
+    class Utils {
+      Utility関数の定義
+    }
+    class Types {
+      構造体や名前空間の定義
+    }
+    class main {
+      mainファイル
+    }
+  
+    FileAccess <|-- HotkeyAndRemapMapLoader
+    KeyMapLoader <|-- HotkeyAndRemapMapLoader
+    KeyboardHookManager<|-- HotkeyAndRemapMapLoader
+    ActionFuncs <|-- HotkeyAndRemapMapLoader
+    HotkeyAndRemapMapLoader <|-- main
+    Logger <|-- FileAccess
+    Utils <|-- FileAccess
+    Types <|-- Utils
