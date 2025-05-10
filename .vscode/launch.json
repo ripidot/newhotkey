@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug hotkey_app", // 実行可能
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/hotkey_app",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "externalConsole": false,  // terminalに出力するかどうか
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb",
+        "preLaunchTask": "build-hotkey"
+      },
+      {
+        "name": "Debug build_hotkey_app", // 
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/hotkey_app",
+        "cwd": "${workspaceFolder}/build",
+        "stopAtEntry": false,
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb",
+        "preLaunchTask": "build-cmake",
+        "externalConsole": false
+      }
+    ]
+}

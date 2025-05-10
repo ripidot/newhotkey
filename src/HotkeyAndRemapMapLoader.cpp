@@ -1,13 +1,4 @@
-#include "../include/HotkeyAndRemapMapLoader.hpp"
-
-std::string filename_;
-FileAccess amap = FileAccess(filename_);
-KeyMapLoader keymaploader = KeyMapLoader();
-std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
-std::unordered_map<WORD, std::function<bool(bool keyDown)>> remap_map; //単キーと関数の紐づけ
-
-std::unordered_map<Hotkey, bool> suppress_hotkeys;
-std::unordered_map<WORD, bool> suppress_keys;
+﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(){}
 HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(std::string filename) : filename_(filename){}

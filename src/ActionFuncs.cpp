@@ -1,4 +1,4 @@
-#include "../include/ActionFuncs.hpp"
+﻿#include "../include/ActionFuncs.hpp"
 // string用のsendinput関数
 void SendStringInput(const std::string& str){
     // str.find()

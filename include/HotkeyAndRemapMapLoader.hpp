@@ -1,5 +1,4 @@
-#pragma once
-#include "Types.hpp"
+﻿#pragma once
 #include "FileAccess.hpp"
 #include "KeyMapLoader.hpp"
 #include "KeyboardHookManager.hpp"
