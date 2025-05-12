@@ -3,7 +3,7 @@
 #include <windows.h>
 // string用のsendinput関数
 void SendStringInput(const std::string& str);
-namespace ActionFuncs { // hotkeyに対してのアクションの関数
+namespace HotkeyActionFuncs { // hotkeyに対してのアクションの関数
     void volume_up();
     void volume_down();
     void input_key(const std::string& str);

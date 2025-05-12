@@ -4,8 +4,13 @@
 
 A ctrl shift : launch_app notepad.exe
 K ctrl alt   : open_url https://www.example.com
-D ctrl : input_key ()VK_LEFT
+D ctrl : input_key 8888
 E ctrl : input_key ""VK_LEFT
+I ctrl : input_key VK_UP
+J ctrl : input_key VK_LEFT
+K ctrl : input_key VK_DOWN
+L ctrl : input_key VK_RIGHT
+
 VK_NUMPAD0 : volume_down
 VK_NUMPAD1 : volume_up
 

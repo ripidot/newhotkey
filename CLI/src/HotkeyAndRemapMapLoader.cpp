@@ -23,7 +23,7 @@ ParsedHotkey HotkeyAndRemapMapLoader::parse_key_with_modifiers(const std::string
     }
     return result;
 }
-// remap用sendinput関数
+// remapの実行関数
 void HotkeyAndRemapMapLoader::SendKeyboardInput(WORD key, bool keyDown) { //key:vk_key
     KeyboardHookManager::suppress_input = true;
     INPUT input = {0};
@@ -52,20 +52,20 @@ void HotkeyAndRemapMapLoader::register_loaded_remaps(){
         vk_to_key = keymaploader.key_string_to_vk(to_key);
 
         if (vk_from_key == 0) {
-            std::cerr << "Invalid input key: " << from_key << std::endl;
+            debug_log(LogLevel::Error, "Invalid input key: ", from_key);
             continue;
         }
         if (vk_to_key == 0) {
-            std::cerr << "Invalid output key: " << to_key << std::endl;
+            debug_log(LogLevel::Error, "Invalid output key: ", to_key);
             continue;
         }
-        // ここでホットキー登録
+        // remap機能の登録
         register_remap(vk_from_key,
             HotkeyAction {
-                [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, true);
-                    return true;}, // backspace押下
-                [&, vk_to_key]() -> bool { SendKeyboardInput(vk_to_key, false);
-                    return true;}// backspace離す
+                [&, vk_to_key]() -> bool { RemapActionFuncs::SendKeyboardInput(vk_to_key, true);
+                    return true;},
+                [&, vk_to_key]() -> bool { RemapActionFuncs::SendKeyboardInput(vk_to_key, false);
+                    return true;}
             },
         true
         );
@@ -88,39 +88,40 @@ void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
         ParsedHotkey parsed = parse_key_with_modifiers(key_str);
 
         if (parsed.key == 0) {
-            std::cerr << "Invalid key: " << key_str << std::endl;
+            debug_log(LogLevel::Error, "Invalid key: ", key_str);
             continue;
         }
 
-        // ここでホットキー登録
+        // hotkey機能の登録
         register_hotkey(parsed.key, parsed.shift, parsed.ctrl, parsed.alt, parsed.win,
             HotkeyAction {
                 [action]() -> bool{
                     if (action.command == "launch_app") {
-                        if (!ActionFuncs::launch_app(action.command)){
-                            std::cerr << "Failed to launch app: " << action.parameter << std::endl;}
+                        if (!HotkeyActionFuncs::launch_app(action.command)){
+                            debug_log(LogLevel::Error, "Failed to launch app: ", action.parameter);
+                        }
                     }
                     else if (action.command == "open_url") {
-                        if (!ActionFuncs::open_url(action.command)) {
-                            std::cerr << "Failed to open URL: " << action.parameter << std::endl;
+                        if (!HotkeyActionFuncs::open_url(action.command)) {
+                            debug_log(LogLevel::Error, "Failed to open url: ", action.parameter);
                         }
                     }
                     else if (action.command == "volume_up") {
-                        ActionFuncs::volume_up();
+                        HotkeyActionFuncs::volume_up();
                         debug_log(LogLevel::Info, "volume_up");
                         // 音量上げる関数呼び出し
                     }
                     else if (action.command == "volume_down") {
-                        ActionFuncs::volume_down();
+                        HotkeyActionFuncs::volume_down();
                         debug_log(LogLevel::Info, "volume_down");
                         // 音量下げる関数呼び出し
                     }
                     else if (action.command == "input_key") {
-                        ActionFuncs::input_key(action.command); // キー入力
-                        debug_log(LogLevel::Info, "input_key");
+                        HotkeyActionFuncs::input_key(action.parameter); // キー入力
+                        debug_log(LogLevel::Info, "input_key", action.parameter);
                     }
                     else {
-                        std::cerr << "Unknown action: " << action.command << std::endl;
+                        debug_log(LogLevel::Error, "Unknown command: ", action.command);
                     }
                     return true;
                 }
@@ -177,4 +178,3 @@ void HotkeyAndRemapMapLoader::run_all_tests(){
     test_invalid_key();
     debug_log(LogLevel::Info, "Passed all tests");
 }
-
