@@ -1,5 +1,5 @@
 ---
-title: Sample title
+title: Hotkey and Remap
 ---
 classDiagram
 direction TB
@@ -7,7 +7,7 @@ direction TB
 	    ファイルのアクセス
     }
     class HotkeyAndRemapMapLoader {
-      hotkeyとremapのmappingの保持,実行
+      hotkeyとremapのマップのロード
     }
     class KeyMapLoader {
       vkとキーネームのmap
@@ -15,8 +15,11 @@ direction TB
     class KeyboardHookManager {
       フックの処理
     }
-    class ActionFuncs {
+    class HotkeyActionFuncs {
       hotkeyの実行関数定義
+    }
+    class RemapActionFuncs {
+      remapの実行関数定義
     }
     class Logger {
       debug関数の定義
@@ -33,8 +36,9 @@ direction TB
   
     FileAccess <|-- HotkeyAndRemapMapLoader
     KeyMapLoader <|-- HotkeyAndRemapMapLoader
-    KeyboardHookManager<|-- HotkeyAndRemapMapLoader
-    ActionFuncs <|-- HotkeyAndRemapMapLoader
+    KeyboardHookManager<|-- RemapActionFuncs
+    RemapActionFuncs<|-- HotkeyAndRemapMapLoader
+    HotkeyActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyAndRemapMapLoader <|-- main
     Logger <|-- FileAccess
     Utils <|-- FileAccess

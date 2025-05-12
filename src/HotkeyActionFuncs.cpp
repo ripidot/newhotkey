@@ -1,9 +1,9 @@
-﻿#include "../include/ActionFuncs.hpp"
+﻿#include "../include/HotkeyActionFuncs.hpp"
 // string用のsendinput関数
 void SendStringInput(const std::string& str){
     // str.find()
 }
-namespace ActionFuncs { // hotkeyに対してのアクションの関数
+namespace HotkeyActionFuncs { // hotkeyに対してのアクションの関数
     void volume_up() {
         keybd_event(VK_VOLUME_UP, 0, 0, 0);   // キー押し
         keybd_event(VK_VOLUME_UP, 0, KEYEVENTF_KEYUP, 0); // キー離し

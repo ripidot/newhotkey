@@ -1,10 +1,15 @@
 {
     "configurations": [
-      {
-        "includePath": [
-          "/usr/include/dbus-1.0",
-          "/usr/lib/x86_64-linux-gnu/dbus-1.0/include",
-        ]
-      }
-    ]
-  }
+        {
+            "includePath": [
+                "/usr/include/dbus-1.0",
+                "/usr/lib/x86_64-linux-gnu/dbus-1.0/include"
+            ],
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.36.32532\\bin\\Hostx64\\x64\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

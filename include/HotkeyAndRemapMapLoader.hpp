@@ -1,13 +1,12 @@
 ﻿#pragma once
 #include "FileAccess.hpp"
 #include "KeyMapLoader.hpp"
-#include "KeyboardHookManager.hpp"
-#include "ActionFuncs.hpp"
+#include "HotkeyActionFuncs.hpp"
+#include "RemapActionFuncs.hpp"
 #include <unordered_map>
 #include <chrono>
 #include <thread>
 #include <cassert>
-
 class HotkeyAndRemapMapLoader{
     private:
         std::string filename_;

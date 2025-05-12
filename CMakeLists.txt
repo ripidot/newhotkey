@@ -15,7 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
 
 # src ディレクトリ内のすべての .cpp ファイルを対象に
 file(GLOB SOURCES "src/*.cpp")
-
+# list(FILTER SOURCES EXCLUDE REGEX ".*RemapActionFunc.cpp$")
 
 # 実行ファイルの作成 win32指定
 add_executable(hotkey_app ${SOURCES})
