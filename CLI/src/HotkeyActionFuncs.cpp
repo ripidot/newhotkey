@@ -1,8 +1,13 @@
 ﻿#include "../include/HotkeyActionFuncs.hpp"
+
 // string用のsendinput関数
 void SendStringInput(const std::string& str){
-    // str.find()
+    for (size_t i = 0; i < str.size(); ++i) {
+        char c = str[i];
+
+    }
 }
+
 namespace HotkeyActionFuncs { // hotkeyに対してのアクションの関数
     void volume_up() {
         keybd_event(VK_VOLUME_UP, 0, 0, 0);   // キー押し
@@ -12,9 +17,8 @@ namespace HotkeyActionFuncs { // hotkeyに対してのアクションの関数
         keybd_event(VK_VOLUME_DOWN, 0, 0, 0); 
         keybd_event(VK_VOLUME_DOWN, 0, KEYEVENTF_KEYUP, 0);
     }
-    void input_key(const std::string& str) {
-        // std::string cmd = "start \"\" \"" + str + "\"";
-        SendStringInput(str);
+    void input_key(const std::string& vk) {
+        SendStringInput(vk);
         // int result = system(cmd.c_str());
     }
     bool launch_app(const std::string& path) {

@@ -1,6 +1,7 @@
 ﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 #define HOTKEY_ID 1
+
 int main(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     const std::string hotkeyfileurl = "data/hotkeys.txt";
     const std::string vkfileurl = "data/vkmaps.txt";
