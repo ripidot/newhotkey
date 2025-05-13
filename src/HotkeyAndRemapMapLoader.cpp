@@ -23,19 +23,6 @@ ParsedHotkey HotkeyAndRemapMapLoader::parse_key_with_modifiers(const std::string
     }
     return result;
 }
-// remapの実行関数
-void HotkeyAndRemapMapLoader::SendKeyboardInput(WORD key, bool keyDown) { //key:vk_key
-    KeyboardHookManager::suppress_input = true;
-    INPUT input = {0};
-    input.type = INPUT_KEYBOARD;
-    input.ki.wVk = key;
-    input.ki.dwFlags = keyDown ? 0 : KEYEVENTF_KEYUP;
-
-    SendInput(1, &input, sizeof(INPUT));
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    KeyboardHookManager::suppress_input = false;
-}
 void HotkeyAndRemapMapLoader::register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress = true){
     suppress_keys[key] = suppress;
     remap_map[key] = [hotkeyaction](bool keyDown){
@@ -86,23 +73,25 @@ void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
     std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys = *amap.lhotkeys_getter();
     for (auto& [key_str, action] : loaded_hotkeys) {
         ParsedHotkey parsed = parse_key_with_modifiers(key_str);
-
-        if (parsed.key == 0) {
+        
+        // 無効なキー or REMAPで登録すべき内容
+        if (parsed.key == 0 || !parsed.win && !parsed.alt && !parsed.ctrl && !parsed.shift
+        && action.command == "input_key") {
             debug_log(LogLevel::Error, "Invalid key: ", key_str);
             continue;
         }
 
         // hotkey機能の登録
         register_hotkey(parsed.key, parsed.shift, parsed.ctrl, parsed.alt, parsed.win,
-            HotkeyAction {
+            HotkeyAction { // defaultでkeyupはfalseが入る
                 [action]() -> bool{
                     if (action.command == "launch_app") {
-                        if (!HotkeyActionFuncs::launch_app(action.command)){
+                        if (!HotkeyActionFuncs::launch_app(action.parameter)){
                             debug_log(LogLevel::Error, "Failed to launch app: ", action.parameter);
                         }
                     }
                     else if (action.command == "open_url") {
-                        if (!HotkeyActionFuncs::open_url(action.command)) {
+                        if (!HotkeyActionFuncs::open_url(action.parameter)) {
                             debug_log(LogLevel::Error, "Failed to open url: ", action.parameter);
                         }
                     }

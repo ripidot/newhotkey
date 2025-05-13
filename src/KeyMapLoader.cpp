@@ -59,13 +59,26 @@ const std::unordered_map<std::string, WORD> KeyMapLoader::vk_map_ = {
     {"VK_VOLUME_DOWN", VK_VOLUME_DOWN},
     {"VK_VOLUME_UP", VK_VOLUME_UP},
     {"VK_MEDIA_PLAY_PAUSE", VK_MEDIA_PLAY_PAUSE},
-    {"VK_ZENHANKAKU", 243}
+    {"VK_ZENHANKAKU", 243},
+    {"VK_MINUS", VK_OEM_MINUS}, // minus
+    {"VK_CARET", VK_OEM_7},
+    {"VK_YEN", VK_OEM_5},
+    {"VK_AT", VK_OEM_3},
+    {"VK_LBRAKET", VK_OEM_4},
+    {"VK_SEMICOLON", VK_OEM_PLUS},
+    {"VK_COLON", VK_OEM_1},
+    {"VK_RBRAKET", VK_OEM_6},
+    {"VK_COMMA", VK_OEM_COMMA},
+    {"VK_PERIOD", VK_OEM_PERIOD},
+    {"VK_SRASH", VK_OEM_2},
+    {"VK_BACKSRASH", VK_OEM_102}
 };
 
 KeyMapLoader::KeyMapLoader(std::string fileurl) : fileurl_(fileurl) {}
 KeyMapLoader::KeyMapLoader() : fileurl_() {}
 
-WORD KeyMapLoader::key_string_to_vk(const std::string& key_name) {
+// char c を取り出し、asciiコード表を基にvkに変換
+WORD KeyMapLoader::key_string_to_vk(const std::string& key_name) { 
 
     // "VK_"で始まる名前ならテーブル検索
     auto it = vk_map_.find(key_name);
@@ -76,11 +89,10 @@ WORD KeyMapLoader::key_string_to_vk(const std::string& key_name) {
     // アルファベット単文字（大文字小文字問わず）
     if (key_name.size() == 1) {
         char c = key_name[0];
-        if ('a' <= c && c <= 'z') c -= 32; // 小文字→大文字変換
+        if ('a' <= c && c <= 'z') c -= 32; // 小文字→大文字変換, char型1byteなので32
         if ('A' <= c && c <= 'Z') return static_cast<WORD>(c);
         if ('0' <= c && c <= '9') return static_cast<WORD>(c);
     }
-
     // それ以外は失敗
     return 0;
 }

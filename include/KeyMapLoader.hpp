@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <unordered_map>
 #include <string>
+#include <iostream>
 
 
 class KeyMapLoader {

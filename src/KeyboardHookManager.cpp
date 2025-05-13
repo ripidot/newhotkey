@@ -20,7 +20,9 @@ LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM 
         bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
         bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
 
-        if (isKeyDown && keyDownHandler) keyDownHandler(vkCode);
+        // debug_log(LogLevel::LogInfo, "vk: ", vkCode);
+
+        if (isKeyDown && keyDownHandler) keyDownHandler(vkCode); // keydownのアクションが定義されていたら
         if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
 
         if (shouldSuppress(vkCode, isKeyDown)) return 1;
