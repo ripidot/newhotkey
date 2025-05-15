@@ -3,6 +3,8 @@
 #include "KeyMapLoader.hpp"
 #include "HotkeyActionFuncs.hpp"
 #include "RemapActionFuncs.hpp"
+#include "KeyLogger.hpp"
+#include "Logger.hpp"
 #include <unordered_map>
 #include <chrono>
 #include <thread>
@@ -12,6 +14,7 @@ class HotkeyAndRemapMapLoader{
         std::string filename_;
         FileAccess amap = FileAccess(filename_);
         KeyMapLoader keymaploader = KeyMapLoader();
+        KeyLogger keylogger = KeyLogger();
         std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
         std::unordered_map<WORD, std::function<bool(bool keyDown)>> remap_map; //単キーと関数の紐づけ
 

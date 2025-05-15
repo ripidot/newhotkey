@@ -1,6 +1,7 @@
 # ホットキー設定ファイル
 # エスケープ文字 : [\], 対象文字 : [#,/]
 # 最初のコロンでホットキーとコマンド+引数に分解
+# input_keyコマンドのときは2つ以上のキーの同時押しがトリガー
 
 A ctrl shift : launch_app notepad.exe
 K ctrl alt   : open_url https://www.example.com
