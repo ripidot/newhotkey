@@ -129,6 +129,12 @@ void HotkeyAndRemapMapLoader::load(){
 // アクションの実行
 void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
     switch(p){
+        case ProcessType::KeyLogger:{
+            std::string str = keymaploader.vk_to_key_string(current.key);
+            // std::string str = "A";
+            keylogger.onKeyPress(str);
+            break;
+        }
         case ProcessType::Remap:{
             auto sit = remap_map.find(vk_code);
             if (sit != remap_map.end()) {
@@ -153,8 +159,10 @@ void HotkeyAndRemapMapLoader::execute(WORD vk_code, bool keyDown) { // actionを
     bool win = (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
 
     Hotkey current = { vk_code, shift, ctrl, alt, win };
-    debug_log(LogLevel::LogInfo, current);
 
+    if (keyDown == true){
+        execute_action(ProcessType::KeyLogger, vk_code, current, keyDown); // hotkeyのaction
+    }
     execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
     execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
 }

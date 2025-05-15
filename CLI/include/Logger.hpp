@@ -7,7 +7,6 @@
 #include <thread>
 #include <iomanip>  // 時間のフォーマットに使う
 
-
 inline std::ostream& operator<<(std::ostream& os, const Hotkey& h){
     os << "{";
     os << h.key << " " << h.shift << " " << h.ctrl << " " << h.alt << " " << h.win;

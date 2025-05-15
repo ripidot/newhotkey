@@ -19,7 +19,6 @@ namespace HotkeyActionFuncs { // hotkeyに対してのアクションの関数
     }
     void input_key(const std::string& vk) {
         SendStringInput(vk);
-        // int result = system(cmd.c_str());
     }
     bool launch_app(const std::string& path) {
         std::string cmd = "start \"\" \"" + path + "\"";

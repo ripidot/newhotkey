@@ -13,7 +13,8 @@ enum class LogLevel {
 };
 enum class ProcessType{ // 命令のタイプ判別
     Hotkey,
-    Remap
+    Remap,
+    KeyLogger
 };
 enum class ParsedLineType { // 読み込み行のタイプ判別
     Hotkey,
