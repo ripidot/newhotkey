@@ -28,7 +28,7 @@ void HotkeyAndRemapMapLoader::register_remap(WORD key, HotkeyAction hotkeyaction
     remap_map[key] = [hotkeyaction](bool keyDown){
         auto& action = keyDown ? hotkeyaction.on_press : hotkeyaction.on_release;
         if (action) return action();
-        return false;
+        return (WORD)0;
     };
 }
 void HotkeyAndRemapMapLoader::register_loaded_remaps(){
@@ -136,12 +136,11 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
             break;
         }
         case ProcessType::Remap:{
-            auto sit = remap_map.find(vk_code);
-            if (sit != remap_map.end()) {
+            auto sit = remap_map.find(vk_code); // 見つからなければremap.end()を返す
+            if (sit != remap_map.end()) { // 見つかったら
                 vk_code = sit->second(keyDown); // 登録された関数を実行
             }
-            if (keyDown) {
-                debug_log(LogLevel::Warning, vk_code);
+            if (keyDown) { // キーロガー機能
                 std::string str = keymaploader.vk_to_key_string(vk_code);
                 keylogger.onKeyPress(str);
             }
@@ -165,9 +164,6 @@ void HotkeyAndRemapMapLoader::execute(WORD vk_code, bool keyDown) { // actionを
 
     Hotkey current = { vk_code, shift, ctrl, alt, win };
 
-    // if (keyDown == true){
-    //     execute_action(ProcessType::KeyLogger, vk_code, current, keyDown); // hotkeyのaction
-    // }
     execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
     execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
 }
