@@ -1,7 +1,7 @@
 ﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(){}
-HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(std::string filename) : filename_(filename){}
+HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(std::string filename, std::string vkfilename) : filename_(filename), vkfilename_(vkfilename){}
 std::unordered_map<WORD, bool>* HotkeyAndRemapMapLoader::skeys_getter(){
     return &suppress_keys;
 }
@@ -32,7 +32,7 @@ void HotkeyAndRemapMapLoader::register_remap(WORD key, HotkeyAction hotkeyaction
     };
 }
 void HotkeyAndRemapMapLoader::register_loaded_remaps(){
-    std::unordered_map<std::string, std::string> lremaps = *amap.lremaps_getter();
+    std::unordered_map<std::string, std::string> lremaps = *fileaccess.lremaps_getter();
     for (auto& [from_key, to_key] : lremaps) {
         WORD vk_from_key, vk_to_key;
         vk_from_key = keymaploader.key_string_to_vk(from_key);
@@ -70,7 +70,7 @@ void HotkeyAndRemapMapLoader::register_hotkey(WORD key, bool shift, bool ctrl, b
     };
 }
 void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
-    std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys = *amap.lhotkeys_getter();
+    std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys = *fileaccess.lhotkeys_getter();
     for (auto& [key_str, action] : loaded_hotkeys) {
         ParsedHotkey parsed = parse_key_with_modifiers(key_str);
         
@@ -121,8 +121,8 @@ void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
     }
 }
 void HotkeyAndRemapMapLoader::load(){
-    keymaploader.load();
-    amap.load_hotkeys_from_file();
+    keymaploader.load(vkfilename_);
+    fileaccess.load_hotkeys_from_file();
     register_loaded_hotkeys();
     register_loaded_remaps();
 }

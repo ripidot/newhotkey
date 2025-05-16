@@ -40,7 +40,7 @@ struct ParsedLine {
     std::string from_key;
     std::string to_key;
 };
-struct HotkeyAction {
+struct HotkeyAction { // 入力があった時のアクション、入力キーをreturnする
     std::function<WORD()> on_press;
     std::function<WORD()> on_release = nullptr;
 };
