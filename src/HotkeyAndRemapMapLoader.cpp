@@ -49,10 +49,10 @@ void HotkeyAndRemapMapLoader::register_loaded_remaps(){
         // remap機能の登録
         register_remap(vk_from_key,
             HotkeyAction {
-                [&, vk_to_key]() -> bool { RemapActionFuncs::SendKeyboardInput(vk_to_key, true);
-                    return true;},
-                [&, vk_to_key]() -> bool { RemapActionFuncs::SendKeyboardInput(vk_to_key, false);
-                    return true;}
+                [&, vk_to_key]() -> WORD { RemapActionFuncs::SendKeyboardInput(vk_to_key, true);
+                    return vk_to_key;},
+                [&, vk_to_key]() -> WORD { RemapActionFuncs::SendKeyboardInput(vk_to_key, false);
+                    return vk_to_key;}
             },
         true
         );
@@ -121,6 +121,7 @@ void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
     }
 }
 void HotkeyAndRemapMapLoader::load(){
+    keymaploader.load();
     amap.load_hotkeys_from_file();
     register_loaded_hotkeys();
     register_loaded_remaps();
@@ -131,14 +132,18 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
     switch(p){
         case ProcessType::KeyLogger:{
             std::string str = keymaploader.vk_to_key_string(current.key);
-            // std::string str = "A";
             keylogger.onKeyPress(str);
             break;
         }
         case ProcessType::Remap:{
             auto sit = remap_map.find(vk_code);
             if (sit != remap_map.end()) {
-                sit->second(keyDown); // 登録された関数を実行
+                vk_code = sit->second(keyDown); // 登録された関数を実行
+            }
+            if (keyDown) {
+                debug_log(LogLevel::Warning, vk_code);
+                std::string str = keymaploader.vk_to_key_string(vk_code);
+                keylogger.onKeyPress(str);
             }
             break;
         }
@@ -160,9 +165,9 @@ void HotkeyAndRemapMapLoader::execute(WORD vk_code, bool keyDown) { // actionを
 
     Hotkey current = { vk_code, shift, ctrl, alt, win };
 
-    if (keyDown == true){
-        execute_action(ProcessType::KeyLogger, vk_code, current, keyDown); // hotkeyのaction
-    }
+    // if (keyDown == true){
+    //     execute_action(ProcessType::KeyLogger, vk_code, current, keyDown); // hotkeyのaction
+    // }
     execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
     execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
 }
