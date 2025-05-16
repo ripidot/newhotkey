@@ -41,8 +41,8 @@ struct ParsedLine {
     std::string to_key;
 };
 struct HotkeyAction {
-    std::function<bool()> on_press;
-    std::function<bool()> on_release = nullptr;
+    std::function<WORD()> on_press;
+    std::function<WORD()> on_release = nullptr;
 };
 struct Hotkey {
     WORD key;
