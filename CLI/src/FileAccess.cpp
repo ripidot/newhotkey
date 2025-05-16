@@ -5,8 +5,12 @@ const std::string fileurl_;
 std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
 std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
 
+std::unordered_map<std::string, WORD> vk_map_;
+std::unordered_map<WORD, std::string> vk_inv_map_;
+
 FileAccess::FileAccess() : fileurl_(){}
 FileAccess::FileAccess(std::string fileurl) : fileurl_(fileurl){}
+
 
 std::unordered_map<std::string, HotkeyCommandAction>* FileAccess::lhotkeys_getter(){
     return &loaded_hotkeys;
@@ -14,6 +18,13 @@ std::unordered_map<std::string, HotkeyCommandAction>* FileAccess::lhotkeys_gette
 std::unordered_map<std::string, std::string>* FileAccess::lremaps_getter(){
     return &loaded_remaps;
 }
+std::unordered_map<std::string, WORD>* FileAccess::vk_map_getter(){
+    return &vk_map_;
+}
+std::unordered_map<WORD, std::string>* FileAccess::vk_inv_map_getter(){
+    return &vk_inv_map_;
+}
+
 void FileAccess::load_hotkeys_from_file() {
     std::ifstream infile(fileurl_);
     if (!infile) {
@@ -63,6 +74,26 @@ void FileAccess::load_hotkeys_from_file() {
             case ParsedLineType::Remap:
                 debug_log(LogLevel::Info,"Loaded Remap: [", parsed.from_key, "] -> [", parsed.to_key,"]");
                 break;
+        }
+    }
+}
+
+void FileAccess::load_vk_from_file(){
+    using json = nlohmann::json;
+
+    std::ifstream file(fileurl_);
+    if (!file.is_open()) {
+        std::cerr << "couldnt open file\n";
+        return;
+    }
+
+    json j;
+    file >> j;
+
+    for (auto& [group_name, group_content] : j.items()) { // j: vkmap_grouped_numeric.json
+        for (auto& [key, value] : group_content.items()) {
+            vk_map_[key] = value;
+            vk_inv_map_[value] = key;
         }
     }
 }

@@ -4,7 +4,6 @@
 #include "HotkeyActionFuncs.hpp"
 #include "RemapActionFuncs.hpp"
 #include "KeyLogger.hpp"
-#include "Logger.hpp"
 #include <unordered_map>
 #include <chrono>
 #include <thread>
@@ -12,7 +11,8 @@
 class HotkeyAndRemapMapLoader{
     private:
         std::string filename_;
-        FileAccess amap = FileAccess(filename_);
+        std::string vkfilename_;
+        FileAccess fileaccess = FileAccess(filename_);
         KeyMapLoader keymaploader = KeyMapLoader();
         KeyLogger keylogger = KeyLogger();
         std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
@@ -22,11 +22,9 @@ class HotkeyAndRemapMapLoader{
         std::unordered_map<WORD, bool> suppress_keys;
     public:
         HotkeyAndRemapMapLoader();
-        HotkeyAndRemapMapLoader(std::string filename);
+        HotkeyAndRemapMapLoader(std::string filename, std::string vkfilename);
         std::unordered_map<WORD, bool>* skeys_getter();
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str);
-        // remap用sendinput関数
-        void SendKeyboardInput(WORD key, bool keyDown);
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress);
         void register_loaded_remaps();
         void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 

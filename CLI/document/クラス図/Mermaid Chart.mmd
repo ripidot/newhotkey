@@ -7,43 +7,32 @@ direction TB
 	    ファイルのアクセス
     }
     class HotkeyAndRemapMapLoader {
-      hotkeyとremapのマップのロード、トリガーの判定(vkによる判定処理)、アクションの実行
+	    hotkeyとremapのマップのロード、トリガーの判定(vkによる判定処理) 、アクションの実行
     }
     class KeyMapLoader {
-      vkとキーネームのmap
+	    vkとキーネームのmap
     }
     class KeyboardHookManager {
-    SetWindowHookExでキー全体にフック
+	    SetWindowHookExでキー全体にフック
     }
     class HotkeyActionFuncs {
-      hotkeyの実行関数定義
+	    hotkeyの実行関数定義
     }
     class RemapActionFuncs {
-      remapの実行関数定義
-    }
-    class Logger {
-      debug関数の定義
-    }
-    class Utils {
-      Utility関数の定義
-    }
-    class Types {
-      構造体や名前空間の定義
+	    remapの実行関数定義
     }
     class main {
-      mainファイル
+	    mainファイル
     }
     class KeyLogger {
-        keylog機能
+	    keylog機能
     }
-  
+
     FileAccess <|-- HotkeyAndRemapMapLoader
+    FileAccess <|-- KeyMapLoader
     KeyMapLoader <|-- HotkeyAndRemapMapLoader
-    KeyboardHookManager<|-- RemapActionFuncs
+    KeyboardHookManager <|-- RemapActionFuncs
     KeyLogger <|-- HotkeyAndRemapMapLoader
-    RemapActionFuncs<|-- HotkeyAndRemapMapLoader
+    RemapActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyAndRemapMapLoader <|-- main
-    Logger <|-- FileAccess
-    Utils <|-- FileAccess
-    Types <|-- Utils
