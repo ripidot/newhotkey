@@ -33,10 +33,14 @@ direction TB
     class main {
       mainファイル
     }
+    class KeyLogger {
+        keylog機能
+    }
   
     FileAccess <|-- HotkeyAndRemapMapLoader
     KeyMapLoader <|-- HotkeyAndRemapMapLoader
     KeyboardHookManager<|-- RemapActionFuncs
+    KeyLogger <|-- HotkeyAndRemapMapLoader
     RemapActionFuncs<|-- HotkeyAndRemapMapLoader
     HotkeyActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyAndRemapMapLoader <|-- main

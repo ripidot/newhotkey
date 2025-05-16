@@ -1,5 +1,10 @@
 ﻿#include "../include/KeyMapLoader.hpp"
 
+using json = nlohmann::json;
+
+std::unordered_map<std::string, WORD> KeyMapLoader::vk_map_;
+std::unordered_map<WORD, std::string> KeyMapLoader::vk_inv_map_;
+/*
 const std::unordered_map<std::string, WORD> KeyMapLoader::vk_map_ = {
     {"VK_BACK", VK_BACK},
     {"VK_TAB", VK_TAB},
@@ -73,13 +78,37 @@ const std::unordered_map<std::string, WORD> KeyMapLoader::vk_map_ = {
     {"VK_SRASH", VK_OEM_2},
     {"VK_BACKSRASH", VK_OEM_102}
 };
+*/
+
 const std::unordered_map<WORD, std::string> KeyMapLoader::string_map_ = {
     {VK_OEM_MINUS, "VK_MINUS"}, // minus
-    {VK_OEM_7, "VK_CARET", },
-    {VK_OEM_5, "VK_YEN", }
+    {VK_OEM_7, "VK_CARET"},
+    {VK_OEM_5, "VK_YEN"}
 };
 KeyMapLoader::KeyMapLoader(std::string fileurl) : fileurl_(fileurl) {}
-KeyMapLoader::KeyMapLoader() : fileurl_() {}
+KeyMapLoader::KeyMapLoader(){}
+
+void KeyMapLoader::load(){
+
+    using json = nlohmann::json;
+
+    std::ifstream file("data/vkmap_grouped_numeric.json");
+    if (!file.is_open()) {
+        std::cerr << "ファイルを開けませんでした\n";
+        return;
+    }
+
+    json j;
+    file >> j;
+
+    for (auto& [group_name, group_content] : j.items()) { // j: vkmap_grouped_numeric.json
+        for (auto& [key, value] : group_content.items()) {
+            vk_map_[key] = value;
+            vk_inv_map_[value] = key;
+        }
+    }
+
+}
 
 // char c を取り出し、asciiコード表を基にvkに変換
 WORD KeyMapLoader::key_string_to_vk(const std::string& key_name) { 
@@ -113,8 +142,8 @@ std::string KeyMapLoader::vk_to_key_string(WORD vk){
         return str;
     }
     // vkのテーブル検索
-    auto it = string_map_.find(vk);
-    if (it != string_map_.end()) {
+    auto it = vk_inv_map_.find(vk);
+    if (it != vk_inv_map_.end()) {
         return it->second;
     }
     return "";
