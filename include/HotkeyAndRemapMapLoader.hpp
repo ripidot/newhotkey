@@ -17,9 +17,17 @@ class HotkeyAndRemapMapLoader{
         KeyLogger keylogger = KeyLogger();
         std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
         std::unordered_map<WORD, std::function<WORD(bool keyDown)>> remap_map; //単キーと関数の紐づけ
+        std::wstring inputBuffer;
+        std::unordered_map<std::wstring, std::wstring> hotstrings = {
+            {L"brb", L"be right back"},
+            {L"omw", L"on my way"},
+            {L"ty", L"thank you"},
+            {L"idk", L"I don't know"},
+        };
 
         std::unordered_map<Hotkey, bool> suppress_hotkeys;
         std::unordered_map<WORD, bool> suppress_keys;
+ 
     public:
         HotkeyAndRemapMapLoader();
         HotkeyAndRemapMapLoader(std::string filename, std::string vkfilename);
@@ -31,6 +39,7 @@ class HotkeyAndRemapMapLoader{
             HotkeyAction hotkeyaction, bool suppress);
         void register_loaded_hotkeys();
         void load();
+        void simulateTextInput(const std::wstring& text);
 
 // アクションの実行
         void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown);

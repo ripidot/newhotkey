@@ -13,6 +13,7 @@ bool KeyboardHookManager::shouldSuppress(WORD vkCode, bool isKeyDown) {
     }
     return false;
 }
+
 LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION && !suppress_input) {
         const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
@@ -22,7 +23,8 @@ LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM 
 
         // debug_log(LogLevel::LogInfo, "vk: ", vkCode);
 
-        if (isKeyDown && keyDownHandler) keyDownHandler(vkCode); // keydownのアクションが定義されていたら
+        if (isKeyDown && keyDownHandler) { keyDownHandler(vkCode); // keydownのアクションが定義されていたら
+        }
         if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
 
         if (shouldSuppress(vkCode, isKeyDown)) return 1;
