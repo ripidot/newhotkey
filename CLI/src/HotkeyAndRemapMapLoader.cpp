@@ -126,20 +126,29 @@ void HotkeyAndRemapMapLoader::load(){
     register_loaded_hotkeys();
     register_loaded_remaps();
 }
+void HotkeyAndRemapMapLoader::simulateTextInput(const std::wstring& text) {
+    for (wchar_t c : text) {
+        INPUT input[2] = {};
+        input[0].type = INPUT_KEYBOARD;
+        input[0].ki.wScan = c;
+        input[0].ki.dwFlags = KEYEVENTF_UNICODE;
 
+        input[1] = input[0];
+        input[1].ki.dwFlags |= KEYEVENTF_KEYUP;
+
+        SendInput(2, input, sizeof(INPUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
 // アクションの実行
 void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
     switch(p){
-        case ProcessType::KeyLogger:{
-            std::string str = keymaploader.vk_to_key_string(current.key);
-            keylogger.onKeyPress(str);
-            break;
-        }
         case ProcessType::Remap:{
             auto sit = remap_map.find(vk_code); // 見つからなければremap.end()を返す
             if (sit != remap_map.end()) { // 見つかったら
                 vk_code = sit->second(keyDown); // 登録された関数を実行
             }
+
             if (keyDown) { // キーロガー機能
                 std::string str = keymaploader.vk_to_key_string(vk_code);
                 keylogger.onKeyPress(str);

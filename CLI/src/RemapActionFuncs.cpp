@@ -11,7 +11,7 @@ namespace RemapActionFuncs { // hotkeyに対してのアクションの関数
 
         SendInput(1, &input, sizeof(INPUT));
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         KeyboardHookManager::suppress_input = false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
