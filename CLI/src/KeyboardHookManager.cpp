@@ -13,7 +13,19 @@ bool KeyboardHookManager::shouldSuppress(WORD vkCode, bool isKeyDown) {
     }
     return false;
 }
+void KeyboardHookManager::simulateTextInput(const std::wstring& text) {
+    for (wchar_t c : text) {
+        INPUT input[2] = {};
+        input[0].type = INPUT_KEYBOARD;
+        input[0].ki.wScan = c;
+        input[0].ki.dwFlags = KEYEVENTF_UNICODE;
 
+        input[1] = input[0];
+        input[1].ki.dwFlags |= KEYEVENTF_KEYUP;
+
+        SendInput(2, input, sizeof(INPUT));
+    }
+}
 LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION && !suppress_input) {
         const KBDLLHOOKSTRUCT* p = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
@@ -21,9 +33,11 @@ LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM 
         bool isKeyDown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
         bool isKeyUp = (wParam == WM_KEYUP || wParam == WM_SYSKEYUP);
 
-        // debug_log(LogLevel::LogInfo, "vk: ", vkCode);
+        if (isKeyDown && keyDownHandler) {
+            keyDownHandler(vkCode); // keydownのアクションが定義されていたら
 
-        if (isKeyDown && keyDownHandler) { keyDownHandler(vkCode); // keydownのアクションが定義されていたら
+
+
         }
         if (isKeyUp && keyUpHandler) keyUpHandler(vkCode);
 

@@ -140,6 +140,35 @@ void HotkeyAndRemapMapLoader::simulateTextInput(const std::wstring& text) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
+void HotkeyAndRemapMapLoader::inputToBuffer(WORD vkCode){
+    if ((vkCode >= 'A' && vkCode <= 'Z') || (vkCode >= '0' && vkCode <= '9')) {
+        wchar_t ch = (wchar_t)vkCode;
+        if (GetKeyState(VK_SHIFT) >= 0) {
+            ch = towlower(ch); // 小文字化
+        }
+        inputBuffer += ch;
+        for (const auto& [trigger, replacement] : hotstrings){
+            if (inputBuffer.size() >= trigger.size() &&
+                inputBuffer.substr(inputBuffer.size() - trigger.size()) == trigger) {
+
+                // バックスペース送信
+                for (size_t i = 0; i < trigger.size(); ++i) {
+                    keybd_event(VK_BACK, 0, 0, 0);
+                    keybd_event(VK_BACK, 0, KEYEVENTF_KEYUP, 0);
+                }
+
+                // 置換文字列送信
+                keystringactionfuncs.simulateTextInput(replacement);
+                inputBuffer.clear();
+
+                return;
+            }
+        }
+    }
+    if (vkCode == VK_BACK && !inputBuffer.empty()) {
+        inputBuffer.pop_back();
+    }
+}
 // アクションの実行
 void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
     switch(p){
@@ -162,6 +191,13 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
             }
             break;
         }
+        case ProcessType::KeyString:{
+            if (!keyDown){ // キーストリング処理
+                WORD vkCode = current.key;
+                inputToBuffer(vkCode);
+            }
+            break;
+        }
     }
 }
 
@@ -175,6 +211,7 @@ void HotkeyAndRemapMapLoader::execute(WORD vk_code, bool keyDown) { // actionを
 
     execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
     execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
+    execute_action(ProcessType::KeyString, vk_code, current, keyDown);
 }
 // テストの実行
 void HotkeyAndRemapMapLoader::test_invalid_key(){
