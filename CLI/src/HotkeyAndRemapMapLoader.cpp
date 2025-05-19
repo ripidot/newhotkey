@@ -120,11 +120,15 @@ void HotkeyAndRemapMapLoader::register_loaded_hotkeys(){
 
     }
 }
+void HotkeyAndRemapMapLoader::register_loaded_keystrings(){ // lkstrings = hotkstrings
+    hotstrings = move(*fileaccess.lkstrings_getter());
+}
 void HotkeyAndRemapMapLoader::load(){
     keymaploader.load(vkfilename_);
     fileaccess.load_hotkeys_from_file();
     register_loaded_hotkeys();
     register_loaded_remaps();
+    register_loaded_keystrings();
 }
 void HotkeyAndRemapMapLoader::simulateTextInput(const std::wstring& text) {
     for (wchar_t c : text) {
@@ -142,12 +146,12 @@ void HotkeyAndRemapMapLoader::simulateTextInput(const std::wstring& text) {
 }
 void HotkeyAndRemapMapLoader::inputToBuffer(WORD vkCode){
     if ((vkCode >= 'A' && vkCode <= 'Z') || (vkCode >= '0' && vkCode <= '9')) {
-        wchar_t ch = (wchar_t)vkCode;
+        WORD ch = vkCode;
         if (GetKeyState(VK_SHIFT) >= 0) {
             ch = towlower(ch); // 小文字化
         }
         inputBuffer += ch;
-        for (const auto& [trigger, replacement] : hotstrings){
+        for (const auto& [trigger, replacement] : hotstrings) { //hotstrings wo wstring ni
             if (inputBuffer.size() >= trigger.size() &&
                 inputBuffer.substr(inputBuffer.size() - trigger.size()) == trigger) {
 

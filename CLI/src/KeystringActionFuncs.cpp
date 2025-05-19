@@ -1,6 +1,6 @@
-#include "../include/KeystringActionFuncs.hpp"
+﻿#include "../include/KeystringActionFuncs.hpp"
 
-void KeystringActionFuncs::simulateTextInput(const std::wstring& text) {
+void KeystringActionFuncs::simulateTextInput(const std::string& text) {
     for (wchar_t c : text) {
         INPUT input[2] = {};
         input[0].type = INPUT_KEYBOARD;

@@ -4,7 +4,7 @@
 const std::string fileurl_;
 std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
 std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
-
+std::unordered_map<std::string, std::string> loaded_keystrings;
 std::unordered_map<std::string, WORD> vk_map_;
 std::unordered_map<WORD, std::string> vk_inv_map_;
 
@@ -17,6 +17,9 @@ std::unordered_map<std::string, HotkeyCommandAction>* FileAccess::lhotkeys_gette
 }
 std::unordered_map<std::string, std::string>* FileAccess::lremaps_getter(){
     return &loaded_remaps;
+}
+std::unordered_map<std::string, std::string>* FileAccess::lkstrings_getter(){
+    return &loaded_keystrings;
 }
 std::unordered_map<std::string, WORD>* FileAccess::vk_map_getter(){
     return &vk_map_;
@@ -61,6 +64,9 @@ void FileAccess::load_hotkeys_from_file() {
             case ParsedLineType::Remap:
                 loaded_remaps[parsed.from_key] = parsed.to_key;
                 break;
+            case ParsedLineType::Keystring:
+                loaded_keystrings[parsed.from_strkey] = parsed.to_strkey;
+                break;
             case ParsedLineType::Invalid:
                 // 無視
                 break;
@@ -74,6 +80,8 @@ void FileAccess::load_hotkeys_from_file() {
             case ParsedLineType::Remap:
                 debug_log(LogLevel::Info,"Loaded Remap: [", parsed.from_key, "] -> [", parsed.to_key,"]");
                 break;
+            case ParsedLineType::Keystring:
+                debug_log(LogLevel::Info,"Loaded Keystring: [", parsed.from_strkey, "] -> [", parsed.to_strkey,"]");
         }
     }
 }

@@ -22,11 +22,8 @@ class HotkeyAndRemapMapLoader{
 
         std::unordered_map<Hotkey, bool> suppress_hotkeys;
         std::unordered_map<WORD, bool> suppress_keys;
-        static inline std::wstring inputBuffer;
-        std::unordered_map<std::wstring, std::wstring> hotstrings = {
-            {L"brb", L"be right back"},
-            {L"omw", L"on my way"},
-        };
+        static inline std::string inputBuffer;
+        std::unordered_map<std::string, std::string> hotstrings;
     public:
         HotkeyAndRemapMapLoader();
         HotkeyAndRemapMapLoader(std::string filename, std::string vkfilename);
@@ -37,6 +34,7 @@ class HotkeyAndRemapMapLoader{
         void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
             HotkeyAction hotkeyaction, bool suppress);
         void register_loaded_hotkeys();
+        void register_loaded_keystrings();
         void load();
         void simulateTextInput(const std::wstring& text);
         void inputToBuffer(WORD vkCode);

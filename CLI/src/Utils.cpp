@@ -4,6 +4,7 @@ namespace StringUtils {
         bool escaped = false;
         bool found_colon = false;
         bool found_arrow = false;
+        bool found_Darrow = false;
         ParsedLine result;
         result.type = ParsedLineType::Invalid;
         std::string left, right;
@@ -11,21 +12,25 @@ namespace StringUtils {
         for (size_t i = 0; i < line.size(); ++i) {
             char c = line[i];
             if (escaped) {
-                ((found_colon || found_arrow) ? right : left) += c;
+                ((found_colon || found_arrow || found_Darrow) ? right : left) += c;
                 escaped = false;
             } else {
                 if (c == '\\') {
                     escaped = true;
-                } else if (c == '#' && !found_colon && !found_arrow) {
+                } else if (c == '#' && !found_colon && !found_arrow && !found_Darrow) {
                     break; // 非エスケープ#でコメント開始
-                } else if (c == ':' && !found_colon && !found_arrow) {
+                } else if (c == ':' && !found_colon && !found_arrow && !found_Darrow) {
                     found_colon = true;
                 } else if (c == '-' && i + 1 < line.size() && line[i + 1] == '>'
-                            && !found_colon && !found_arrow){
+                            && !found_colon && !found_arrow && !found_Darrow){
                     found_arrow = true;
                     i++;
+                } else if (c == '=' && i + 1 < line.size() && line[i + 1] == '>'
+                            && !found_colon && !found_arrow && !found_Darrow){
+                    found_Darrow = true;
+                    i++;
                 }else {
-                    ((found_colon || found_arrow) ? right : left) += c;
+                    ((found_colon || found_arrow || found_Darrow) ? right : left) += c;
                 }
             }
         }
@@ -45,6 +50,10 @@ namespace StringUtils {
             result.type = ParsedLineType::Remap;
             result.from_key = left;
             result.to_key = right;
+        } else if (found_Darrow && !left.empty()) {
+            result.type = ParsedLineType::Keystring;
+            result.from_strkey = left;
+            result.to_strkey = right;
         }
     
         return result; // r.left = "A ctrl shift", r.right = "launch_app notepad.exe"
