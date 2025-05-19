@@ -20,7 +20,8 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     hook.setHook();
 
     MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)) {
+    //フレームのようなもの, メッセージループが終わるとアプリ側での処理が実行される
+    while (GetMessage(&msg, NULL, 0, 0)) { 
         switch (msg.message) {
         case WM_HOTKEY:
             if (msg.wParam == HOTKEY_ID) {
