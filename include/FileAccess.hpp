@@ -14,6 +14,7 @@ class FileAccess { // file access
         std::string fileurl_;
         std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
         std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
+        std::unordered_map<std::string, std::string> loaded_keystrings;
         std::unordered_map<std::string, WORD> vk_map_;
         std::unordered_map<WORD, std::string> vk_inv_map_;
     public:
@@ -22,6 +23,7 @@ class FileAccess { // file access
 
         std::unordered_map<std::string, HotkeyCommandAction>* lhotkeys_getter();
         std::unordered_map<std::string, std::string>* lremaps_getter();
+        std::unordered_map<std::string, std::string>* lkstrings_getter();
         std::unordered_map<std::string, WORD>* vk_map_getter();
         std::unordered_map<WORD, std::string>* vk_inv_map_getter();
         void load_hotkeys_from_file();

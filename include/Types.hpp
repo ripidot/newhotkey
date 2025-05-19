@@ -19,6 +19,7 @@ enum class ProcessType{ // 命令のタイプ判別
 enum class ParsedLineType { // 読み込み行のタイプ判別
     Hotkey,
     Remap,
+    Keystring,
     Invalid
 };
 
@@ -39,6 +40,8 @@ struct ParsedLine {
     std::string action_part;
     std::string from_key;
     std::string to_key;
+    std::string from_strkey;
+    std::string to_strkey;
 };
 struct HotkeyAction { // 入力があった時のアクション、入力キーをreturnする
     std::function<WORD()> on_press;

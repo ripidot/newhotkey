@@ -7,7 +7,7 @@ direction TB
 	    ファイルのアクセス
     }
     class HotkeyAndRemapMapLoader {
-	    hotkeyとremapのマップのロード、トリガーの判定(vkによる判定処理) 、アクションの実行
+	    hotkeyとremapとhotstringマップのロード、トリガーの判定(vkによる判定処理) 、アクションの実行
     }
     class KeyMapLoader {
 	    vkとキーネームのmap
@@ -21,6 +21,9 @@ direction TB
     class RemapActionFuncs {
 	    remapの実行関数定義
     }
+    class HotstringActionFuncs {
+	    hotstringの実行関数定義
+    }
     class main {
 	    mainファイル
     }
@@ -32,6 +35,7 @@ direction TB
     FileAccess <|-- KeyMapLoader
     KeyMapLoader <|-- HotkeyAndRemapMapLoader
     KeyboardHookManager <|-- RemapActionFuncs
+    HotstringActionFuncs <|-- HotkeyAndRemapMapLoader
     KeyLogger <|-- HotkeyAndRemapMapLoader
     RemapActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyActionFuncs <|-- HotkeyAndRemapMapLoader

@@ -33,5 +33,5 @@ VK_VOLUME_UP -> VK_VOLUME_DOWN
 
 ############################################################
 # キーストリング
-# brb => be right back
-# omw => on my way
+brbrb => be right back
+omomw => on my way
