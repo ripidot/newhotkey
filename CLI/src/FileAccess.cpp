@@ -1,7 +1,7 @@
 ﻿#include "../include/FileAccess.hpp"
 
 
-const std::string fileurl_;
+const PATH fileurl_;
 std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
 std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
 std::unordered_map<std::string, std::string> loaded_keystrings;
@@ -9,7 +9,7 @@ std::unordered_map<std::string, WORD> vk_map_;
 std::unordered_map<WORD, std::string> vk_inv_map_;
 
 FileAccess::FileAccess() : fileurl_(){}
-FileAccess::FileAccess(std::string fileurl) : fileurl_(fileurl){}
+FileAccess::FileAccess(PATH fileurl) : fileurl_(fileurl){}
 
 
 std::unordered_map<std::string, HotkeyCommandAction>* FileAccess::lhotkeys_getter(){
@@ -26,6 +26,10 @@ std::unordered_map<std::string, WORD>* FileAccess::vk_map_getter(){
 }
 std::unordered_map<WORD, std::string>* FileAccess::vk_inv_map_getter(){
     return &vk_inv_map_;
+}
+
+void FileAccess::set_filename(PATH filename) {
+    fileurl_ = filename;
 }
 
 void FileAccess::load_hotkeys_from_file() {
@@ -91,7 +95,7 @@ void FileAccess::load_vk_from_file(){
 
     std::ifstream file(fileurl_);
     if (!file.is_open()) {
-        std::cerr << "couldnt open file\n";
+        debug_log(LogLevel::Error, "couldn't open file in load_vk_from_file\n");
         return;
     }
 
@@ -104,4 +108,27 @@ void FileAccess::load_vk_from_file(){
             vk_inv_map_[value] = key;
         }
     }
+}
+
+int FileAccess::load_launchCounter(){
+    std::ifstream file(fileurl_);
+    if (!file.is_open()) {
+        debug_log(LogLevel::Error, "couldn't open file in load_launchCounter\n");
+        return -1;
+    }
+    std::string line;
+    std::ifstream infile(fileurl_);
+    std::getline(infile, line);
+    int launchCounter = atoi(line.c_str());
+    debug_log(LogLevel::Info, "lcounter: ", launchCounter++);
+    file.close();
+
+    std::ofstream ofs(fileurl_);
+    if (!ofs) {
+        debug_log(LogLevel::Error, "couldn't open file in load_launchCounter\n");
+    }
+    ofs << launchCounter;
+    ofs.close();
+
+    return launchCounter;
 }

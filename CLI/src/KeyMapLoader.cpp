@@ -5,10 +5,10 @@ using json = nlohmann::json;
 std::unordered_map<std::string, WORD> KeyMapLoader::vk_map;
 std::unordered_map<WORD, std::string> KeyMapLoader::vk_inv_map;
 
-KeyMapLoader::KeyMapLoader(std::string fileurl) : fileurl(fileurl) {}
+KeyMapLoader::KeyMapLoader(PATH fileurl) : fileurl(fileurl) {}
 KeyMapLoader::KeyMapLoader(){}
 
-void KeyMapLoader::load(std::string vkfilename){
+void KeyMapLoader::load(PATH vkfilename){
     fileaccess = FileAccess(vkfilename);
     fileaccess.load_vk_from_file();
     vk_map = *fileaccess.vk_map_getter();

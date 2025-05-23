@@ -2,9 +2,12 @@
 #include <string>
 #include <functional>
 #include <unordered_set>
+#include <filesystem>
 
 
 using WORD = unsigned short;
+using PATH = std::filesystem::path;
+
 enum class LogLevel {
     LogInfo,
     Info,
@@ -61,7 +64,12 @@ struct Hotkey {
         return false;
     }
 };
-
+struct KeyLog {
+    tm local_time;
+    Hotkey current;
+    bool keystate;
+    std::string window_title;
+};
 namespace constants {
     inline constexpr LogLevel displaylevel = LogLevel::Info;
     constexpr bool debug_mode = true; // デバッグ出力するかどうか

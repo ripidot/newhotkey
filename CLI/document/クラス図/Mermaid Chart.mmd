@@ -21,8 +21,8 @@ direction TB
     class RemapActionFuncs {
 	    remapの実行関数定義
     }
-    class HotstringActionFuncs {
-	    hotstringの実行関数定義
+    class KeystringActionFuncs {
+	    Keystringの実行関数定義
     }
     class main {
 	    mainファイル
@@ -34,8 +34,9 @@ direction TB
     FileAccess <|-- HotkeyAndRemapMapLoader
     FileAccess <|-- KeyMapLoader
     KeyMapLoader <|-- HotkeyAndRemapMapLoader
+    KeyboardHookManager <|-- KeystringActionFuncs
     KeyboardHookManager <|-- RemapActionFuncs
-    HotstringActionFuncs <|-- HotkeyAndRemapMapLoader
+    KeystringActionFuncs <|-- HotkeyAndRemapMapLoader
     KeyLogger <|-- HotkeyAndRemapMapLoader
     RemapActionFuncs <|-- HotkeyAndRemapMapLoader
     HotkeyActionFuncs <|-- HotkeyAndRemapMapLoader
