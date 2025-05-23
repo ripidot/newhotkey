@@ -1,7 +1,9 @@
 ﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(){}
-HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(std::string filename, std::string vkfilename) : filename_(filename), vkfilename_(vkfilename){}
+HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename) : filename_(filename), vkfilename_(vkfilename){}
+HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename) : filename_(filename), vkfilename_(vkfilename), initlogfilename_(initlogfilename){}
+HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename, PATH dbfilename): filename_(filename), vkfilename_(vkfilename), initlogfilename_(initlogfilename), dbfilename_(dbfilename){}
 std::unordered_map<WORD, bool>* HotkeyAndRemapMapLoader::skeys_getter(){
     return &suppress_keys;
 }
@@ -126,6 +128,14 @@ void HotkeyAndRemapMapLoader::register_loaded_keystrings(){ // lkstrings = hotks
 void HotkeyAndRemapMapLoader::load(){
     keymaploader.load(vkfilename_);
     fileaccess.load_hotkeys_from_file();
+
+    keylogger.setDBFilename(dbfilename_);
+
+    debug_log(LogLevel::Info, "initlogfilename_", initlogfilename_);
+    fileaccess.set_filename(initlogfilename_);
+    int lcounter = fileaccess.load_launchCounter();
+    keylogger.setLaunchCounter(lcounter);
+
     register_loaded_hotkeys();
     register_loaded_remaps();
     register_loaded_keystrings();
@@ -183,8 +193,27 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
             }
 
             if (keyDown) { // キーロガー機能
-                std::string str = keymaploader.vk_to_key_string(vk_code);
-                keylogger.onKeyPress(str);
+                auto now = std::chrono::system_clock::now();
+                auto time = std::chrono::system_clock::to_time_t(now);
+                auto local_time = *std::localtime(&time);
+
+                HWND hwnd = GetForegroundWindow();
+                DWORD pid;
+                GetWindowThreadProcessId(hwnd, &pid);
+                HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+                TCHAR processName[MAX_PATH];
+                GetModuleBaseName(hProcess, nullptr, processName, MAX_PATH);
+
+                char title[256];
+                std::string window_title;
+                window_title = GetWindowText(hwnd, title, sizeof(title)) ? title : "couldn't get title";
+
+                KeyLog keylog = {local_time, current, keyDown,
+                window_title};
+                keylogger.memory(&keylog);
+
+                // std::string str = keymaploader.vk_to_key_string(vk_code);
+                // keylogger.onKeyPress(str);
             }
             break;
         }

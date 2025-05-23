@@ -3,9 +3,12 @@
 #define HOTKEY_ID 1
 
 int main(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
-    const std::string hotkeyfileurl = "data/hotkeys.txt";
-    const std::string vkfileurl = "data/vkmap_grouped_numeric.json";
-    HotkeyAndRemapMapLoader maplod = HotkeyAndRemapMapLoader(hotkeyfileurl, vkfileurl);
+    const PATH hotkeyfileurl = "data/hotkeys.txt";
+    const PATH vkfileurl = "data/vkmap_grouped_numeric.json";
+    const char* appdata = std::getenv("APPDATA");  // AppData\Roaming
+    const PATH initlogfileurl = std::filesystem::path(appdata) / "MyApp" / "log" / "initlog.txt";
+    const PATH dbfileurl = std::filesystem::path(appdata) / "MyApp" / "log" / "keylog.db";
+    HotkeyAndRemapMapLoader maplod = HotkeyAndRemapMapLoader(hotkeyfileurl, vkfileurl, initlogfileurl, dbfileurl);
     maplod.load();
     maplod.run_all_tests();
 
