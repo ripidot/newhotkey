@@ -18,7 +18,6 @@ class KeyLogger {
         int rand; // logのための乱数生成
         int rmin = 1000;
         int rmax = 9999;
-        int flushBufferSize = 10;
         const char* appdata = std::getenv("APPDATA");  // AppData\Roaming
         std::filesystem::path logfilepath = std::filesystem::path(appdata) / "MyApp" / "log" / "logfile.txt";
         PATH dbpath;
@@ -28,9 +27,7 @@ class KeyLogger {
         }
         static inline std::string keyBuffer;
         void setDBFilename(PATH initpath);
-        void onKeyPress(std::string str);
-        void memory(KeyLog* keylog);
-        void flushBufferToFile();
+        void memory(const KeyLog& keylog);
         void setRand();
         void setLaunchCounter(int lcounter);
         std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current); 
