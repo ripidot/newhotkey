@@ -67,7 +67,9 @@ struct Hotkey {
 struct KeyLog {
     tm local_time;
     Hotkey current;
+    std::string keyname;
     bool keystate;
+    std::string processname;
     std::string window_title;
 };
 namespace constants {

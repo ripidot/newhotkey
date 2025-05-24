@@ -27,8 +27,9 @@ VK_F3 : open_url https://www.example.com/page\#section1
 VK_LWIN -> VK_LCONTROL
 VK_LCONTROL -> VK_LWIN
 VK_NONCONVERT -> VK_BACK
-VK_CAPITAL -> VK_ZENHANKAKU
-VK_ZENHANKAKU -> VK_CAPITAL
+VK_CONVERT -> VK_DELETE
+# VK_CAPITAL -> VK_ZENHANKAKU
+# VK_ZENHANKAKU -> VK_CAPITAL
 VK_VOLUME_UP -> VK_VOLUME_DOWN
 
 ############################################################

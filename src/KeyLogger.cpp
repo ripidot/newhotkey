@@ -13,6 +13,21 @@ void KeyLogger::onKeyPress(std::string str) {
         keyBuffer = "";
     }
 }
+std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current){
+    std::vector<std::string> modifiers;
+    if (current.shift) modifiers.push_back("shift");
+    if (current.ctrl) modifiers.push_back("ctrl");
+    if (current.alt) modifiers.push_back("alt");
+    if (current.win) modifiers.push_back("win");
+
+    std::ostringstream oss;
+    for (size_t i = 0; i < modifiers.size(); ++i) { 
+        if (0 < i) oss << ",";
+        oss << modifiers[i];
+    }
+    return oss.str().c_str();
+}
+
 void KeyLogger::memory(KeyLog* keylog) {
     sqlite3* db;
     char* errMsg = nullptr;
@@ -40,22 +55,21 @@ void KeyLogger::memory(KeyLog* keylog) {
         sqlite3_free(errMsg);
     }
 
-    std::ostringstream oss;
-    std::ostringstream osss;
+    std::ostringstream setoss;
+    std::ostringstream timeoss;
 
-    // 仮のログデータを挿入（本来はキー入力処理から取得）
-    // std::string timestamp = "2025-05-22 12:34:56";
     tm time = keylog->local_time;
-    oss << launchCounter << "_" << 1900 + time.tm_year << 1 + time.tm_mon << time.tm_mday;
-    osss << 1900 + time.tm_year << "-" << 1 + time.tm_mon << "-" << time.tm_mday<< " " 
-    << time.tm_hour << ":" << time.tm_min << ":" << time.tm_sec ;
 
-    std::string session_id = oss.str().c_str();
-    std::string timestamp = osss.str().c_str();
-    std::string key = "A";
-    std::string modifiers = "Shift";
-    std::string window_title = "メモ帳";
-    std::string process_name = "notepad.exe";
+    setoss << StringUtils::pad(launchCounter, 3) << "_" << 1900 + time.tm_year << StringUtils::pad(1 + time.tm_mon) << StringUtils::pad(time.tm_mday);
+    timeoss << 1900 + time.tm_year << "-" << StringUtils::pad(1 + time.tm_mon) << "-" << StringUtils::pad(time.tm_mday)<< " " 
+    << StringUtils::pad(time.tm_hour) << ":" << StringUtils::pad(time.tm_min) << ":" << StringUtils::pad(time.tm_sec);
+
+    std::string session_id = setoss.str().c_str();
+    std::string timestamp = timeoss.str().c_str();
+    std::string key = keylog->keyname;
+    std::string modifiers = return_Modifier_from_Hotkey(keylog->current);
+    std::string window_title = keylog->window_title;
+    std::string process_name = keylog->processname;
 
     std::string insertSQL = "INSERT INTO keylogs (session_id, timestamp, key, modifiers, window_title, process_name) VALUES ('" +
         session_id + "', '" + timestamp + "', '" + key + "', '" + modifiers + "', '" + window_title + "', '" + process_name + "');";
@@ -63,14 +77,12 @@ void KeyLogger::memory(KeyLog* keylog) {
     if (sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
         debug_log(LogLevel::Error, "Insertion Error ", errMsg);
         sqlite3_free(errMsg);
-    } else {
-        debug_log(LogLevel::Info, "Save Success");
     }
 
     sqlite3_close(db);
-    debug_log(LogLevel::Info, "close");
     return;
 }
+
 void KeyLogger::flushBufferToFile(){
     debug_log(LogLevel::Info, "flush: ", keyBuffer);
     std::ofstream file;

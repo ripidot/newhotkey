@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <string>
+#include "Utils.hpp"
 #include "Types.hpp"
 #include "Logger.hpp"
 #include "sqlite3.h"
@@ -25,4 +26,5 @@ class KeyLogger {
         void memory(KeyLog* keylog);
         void flushBufferToFile();
         void setLaunchCounter(int lcounter);
+        std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current); 
 };
