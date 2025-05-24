@@ -203,17 +203,18 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
                 HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
                 TCHAR processName[MAX_PATH];
                 GetModuleBaseName(hProcess, nullptr, processName, MAX_PATH);
+                std::string stringProcessName = processName;
 
                 char title[256];
                 std::string window_title;
                 window_title = GetWindowText(hwnd, title, sizeof(title)) ? title : "couldn't get title";
 
-                KeyLog keylog = {local_time, current, keyDown,
-                window_title};
+                std::string keyname = keymaploader.vk_to_key_string(vk_code);
+                debug_log(LogLevel::LogInfo, "vk_code: ", vk_code);
+                debug_log(LogLevel::LogInfo, "keyname: ", keyname);
+                KeyLog keylog = {local_time, current, keyname,
+                    keyDown, processName, window_title};
                 keylogger.memory(&keylog);
-
-                // std::string str = keymaploader.vk_to_key_string(vk_code);
-                // keylogger.onKeyPress(str);
             }
             break;
         }

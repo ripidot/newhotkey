@@ -1,4 +1,5 @@
 ﻿#include "../include/Types.hpp"
+#include "../include/Utils.hpp"
 namespace StringUtils {
     ParsedLine parse_line(const std::string& line) {
         bool escaped = false;
@@ -58,4 +59,10 @@ namespace StringUtils {
     
         return result; // r.left = "A ctrl shift", r.right = "launch_app notepad.exe"
     }
+    std::string pad(int value, int digits) {
+        std::ostringstream oss;
+        oss << std::setw(digits) << std::setfill('0') << value;
+        return oss.str();
+    }
+
 }
