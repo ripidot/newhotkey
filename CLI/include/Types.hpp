@@ -69,8 +69,8 @@ struct KeyLog {
     Hotkey current;
     std::string keyname;
     bool keystate;
-    std::string processname;
-    std::string window_title;
+    std::wstring processname;
+    std::wstring window_title;
 };
 namespace constants {
     inline constexpr LogLevel displaylevel = LogLevel::Info;

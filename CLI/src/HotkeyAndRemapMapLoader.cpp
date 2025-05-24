@@ -129,9 +129,9 @@ void HotkeyAndRemapMapLoader::load(){
     keymaploader.load(vkfilename_);
     fileaccess.load_hotkeys_from_file();
 
+    keylogger.setRand();
     keylogger.setDBFilename(dbfilename_);
 
-    debug_log(LogLevel::Info, "initlogfilename_", initlogfilename_);
     fileaccess.set_filename(initlogfilename_);
     int lcounter = fileaccess.load_launchCounter();
     keylogger.setLaunchCounter(lcounter);
@@ -201,19 +201,19 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
                 DWORD pid;
                 GetWindowThreadProcessId(hwnd, &pid);
                 HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-                TCHAR processName[MAX_PATH];
-                GetModuleBaseName(hProcess, nullptr, processName, MAX_PATH);
-                std::string stringProcessName = processName;
+                wchar_t processName[MAX_PATH];
+                GetModuleBaseNameW(hProcess, nullptr, processName, MAX_PATH);
+                std::wstring stringProcessName = processName;
 
-                char title[256];
-                std::string window_title;
-                window_title = GetWindowText(hwnd, title, sizeof(title)) ? title : "couldn't get title";
+                wchar_t title[256];
+                std::wstring window_title;
+                window_title = GetWindowTextW(hwnd, title, sizeof(title)) ? title : L"couldn't get title";
 
                 std::string keyname = keymaploader.vk_to_key_string(vk_code);
                 debug_log(LogLevel::LogInfo, "vk_code: ", vk_code);
                 debug_log(LogLevel::LogInfo, "keyname: ", keyname);
                 KeyLog keylog = {local_time, current, keyname,
-                    keyDown, processName, window_title};
+                    keyDown, stringProcessName, window_title};
                 keylogger.memory(&keylog);
             }
             break;
