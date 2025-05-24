@@ -5,14 +5,6 @@ void KeyLogger::setDBFilename(PATH initpath){
     dbpath = initpath;
 }
 
-void KeyLogger::onKeyPress(std::string str) {
-    keyBuffer += str + ",";
-    if (keyBuffer.length() >= 2 * flushBufferSize){
-        keyBuffer += "\r\n";
-        flushBufferToFile();
-        keyBuffer = "";
-    }
-}
 std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current){
     std::vector<std::string> modifiers;
     if (current.shift) modifiers.push_back("shift");
@@ -46,7 +38,7 @@ std::string wstring_to_utf8(const std::wstring& wstr) {
     return conv.to_bytes(wstr);
 }
 
-void KeyLogger::memory(KeyLog* keylog) {
+void KeyLogger::memory(const KeyLog& keylog) {
     sqlite3* db;
     char* errMsg = nullptr;
 
@@ -77,7 +69,7 @@ void KeyLogger::memory(KeyLog* keylog) {
     std::ostringstream setoss;
     std::ostringstream timeoss;
 
-    tm time = keylog->local_time;
+    tm time = keylog.local_time;
 
     setoss << StringUtils::pad(launchCounter, 3) << "_" << 1900 + time.tm_year << StringUtils::pad(1 + time.tm_mon) << StringUtils::pad(time.tm_mday)
         << "T" << StringUtils::pad(time.tm_hour) << StringUtils::pad(time.tm_min)
@@ -88,10 +80,10 @@ void KeyLogger::memory(KeyLog* keylog) {
     std::string session_id = setoss.str().c_str();
     std::string sequence_id = std::to_string(++sequence_counter);
     std::string timestamp = timeoss.str().c_str();
-    std::string key = keylog->keyname;
-    std::string modifiers = return_Modifier_from_Hotkey(keylog->current);
-    std::string window_title = wstring_to_utf8(keylog->window_title);
-    std::string process_name = wstring_to_utf8(keylog->processname);
+    std::string key = keylog.keyname;
+    std::string modifiers = return_Modifier_from_Hotkey(keylog.current);
+    std::string window_title = wstring_to_utf8(keylog.window_title);
+    std::string process_name = wstring_to_utf8(keylog.processname);
 
     std::string insertSQL = "INSERT INTO keylogs (session_id, sequence_id, timestamp, key, modifiers, window_title, process_name) VALUES ('" +
         session_id + "', '" + sequence_id + "', '" + timestamp + "', '" + key + "', '" + modifiers + "', '" + window_title + "', '" + process_name + "');";
@@ -105,16 +97,6 @@ void KeyLogger::memory(KeyLog* keylog) {
     return;
 }
 
-void KeyLogger::flushBufferToFile(){
-    debug_log(LogLevel::Info, "flush: ", keyBuffer);
-    std::ofstream file;
-    file.open(logfilepath, std::ios::app);  // 追記モード
-    if (!file.is_open()) {
-        debug_log(LogLevel::Info, "couldn't open file");
-    }
-    file << keyBuffer;
-    file.close();
-}
 void KeyLogger::setLaunchCounter(int lcounter){
     launchCounter = lcounter;
 }

@@ -62,7 +62,7 @@ void HotkeyAndRemapMapLoader::register_loaded_remaps(){
 }
 
 void HotkeyAndRemapMapLoader::register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
-    HotkeyAction hotkeyaction, bool suppress = true) {
+    const HotkeyAction& hotkeyaction, bool suppress = true) {
     Hotkey hk = { key, shift, ctrl, alt , win};
     suppress_hotkeys[hk] = suppress;
     hotkey_map[hk] = [hotkeyaction](bool keyDown) -> bool {
@@ -214,7 +214,7 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
                 debug_log(LogLevel::LogInfo, "keyname: ", keyname);
                 KeyLog keylog = {local_time, current, keyname,
                     keyDown, stringProcessName, window_title};
-                keylogger.memory(&keylog);
+                keylogger.memory(keylog);
             }
             break;
         }

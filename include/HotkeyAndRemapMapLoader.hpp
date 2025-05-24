@@ -37,7 +37,7 @@ class HotkeyAndRemapMapLoader{
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress);
         void register_loaded_remaps();
         void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
-            HotkeyAction hotkeyaction, bool suppress);
+            const HotkeyAction& hotkeyaction, bool suppress);
         void register_loaded_hotkeys();
         void register_loaded_keystrings();
         void load();
