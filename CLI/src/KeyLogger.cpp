@@ -4,7 +4,9 @@
 void KeyLogger::setDBFilename(PATH initpath){
     dbpath = initpath;
 }
-
+void KeyLogger::setErrorfilename(PATH path){
+    errorfilepath = path;
+}
 std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current){
     std::vector<std::string> modifiers;
     if (current.shift) modifiers.push_back("shift");
@@ -37,15 +39,21 @@ std::string wstring_to_utf8(const std::wstring& wstr) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
     return conv.to_bytes(wstr);
 }
-
+void KeyLogger::SaveErrorToFile(PATH errorfilepath, std::string err){
+    std::ofstream file;
+    file.open(errorfilepath, std::ios::app);  // 追記モード
+    if (!file.is_open()) {
+        throw std::runtime_error("Couldn't open errorlogfile and Insertion Error: " + err + "\r\n");
+    }
+    file.close();
+}
 void KeyLogger::memory(const KeyLog& keylog) {
     sqlite3* db;
     char* errMsg = nullptr;
 
     // データベース接続
     if (sqlite3_open(dbpath.string().c_str(), &db)) {
-        debug_log(LogLevel::Error, "couldn't open db file: ", sqlite3_errmsg(db));
-        return;
+        throw std::runtime_error(sqlite3_errmsg(db));
     }
 
     // テーブルが存在しないとき作成
@@ -62,8 +70,8 @@ void KeyLogger::memory(const KeyLog& keylog) {
         );
     )";
     if (sqlite3_exec(db, createTableSQL, nullptr, nullptr, &errMsg) != SQLITE_OK) {
-        debug_log(LogLevel::Error, "couldn't create a table ", errMsg);
         sqlite3_free(errMsg);
+        throw std::runtime_error(errMsg);
     }
 
     std::ostringstream setoss;
@@ -90,6 +98,7 @@ void KeyLogger::memory(const KeyLog& keylog) {
 
     if (sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
         debug_log(LogLevel::Error, "Insertion Error ", errMsg);
+        SaveErrorToFile(errorfilepath, errMsg);
         sqlite3_free(errMsg);
     }
 

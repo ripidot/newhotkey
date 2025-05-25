@@ -72,6 +72,7 @@ struct KeyLog {
     std::wstring processname;
     std::wstring window_title;
 };
+
 namespace constants {
     inline constexpr LogLevel displaylevel = LogLevel::Info;
     constexpr bool debug_mode = true; // デバッグ出力するかどうか

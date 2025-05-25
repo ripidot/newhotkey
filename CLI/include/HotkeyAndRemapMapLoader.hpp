@@ -5,6 +5,7 @@
 #include "RemapActionFuncs.hpp"
 #include "KeystringActionFuncs.hpp"
 #include "KeyLogger.hpp"
+#include "PathManager.hpp"
 #include <psapi.h>
 #include <unordered_map>
 #include <chrono>
@@ -12,11 +13,12 @@
 #include <cassert>
 class HotkeyAndRemapMapLoader{
     private:
-        PATH filename_;
-        PATH vkfilename_;
-        PATH initlogfilename_;
-        PATH dbfilename_;
-        FileAccess fileaccess = FileAccess(filename_);
+        PATH hotkeyfilename;
+        PATH vkfilename;
+        PATH initlogfilename;
+        PATH dbfilename;
+        PATH errorfilename;
+        FileAccess fileaccess = FileAccess(hotkeyfilename);
         KeyMapLoader keymaploader = KeyMapLoader();
         KeyLogger keylogger = KeyLogger();
         KeystringActionFuncs keystringactionfuncs = KeystringActionFuncs();
@@ -29,9 +31,7 @@ class HotkeyAndRemapMapLoader{
         std::unordered_map<std::string, std::string> hotstrings;
     public:
         HotkeyAndRemapMapLoader();
-        HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename);
-        HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename);
-        HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename, PATH dbfilename);
+        HotkeyAndRemapMapLoader(const PathManager& pm);
         std::unordered_map<WORD, bool>* skeys_getter();
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str);
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress);

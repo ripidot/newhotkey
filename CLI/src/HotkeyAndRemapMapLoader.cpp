@@ -1,9 +1,10 @@
 ﻿#include "../include/HotkeyAndRemapMapLoader.hpp"
 
 HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(){}
-HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename) : filename_(filename), vkfilename_(vkfilename){}
-HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename) : filename_(filename), vkfilename_(vkfilename), initlogfilename_(initlogfilename){}
-HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(PATH filename, PATH vkfilename, PATH initlogfilename, PATH dbfilename): filename_(filename), vkfilename_(vkfilename), initlogfilename_(initlogfilename), dbfilename_(dbfilename){}
+HotkeyAndRemapMapLoader::HotkeyAndRemapMapLoader(const PathManager& pm)
+    : hotkeyfilename(pm.getHotkeyFile()), vkfilename(pm.getVkFile()),
+    initlogfilename(pm.getInitlogFile()), dbfilename(pm.getDbFile()),
+    errorfilename(pm.getErrorFile()){}
 std::unordered_map<WORD, bool>* HotkeyAndRemapMapLoader::skeys_getter(){
     return &suppress_keys;
 }
@@ -126,15 +127,16 @@ void HotkeyAndRemapMapLoader::register_loaded_keystrings(){ // lkstrings = hotks
     hotstrings = move(*fileaccess.lkstrings_getter());
 }
 void HotkeyAndRemapMapLoader::load(){
-    keymaploader.load(vkfilename_);
+    keymaploader.load(vkfilename);
     fileaccess.load_hotkeys_from_file();
 
     keylogger.setRand();
-    keylogger.setDBFilename(dbfilename_);
+    keylogger.setDBFilename(dbfilename);
 
-    fileaccess.set_filename(initlogfilename_);
+    fileaccess.set_filename(initlogfilename);
     int lcounter = fileaccess.load_launchCounter();
     keylogger.setLaunchCounter(lcounter);
+    keylogger.setErrorfilename(errorfilename);
 
     register_loaded_hotkeys();
     register_loaded_remaps();

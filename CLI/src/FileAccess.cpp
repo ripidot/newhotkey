@@ -5,8 +5,8 @@ const PATH fileurl_;
 std::unordered_map<std::string, HotkeyCommandAction> loaded_hotkeys; //"A ctrl shift", {"launch_app", "notepad.exe"}
 std::unordered_map<std::string, std::string> loaded_remaps; //"Lctrl" , "Lwin"
 std::unordered_map<std::string, std::string> loaded_keystrings;
-std::unordered_map<std::string, WORD> vk_map_;
-std::unordered_map<WORD, std::string> vk_inv_map_;
+std::unordered_map<std::string, WORD> vk_map;
+std::unordered_map<WORD, std::string> vk_inv_map;
 
 FileAccess::FileAccess() : fileurl_(){}
 FileAccess::FileAccess(PATH fileurl) : fileurl_(fileurl){}
@@ -22,10 +22,10 @@ std::unordered_map<std::string, std::string>* FileAccess::lkstrings_getter(){
     return &loaded_keystrings;
 }
 std::unordered_map<std::string, WORD>* FileAccess::vk_map_getter(){
-    return &vk_map_;
+    return &vk_map;
 }
 std::unordered_map<WORD, std::string>* FileAccess::vk_inv_map_getter(){
-    return &vk_inv_map_;
+    return &vk_inv_map;
 }
 
 void FileAccess::set_filename(PATH filename) {
@@ -35,8 +35,7 @@ void FileAccess::set_filename(PATH filename) {
 void FileAccess::load_hotkeys_from_file() {
     std::ifstream infile(fileurl_);
     if (!infile) {
-        std::cerr << "Failed to open " << fileurl_ << std::endl;
-        return;
+        throw std::runtime_error("couldn't open hotkeyfile\r\n");
     }
 
     std::string line;
@@ -95,8 +94,7 @@ void FileAccess::load_vk_from_file(){
 
     std::ifstream file(fileurl_);
     if (!file.is_open()) {
-        debug_log(LogLevel::Error, "couldn't open file in load_vk_from_file\n");
-        return;
+        throw std::runtime_error("couldn't open vkfile\r\n");
     }
 
     json j;
@@ -104,8 +102,8 @@ void FileAccess::load_vk_from_file(){
 
     for (auto& [group_name, group_content] : j.items()) { // j: vkmap_grouped_numeric.json
         for (auto& [key, value] : group_content.items()) {
-            vk_map_[key] = value;
-            vk_inv_map_[value] = key;
+            vk_map[key] = value;
+            vk_inv_map[value] = key;
         }
     }
 }
@@ -113,8 +111,7 @@ void FileAccess::load_vk_from_file(){
 int FileAccess::load_launchCounter(){
     std::ifstream file(fileurl_);
     if (!file.is_open()) {
-        debug_log(LogLevel::Error, "couldn't open file in load_launchCounter\n");
-        return -1;
+        throw std::runtime_error("couldn't open initlogfile\r\n");
     }
     std::string line;
     std::ifstream infile(fileurl_);
@@ -125,7 +122,7 @@ int FileAccess::load_launchCounter(){
 
     std::ofstream ofs(fileurl_);
     if (!ofs) {
-        debug_log(LogLevel::Error, "couldn't open file in load_launchCounter\n");
+        throw std::runtime_error("couldn't open initlogfile\r\n");
     }
     ofs << launchCounter;
     ofs.close();
