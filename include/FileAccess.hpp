@@ -4,7 +4,6 @@
 #include <fstream>
 #include "Logger.hpp"
 #include "Utils.hpp"
-#include <windows.h>
 #include <sstream>
 #include <iostream>
 #include "nlohmann/json.hpp"

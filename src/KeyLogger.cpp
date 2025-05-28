@@ -22,17 +22,8 @@ std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current){
     return oss.str().c_str();
 }
 std::string to_utf8(const std::string& sjis_str) {
-    // Shift_JIS → UTF-16
-    int wide_len = MultiByteToWideChar(CP_ACP, 0, sjis_str.c_str(), -1, nullptr, 0);
-    std::wstring wide_str(wide_len, L'\0');
-    MultiByteToWideChar(CP_ACP, 0, sjis_str.c_str(), -1, wide_str.data(), wide_len);
-
-    // UTF-16 → UTF-8
-    int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wide_str.c_str(), -1, nullptr, 0, nullptr, nullptr);
-    std::string utf8_str(utf8_len, '\0');
-    WideCharToMultiByte(CP_UTF8, 0, wide_str.c_str(), -1, utf8_str.data(), utf8_len, nullptr, nullptr);
-
-    return utf8_str;
+    // Shift_JIS → UTF-8
+    return boost::locale::conv::to_utf<char>(sjis_str, "Shift-JIS");
 }
 
 std::string wstring_to_utf8(const std::wstring& wstr) {
