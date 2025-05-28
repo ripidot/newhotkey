@@ -1,7 +1,9 @@
 #include "../include/RemapActionFuncs.hpp"
 
+
 namespace RemapActionFuncs { // hotkeyに対してのアクションの関数
     // remapの実行関数
+
     void SendKeyboardInput(WORD key, bool keyDown) { // key:vk_key
         KeyboardHookManager::suppress_input = true;
         INPUT input = {0};
@@ -14,4 +16,5 @@ namespace RemapActionFuncs { // hotkeyに対してのアクションの関数
         KeyboardHookManager::suppress_input = false;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
 }

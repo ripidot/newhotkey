@@ -15,6 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
 # src ディレクトリ内のすべての .cpp ファイルを対象に
 file(GLOB SOURCES "src/*.cpp")
 
+find_package(Boost REQUIRED COMPONENTS locale)
 add_library(sqlite3 STATIC external/sqlite/sqlite3.c)
 
 # 実行ファイルの作成 win32指定
@@ -26,7 +27,7 @@ target_include_directories(hotkey_app PRIVATE
     external/sqlite)
 
 # SQLiteライブラリをリンク
-target_link_libraries(hotkey_app PRIVATE sqlite3)
+target_link_libraries(hotkey_app PRIVATE Boost::locale sqlite3)
 
 add_custom_command(TARGET hotkey_app POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
