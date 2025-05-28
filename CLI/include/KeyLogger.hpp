@@ -1,6 +1,5 @@
 ﻿// KeyLogger.hpp
 #pragma once
-#include <boost/locale.hpp>
 #include <iostream>
 #include <string>
 #include "Utils.hpp"
