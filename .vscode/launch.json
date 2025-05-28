@@ -18,8 +18,8 @@
         "name": "Debug build_hotkey_app", // 
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/build/hotkey_app",
-        "cwd": "${workspaceFolder}/build",
+        "program": "${workspaceFolder}/build_vs/hotkey_app",
+        "cwd": "${workspaceFolder}/build_vs",
         "stopAtEntry": false,
         "MIMode": "gdb",
         "miDebuggerPath": "gdb",

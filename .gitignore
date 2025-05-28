@@ -8,7 +8,8 @@
 *.obj
 
 # build folder
-build/
+build_vs/
+build_iwyu
 
 # link
 *.lnk

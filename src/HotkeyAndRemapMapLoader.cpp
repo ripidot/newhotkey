@@ -50,6 +50,7 @@ void HotkeyAndRemapMapLoader::register_loaded_remaps(){
             continue;
         }
         // remap機能の登録
+        debug_log(LogLevel::Warning, "to_key: ", to_key);
         register_remap(vk_from_key,
             HotkeyAction {
                 [&, vk_to_key]() -> WORD { RemapActionFuncs::SendKeyboardInput(vk_to_key, true);

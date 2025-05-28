@@ -4,6 +4,7 @@
             "includePath": [
                 "/usr/include/dbus-1.0",
                 "/usr/lib/x86_64-linux-gnu/dbus-1.0/include",
+                "C:/dev/vcpkg/installed/x64-windows/include",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/external/sqlite"
             ],
