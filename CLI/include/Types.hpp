@@ -17,7 +17,7 @@ enum class LogLevel {
 enum class ProcessType{ // 命令のタイプ判別
     Hotkey,
     Remap,
-    KeyString
+    HotString
 };
 enum class ParsedLineType { // 読み込み行のタイプ判別
     Hotkey,
@@ -97,7 +97,7 @@ struct VKMap{
 struct HRKMap{
     std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map;
     std::unordered_map<WORD, std::function<WORD(bool keyDown)>> remap_map;
-    std::unordered_map<std::string, std::string> hotstrings;
+    std::unordered_map<std::string, std::function<std::string()>> hotstring_map;
 };
 struct SupMap {
     std::unordered_map<Hotkey, bool> suppress_hotkeys;

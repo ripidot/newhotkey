@@ -90,15 +90,14 @@ void HRKMapFileSource::register_loaded_remaps(){
         vk_to_key = key_string_to_vk(to_key);
 
         if (vk_from_key == 0) {
-            debug_log(LogLevel::Error, "Invalid input key: ", from_key);
+            debug_log(LogLevel::Error, "Invalid remap input key: ", from_key);
             continue;
         }
         if (vk_to_key == 0) {
-            debug_log(LogLevel::Error, "Invalid output key: ", to_key);
+            debug_log(LogLevel::Error, "Invalid remap output key: ", to_key);
             continue;
         }
         // remap機能の登録
-        debug_log(LogLevel::Warning, "to_key: ", to_key);
         register_remap(vk_from_key,
             HotkeyAction {
                 [&, vk_to_key]() -> WORD { RemapActionFuncs::SendKeyboardInput(vk_to_key, true);
@@ -129,7 +128,7 @@ void HRKMapFileSource::register_loaded_hotkeys(){
         // 無効なキー or REMAPで登録すべき内容
         if (parsed.key == 0 || !parsed.win && !parsed.alt && !parsed.ctrl && !parsed.shift
         && action.command == "input_key") {
-            debug_log(LogLevel::Error, "Invalid key: ", key_str);
+            debug_log(LogLevel::Error, "Invalid hotkey: ", key_str);
             continue;
         }
 
@@ -172,8 +171,24 @@ void HRKMapFileSource::register_loaded_hotkeys(){
 
     }
 }
-void HRKMapFileSource::register_loaded_keystrings(){ // lkstrings = hotkstrings
-    hrkmap.hotstrings = move(*fileaccess.lkstrings_getter());
+
+void HRKMapFileSource::register_hotstring(std::string from_key,
+    std::function<std::string()> func){
+    hrkmap.hotstring_map[from_key] = func;
+}
+void HRKMapFileSource::register_loaded_hotstrings(){ // lkstrings = hotkstrings
+    std::unordered_map<std::string, std::string> lkeystrings = *fileaccess.lkstrings_getter();
+    for (auto& [from_key, to_key] : lkeystrings) {
+        if (to_key.size() == 0) {
+            debug_log(LogLevel::Error, "Invalid keystring:", from_key);
+            continue;
+        }
+        register_hotstring(from_key, [from_key, to_key]() -> std::string { 
+            KeystringActionFuncs::simulateTextInput(to_key);
+            return from_key;
+        });
+    }
+    // hrkmap.hotstrings = move(*fileaccess.lkstrings_getter());
 }
 void HRKMapFileSource::load(){
     fileaccess.set_filename(hotkeyfilename);
@@ -181,5 +196,5 @@ void HRKMapFileSource::load(){
 
     register_loaded_hotkeys();
     register_loaded_remaps();
-    register_loaded_keystrings();
+    register_loaded_hotstrings();
 }

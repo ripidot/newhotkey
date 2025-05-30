@@ -103,11 +103,11 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
             }
             break;
         }
-        case ProcessType::KeyString:{
+        case ProcessType::HotString:{
             if (!keyDown){ // キーストリング処理
                 WORD vkCode = current.key;
                 inputToBuffer(vkCode);
-                for (const auto& [trigger, replacement] : hrkmap.hotstrings) { //hotstrings wo wstring ni
+                for (const auto& [trigger, replacement] : hrkmap.hotstring_map) { //hotstrings wo wstring ni
                     if (inputBuffer.size() >= trigger.size() &&
                         inputBuffer.substr(inputBuffer.size() - trigger.size()) == trigger) {
 
@@ -118,7 +118,7 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
                         }
 
                         // 置換文字列送信
-                        keystringactionfuncs.simulateTextInput(replacement);
+                        replacement();
                         inputBuffer.clear();
 
                         return;
@@ -140,7 +140,7 @@ void HotkeyAndRemapMapLoader::execute(WORD vk_code, bool keyDown) { // actionを
 
     execute_action(ProcessType::Hotkey, vk_code, current, keyDown); // hotkeyのaction
     execute_action(ProcessType::Remap, vk_code, current, keyDown); // remapのaction
-    execute_action(ProcessType::KeyString, vk_code, current, keyDown);
+    execute_action(ProcessType::HotString, vk_code, current, keyDown);
 }
 // テストの実行
 void HotkeyAndRemapMapLoader::test_invalid_key(){
