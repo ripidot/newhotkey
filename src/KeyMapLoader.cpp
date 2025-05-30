@@ -2,8 +2,7 @@
 
 using json = nlohmann::json;
 
-std::unordered_map<std::string, WORD> KeyMapLoader::vk_map;
-std::unordered_map<WORD, std::string> KeyMapLoader::vk_inv_map;
+VKMap KeyMapLoader::vkmap;
 
 KeyMapLoader::KeyMapLoader(PATH fileurl) : fileurl(fileurl) {}
 KeyMapLoader::KeyMapLoader(){}
@@ -11,16 +10,16 @@ KeyMapLoader::KeyMapLoader(){}
 void KeyMapLoader::load(PATH vkfilename){
     fileaccess = FileAccess(vkfilename);
     fileaccess.load_vk_from_file();
-    vk_map = *fileaccess.vk_map_getter();
-    vk_inv_map = *fileaccess.vk_inv_map_getter();
+    vkmap.vk_map = *fileaccess.vk_map_getter();
+    vkmap.vk_inv_map = *fileaccess.vk_inv_map_getter();
 }
 
 // char c を取り出し、asciiコード表を基にvkに変換
 WORD KeyMapLoader::key_string_to_vk(const std::string& key_name) { 
 
     // "VK_"で始まる名前ならテーブル検索
-    auto it = vk_map.find(key_name);
-    if (it != vk_map.end()) {
+    auto it = vkmap.vk_map.find(key_name);
+    if (it != vkmap.vk_map.end()) {
         return it->second;
     }
 
@@ -47,9 +46,12 @@ std::string KeyMapLoader::vk_to_key_string(WORD vk){
         return str;
     }
     // vkのテーブル検索
-    auto it = vk_inv_map.find(vk);
-    if (it != vk_inv_map.end()) {
+    auto it = vkmap.vk_inv_map.find(vk);
+    if (it != vkmap.vk_inv_map.end()) {
         return it->second;
     }
     return "";
+}
+const VKMap KeyMapLoader::getvkmap() {
+    return vkmap;
 }

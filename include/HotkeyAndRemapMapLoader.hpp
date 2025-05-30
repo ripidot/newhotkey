@@ -1,13 +1,9 @@
 ﻿#pragma once
-#include "FileAccess.hpp"
 #include "KeyMapLoader.hpp"
-#include "HotkeyActionFuncs.hpp"
-#include "RemapActionFuncs.hpp"
-#include "KeystringActionFuncs.hpp"
 #include "KeyLogger.hpp"
 #include "PathManager.hpp"
+#include "HRKMapFileSource.hpp"
 #include <psapi.h>
-#include <unordered_map>
 #include <chrono>
 #include <thread>
 #include <cassert>
@@ -22,16 +18,16 @@ class HotkeyAndRemapMapLoader{
         KeyMapLoader keymaploader = KeyMapLoader();
         KeyLogger keylogger = KeyLogger();
         KeystringActionFuncs keystringactionfuncs = KeystringActionFuncs();
-        std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map; //修飾キー+通常キーと関数の紐づけ
-        std::unordered_map<WORD, std::function<WORD(bool keyDown)>> remap_map; //単キーと関数の紐づけ
 
-        std::unordered_map<Hotkey, bool> suppress_hotkeys;
-        std::unordered_map<WORD, bool> suppress_keys;
+        static HRKMap hrkmap;
+        static SupMap supmap;
+        static VKMap vkmap;
         static inline std::string inputBuffer;
-        std::unordered_map<std::string, std::string> hotstrings;
+
     public:
         HotkeyAndRemapMapLoader();
         HotkeyAndRemapMapLoader(const PathManager& pm);
+        void setHRKMap(const HRKMap& hrkmap);
         std::unordered_map<WORD, bool>* skeys_getter();
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str);
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress);
