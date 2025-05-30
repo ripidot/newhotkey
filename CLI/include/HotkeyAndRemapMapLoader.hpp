@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "KeyMapLoader.hpp"
+#include "LogConfigLoader.hpp"
 #include "KeyLogger.hpp"
 #include "PathManager.hpp"
 #include "HRKMapFileSource.hpp"
@@ -28,6 +29,7 @@ class HotkeyAndRemapMapLoader{
         HotkeyAndRemapMapLoader();
         HotkeyAndRemapMapLoader(const PathManager& pm);
         void setHRKMap(const HRKMap& hrkmap);
+        void setSupMap(const SupMap& supmap);
         std::unordered_map<WORD, bool>* skeys_getter();
         SupMap getSupMap();
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str);
@@ -40,7 +42,8 @@ class HotkeyAndRemapMapLoader{
         void load();
         void simulateTextInput(const std::wstring& text);
         void inputToBuffer(WORD vkCode);
-
+        KeyLog returnLogMsg(WORD vk_code, const Hotkey& current, bool keyDown);
+        void deleteTrigger(int triggerSize);
 // アクションの実行
         void execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown);
         void execute(WORD vk_code, bool keyDown);
