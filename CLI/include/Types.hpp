@@ -3,7 +3,7 @@
 #include <functional>
 #include <unordered_set>
 #include <filesystem>
-
+#include <unordered_map>
 
 using WORD = unsigned short;
 using PATH = std::filesystem::path;
@@ -90,3 +90,16 @@ namespace std {
         }
     };
 }
+struct VKMap{
+    std::unordered_map<std::string, WORD> vk_map;
+    std::unordered_map<WORD, std::string> vk_inv_map;
+};
+struct HRKMap{
+    std::unordered_map<Hotkey, std::function<bool(bool keyDown)>> hotkey_map;
+    std::unordered_map<WORD, std::function<WORD(bool keyDown)>> remap_map;
+    std::unordered_map<std::string, std::string> hotstrings;
+};
+struct SupMap {
+    std::unordered_map<Hotkey, bool> suppress_hotkeys;
+    std::unordered_map<WORD, bool> suppress_keys;
+};
