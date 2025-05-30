@@ -17,6 +17,10 @@ SupMap HotkeyAndRemapMapLoader::getSupMap(){
     return supmap;
 };
 void HotkeyAndRemapMapLoader::setHRKMap(const HRKMap& hrkmap){
+    this->hrkmap = std::move(hrkmap);
+};
+void HotkeyAndRemapMapLoader::setSupMap(const SupMap& supmap){
+    this->supmap = std::move(supmap);
 };
 void HotkeyAndRemapMapLoader::load(){
     keymaploader.load(vkfilename);
@@ -24,16 +28,15 @@ void HotkeyAndRemapMapLoader::load(){
     HRKMapFileSource hrkmapfile(hotkeyfilename);
     hrkmapfile.setvkmap(vkmap);
     hrkmapfile.load();
-    hrkmap = std::move(hrkmapfile.getHRKMap());
-    supmap = std::move(hrkmapfile.getSupMap());
+    setHRKMap(hrkmapfile.getHRKMap());
+    setSupMap(hrkmapfile.getSupMap());
     
-
     keylogger.setRand();
     keylogger.setDBFilename(dbfilename);
 
-    fileaccess.set_filename(initlogfilename);
-    int lcounter = fileaccess.load_launchCounter();
-    keylogger.setLaunchCounter(lcounter);
+
+    LogConfigLoader logconfigloader(initlogfilename);
+    keylogger.setLaunchCounter(logconfigloader.getlCounter());
     keylogger.setErrorfilename(errorfilename);
 
 }
@@ -64,6 +67,37 @@ void HotkeyAndRemapMapLoader::inputToBuffer(WORD vkCode){
         inputBuffer.pop_back();
     }
 }
+KeyLog HotkeyAndRemapMapLoader::returnLogMsg(WORD vk_code, const Hotkey& current, bool keyDown){
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    auto local_time = *std::localtime(&time);
+
+    HWND hwnd = GetForegroundWindow();
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    wchar_t processName[MAX_PATH];
+    GetModuleBaseNameW(hProcess, nullptr, processName, MAX_PATH);
+    std::wstring stringProcessName = processName;
+
+    wchar_t title[256];
+    std::wstring window_title;
+    window_title = GetWindowTextW(hwnd, title, sizeof(title)) ? title : L"couldn't get title";
+
+    std::string keyname = keymaploader.vk_to_key_string(vk_code);
+    debug_log(LogLevel::LogInfo, "vk_code: ", vk_code);
+    debug_log(LogLevel::LogInfo, "keyname: ", keyname);
+    KeyLog keylog = {local_time, current, keyname,
+        keyDown, stringProcessName, window_title};
+    return keylog;
+}
+void HotkeyAndRemapMapLoader::deleteTrigger(int triggerSize){
+    // バックスペース送信
+    for (size_t i = 0; i < triggerSize; ++i) {
+        keybd_event(VK_BACK, 0, 0, 0);
+        keybd_event(VK_BACK, 0, KEYEVENTF_KEYUP, 0);
+    }
+}
 // アクションの実行
 void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const Hotkey& current, bool keyDown){
     switch(p){
@@ -74,28 +108,7 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
             }
 
             if (keyDown) { // キーロガー機能
-                auto now = std::chrono::system_clock::now();
-                auto time = std::chrono::system_clock::to_time_t(now);
-                auto local_time = *std::localtime(&time);
-
-                HWND hwnd = GetForegroundWindow();
-                DWORD pid;
-                GetWindowThreadProcessId(hwnd, &pid);
-                HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-                wchar_t processName[MAX_PATH];
-                GetModuleBaseNameW(hProcess, nullptr, processName, MAX_PATH);
-                std::wstring stringProcessName = processName;
-
-                wchar_t title[256];
-                std::wstring window_title;
-                window_title = GetWindowTextW(hwnd, title, sizeof(title)) ? title : L"couldn't get title";
-
-                std::string keyname = keymaploader.vk_to_key_string(vk_code);
-                debug_log(LogLevel::LogInfo, "vk_code: ", vk_code);
-                debug_log(LogLevel::LogInfo, "keyname: ", keyname);
-                KeyLog keylog = {local_time, current, keyname,
-                    keyDown, stringProcessName, window_title};
-                keylogger.memory(keylog);
+                keylogger.memory(returnLogMsg(vk_code, current, keyDown));
             }
             break;
         }
@@ -108,22 +121,17 @@ void HotkeyAndRemapMapLoader::execute_action(ProcessType p, WORD vk_code, const 
         }
         case ProcessType::HotString:{
             if (!keyDown){ // キーストリング処理
-                WORD vkCode = current.key;
-                inputToBuffer(vkCode);
-                for (const auto& [trigger, replacement] : hrkmap.hotstring_map) { //hotstrings wo wstring ni
+                inputToBuffer(current.key);
+                for (const auto& [trigger, replacement] : hrkmap.hotstring_map) {
                     if (inputBuffer.size() >= trigger.size() &&
                         inputBuffer.substr(inputBuffer.size() - trigger.size()) == trigger) {
 
                         // バックスペース送信
-                        for (size_t i = 0; i < trigger.size(); ++i) {
-                            keybd_event(VK_BACK, 0, 0, 0);
-                            keybd_event(VK_BACK, 0, KEYEVENTF_KEYUP, 0);
-                        }
+                        deleteTrigger(trigger.size());
 
                         // 置換文字列送信
                         replacement();
                         inputBuffer.clear();
-
                         return;
                     }
                 }
