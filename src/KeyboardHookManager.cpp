@@ -2,13 +2,13 @@
 
 
 KeyboardHookManager::KeyboardHookManager(){}
-KeyboardHookManager::KeyboardHookManager(std::unordered_map<WORD, bool>* skeys){
-    suppress_keys = *skeys;
+KeyboardHookManager::KeyboardHookManager(const SupMap& supmap){
+    this->supmap = supmap;
 }
 
 bool KeyboardHookManager::shouldSuppress(WORD vkCode, bool isKeyDown) {
-    auto it1 = suppress_keys.find(vkCode);
-    if (it1 != suppress_keys.end()) {
+    auto it1 = supmap.suppress_keys.find(vkCode);
+    if (it1 != supmap.suppress_keys.end()) {
         return it1->second;
     }
     return false;
@@ -29,10 +29,7 @@ LRESULT CALLBACK KeyboardHookManager::HookProc(int nCode, WPARAM wParam, LPARAM 
     }
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
-void KeyboardHookManager::setSuppressKeys(std::unordered_map<WORD, bool>* skeys){
-    debug_log(LogLevel::Warning, *skeys);
-    suppress_keys = move(*skeys);
-}
+
 void KeyboardHookManager::setKeyDownHandler(std::function<void(int)> handler) {
     keyDownHandler = std::move(handler);
 }

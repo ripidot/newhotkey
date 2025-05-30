@@ -29,6 +29,7 @@ class HotkeyAndRemapMapLoader{
         HotkeyAndRemapMapLoader(const PathManager& pm);
         void setHRKMap(const HRKMap& hrkmap);
         std::unordered_map<WORD, bool>* skeys_getter();
+        SupMap getSupMap();
         ParsedHotkey parse_key_with_modifiers(const std::string& key_str);
         void register_remap(WORD key, HotkeyAction hotkeyaction, bool suppress);
         void register_loaded_remaps();
