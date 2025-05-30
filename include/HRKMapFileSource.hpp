@@ -26,7 +26,9 @@ class HRKMapFileSource{
         void register_hotkey(WORD key, bool shift, bool ctrl, bool alt, bool win, 
             const HotkeyAction& hotkeyaction, bool suppress);
         void register_loaded_hotkeys();
-        void register_loaded_keystrings();
+        void simulateTextInput(const std::wstring& text);
+        void register_hotstring(std::string from_key, std::function<std::string()> func);
+        void register_loaded_hotstrings();
         void load();
         HRKMap getHRKMap();
         SupMap getSupMap();

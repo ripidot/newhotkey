@@ -9,7 +9,5 @@ class KeystringActionFuncs{
     private:
 
     public:
-        KeystringActionFuncs(){}
-        void simulateTextInput(const std::string& text);
-        void keystring(WORD vk_code);
+        static void simulateTextInput(const std::string& text);
 };
