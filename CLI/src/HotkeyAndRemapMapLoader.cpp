@@ -13,6 +13,9 @@ SupMap HotkeyAndRemapMapLoader::supmap;
 std::unordered_map<WORD, bool>* HotkeyAndRemapMapLoader::skeys_getter(){
     return &supmap.suppress_keys;
 }
+SupMap HotkeyAndRemapMapLoader::getSupMap(){
+    return supmap;
+};
 void HotkeyAndRemapMapLoader::setHRKMap(const HRKMap& hrkmap){
 };
 void HotkeyAndRemapMapLoader::load(){

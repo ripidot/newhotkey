@@ -11,7 +11,8 @@ int main(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
         maplod.load();
         maplod.run_all_tests();
 
-        KeyboardHookManager hook(maplod.skeys_getter());
+        // KeyboardHookManager hook(maplod.skeys_getter());
+        KeyboardHookManager hook(maplod.getSupMap());
 
         hook.setKeyDownHandler([&maplod](int vk) {
             maplod.execute(vk, true);

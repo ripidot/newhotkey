@@ -10,11 +10,12 @@ class KeyboardHookManager {
         static inline std::function<void(int)> keyDownHandler = nullptr;
         static inline std::function<void(int)> keyUpHandler = nullptr;
         static inline std::wstring inputBuffer = L"";
+        static inline SupMap supmap;
 
     public:
         KeyboardHookManager();
-        KeyboardHookManager(std::unordered_map<WORD, bool>* skeys);
-        static inline std::unordered_map<WORD, bool> suppress_keys;
+        KeyboardHookManager(const SupMap& supmap);
+
         static inline std::atomic<bool> suppress_input = false;
         static bool shouldSuppress(WORD vkCode, bool isKeyDown);
 
@@ -27,7 +28,6 @@ class KeyboardHookManager {
         static void simulateTextInput(const std::wstring& text);
 
         static LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam);
-        void setSuppressKeys(std::unordered_map<WORD, bool>* skeys);
         void setKeyDownHandler(std::function<void(int)> handler);
         void setKeyUpHandler(std::function<void(int)> handler);
         void setHook();
