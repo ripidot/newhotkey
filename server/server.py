@@ -15,6 +15,10 @@ from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import timedelta
 from fastapi import status
+from fastapi.middleware.cors import CORSMiddleware
+
+from dotenv import load_dotenv
+import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,7 +28,6 @@ def hash_password(password: str):
 def verify_password(plain_password: str, hashed_password: str):
     return check_password_hash(plain_password, hashed_password)
 
-SECRET_KEY = "your-secret-key"  # 本番では .env などに
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -34,17 +37,27 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
+    return jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm=ALGORITHM)
 
 # --------------------
 # DB設定
 # --------------------
-DATABASE_URL = "sqlite:///./loguser3.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# DATABASE_URL = "sqlite:///./loguser3.db"
+load_dotenv(".env")
+engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
+
+# --------------------
+# CORSを許可
+# --------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # --------------------
 # DBモデル
@@ -94,6 +107,20 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
+class KeyResponse(BaseModel):
+    user_id: int
+    id: int
+    session_id: str
+    sequence_id: int
+    timestamp: str
+    key: str
+    modifiers: str
+    window_title: str
+    process_name: str
+    
+    class Config:
+        orm_mode = True
+
 # --------------------
 # DBセッション依存
 # --------------------
@@ -122,6 +149,10 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 def read_logs(db: Session = Depends(get_db)):
     return db.query(Log).all()
 
+@app.get("/key_logs", response_model=List[KeyResponse])
+def read_logs(db: Session = Depends(get_db)):
+    return db.query(Log).all()
+
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form_data.username).first() # user名が一致したuser
@@ -138,7 +169,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if not username:
             raise credentials_exception
