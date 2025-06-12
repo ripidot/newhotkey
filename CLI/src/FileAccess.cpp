@@ -108,24 +108,29 @@ void FileAccess::load_vk_from_file(){
     }
 }
 
-int FileAccess::load_launchCounter(){
+InitLogVar FileAccess::load_launchCounter(){
     std::ifstream file(fileurl_);
     if (!file.is_open()) {
         throw std::runtime_error("couldn't open initlogfile\r\n");
     }
+    InitLogVar ilv;
     std::string line;
     std::ifstream infile(fileurl_);
     std::getline(infile, line);
     int launchCounter = atoi(line.c_str());
-    debug_log(LogLevel::Info, "lcounter: ", launchCounter++);
+    ilv.launchCounter = launchCounter;
+    launchCounter++;
+    std::getline(infile, line);
+    int user_id = atoi(line.c_str());
+    ilv.user_id = user_id;
     file.close();
 
-    std::ofstream ofs(fileurl_);
+    std::ofstream ofs(fileurl_); 
     if (!ofs) {
         throw std::runtime_error("couldn't open initlogfile\r\n");
     }
-    ofs << launchCounter;
+    ofs << launchCounter << "\r\n" << user_id;
     ofs.close();
 
-    return launchCounter;
+    return ilv;
 }

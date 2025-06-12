@@ -36,7 +36,9 @@ void HotkeyAndRemapMapLoader::load(){
 
 
     LogConfigLoader logconfigloader(initlogfilename);
+    logconfigloader.load();
     keylogger.setLaunchCounter(logconfigloader.getlCounter());
+    keylogger.setUserID(logconfigloader.getlId());
     keylogger.setErrorfilename(errorfilename);
 
 }

@@ -28,6 +28,6 @@ class FileAccess { // file access
         void set_filename(const PATH str);
         void load_hotkeys_from_file();
         void load_vk_from_file();
-        int load_launchCounter();
+        InitLogVar load_launchCounter();
         void increment_launchCounter();
 };

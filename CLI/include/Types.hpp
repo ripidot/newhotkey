@@ -25,7 +25,10 @@ enum class ParsedLineType { // 読み込み行のタイプ判別
     Keystring,
     Invalid
 };
-
+struct InitLogVar { 
+    int launchCounter;
+    int user_id;
+};
 struct HotkeyCommandAction {
     std::string command; // ex.openurl, volumeup...
     std::string parameter;

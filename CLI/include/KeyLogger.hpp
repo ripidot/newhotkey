@@ -13,6 +13,7 @@
 class KeyLogger {
     private:
         int launchCounter; // 起動回数
+        int user_id; // フロントからのuserid
         static inline int sequence_counter = 0; // 同launchCounterでの入力回数
         int rand; // logのための乱数生成
         int rmin = 1000;
@@ -29,6 +30,7 @@ class KeyLogger {
         void memory(const KeyLog& keylog);
         void setRand();
         void setLaunchCounter(int lcounter);
+        void setUserID(int lid);
         std::string KeyLogger::return_Modifier_from_Hotkey(const Hotkey& current);
         void SaveErrorToFile(PATH errorfilepath, std::string err);
 
