@@ -36,7 +36,7 @@ export default function Page() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold mb-4">ログ一覧</h1>
+      <h1 className="text-xl font-bold mb-4">アメs一覧</h1>
       <ul>
         {logs.map(log => (
           <li key={log.id}>

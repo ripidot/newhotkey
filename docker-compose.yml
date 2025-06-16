@@ -6,12 +6,11 @@ services:
       - "3000:3000"
     volumes:
       - ./web:/app
-      - /app/node_modules
-      - /app/.next
+      - /app/node_modules  # node_modules は volume でローカルと分離
     environment:
       - CHOKIDAR_USEPOLLING=true
-    env_file:
-      - ./web/.env.local
+      - NODE_ENV=development
+    command: npm run dev
     depends_on:
       - backend
 
