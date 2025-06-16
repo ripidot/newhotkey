@@ -1,5 +1,6 @@
 # build folder
 node_modules/
+.next/
 
 .env.local
 .gitignore

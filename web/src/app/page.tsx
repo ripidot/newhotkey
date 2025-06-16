@@ -26,9 +26,7 @@ export default function Page() {
 
   useEffect(() => {
     const fetchLogs = async () => {
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logs`);
-      const res = await fetch(`http://localhost:8000/keylogs`);
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/keylogs`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/keylogs`);
       const data = await res.json();
       console.log('data: ', data);
       setLogs(data);
@@ -38,7 +36,7 @@ export default function Page() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold mb-4">ロ一覧</h1>
+      <h1 className="text-xl font-bold mb-4">ログ一覧</h1>
       <ul>
         {logs.map(log => (
           <li key={log.id}>
