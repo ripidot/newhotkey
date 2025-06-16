@@ -1,25 +1,23 @@
 # server.py
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
-from datetime import datetime
+from datetime import datetime, timedelta
 from passlib.context import CryptContext
 import uvicorn
 from werkzeug.security import generate_password_hash, check_password_hash
-app = FastAPI()
 
-from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from datetime import timedelta
-from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
 import os
 
+
+app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str):
@@ -42,7 +40,6 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 # --------------------
 # DB設定
 # --------------------
-# DATABASE_URL = "sqlite:///./loguser3.db"
 load_dotenv(".env")
 engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -51,14 +48,14 @@ Base = declarative_base()
 # --------------------
 # CORSを許可
 # --------------------
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["http://localhost:3000"],  # ReactなどのフロントエンドのURL
+    allow_credentials=True,
+    allow_methods=["*"],  # 全てのHTTPメソッドを許可
+    allow_headers=["*"],  # 全てのHTTPヘッダーを許可
 )
-
-
 # --------------------
 # DBモデル
 # --------------------
@@ -78,6 +75,19 @@ class Log(Base):
 
     user = relationship("User", back_populates="logs")
 
+class KeyLog(Base):
+    __tablename__ = "keylogs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String, index=True)
+    sequence_id = Column(Integer)
+    timestamp = Column(String)
+    key = Column(String)
+    modifiers = Column(String)
+    window_title = Column(String)
+    process_name = Column(String)
+    user_id = Column(Integer, ForeignKey("users.user_id"), default=1)
+
 Base.metadata.create_all(bind=engine)
 
 # --------------------
@@ -85,20 +95,11 @@ Base.metadata.create_all(bind=engine)
 # --------------------
 class LogEntry(BaseModel):
     message: str
-    user_id: int  # 今回は簡易的にuser_idをリクエストに含める
-
-class LogResponse(BaseModel):
-    id: int
-    message: str
-    timestamp: datetime
     user_id: int
-
-    class Config:
-        orm_mode = True
 
 class UserCreate(BaseModel):
     username: str
-    password: str  # 今は生のままで（セキュア対応は後で）
+    password: str
 
 class UserResponse(BaseModel):
     user_id: int
@@ -107,22 +108,21 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
-class KeyResponse(BaseModel):
-    user_id: int
+class KeyLogResponse(BaseModel):
     id: int
-    session_id: str
-    sequence_id: int
-    timestamp: str
-    key: str
-    modifiers: str
-    window_title: str
-    process_name: str
-    
+    session_id: Optional[str]
+    sequence_id: Optional[int]
+    timestamp: Optional[str]
+    key: Optional[str]
+    modifiers: Optional[str]
+    window_title: Optional[str]
+    process_name: Optional[str]
+    user_id: Optional[int]
+
     class Config:
         orm_mode = True
-
 # --------------------
-# DBセッション依存
+# DBsession
 # --------------------
 def get_db():
     db = SessionLocal()
@@ -132,7 +132,7 @@ def get_db():
         db.close()
 
 # --------------------
-# APIエンドポイント
+# APIendpoint
 # --------------------
 @app.post("/users", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -145,19 +145,15 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@app.get("/logs", response_model=List[LogResponse])
-def read_logs(db: Session = Depends(get_db)):
-    return db.query(Log).all()
-
-@app.get("/key_logs", response_model=List[KeyResponse])
-def read_logs(db: Session = Depends(get_db)):
-    return db.query(Log).all()
+@app.get("/keylogs", response_model=List[KeyLogResponse])
+def read_keylogs(db: Session = Depends(get_db)):
+    return db.query(KeyLog).all()
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == form_data.username).first() # user名が一致したuser
+    user = db.query(User).filter(User.username == form_data.username).first()
     
-    if not user or not verify_password(user.password_hash, form_data.password): # userが存在し、hash化passとpassが一致したら
+    if not user or not verify_password(user.password_hash, form_data.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
@@ -180,13 +176,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
-@app.post("/logs", response_model=LogResponse)
-def create_log(log: LogEntry, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    db_log = Log(message=log.message, user_id=current_user.user_id)
-    db.add(db_log)
-    db.commit()
-    db.refresh(db_log)
-    return db_log
+# @app.post("/logs", response_model=LogResponse)
+# def create_log(log: LogEntry, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+#     db_log = Log(message=log.message, user_id=current_user.user_id)
+#     db.add(db_log)
+#     db.commit()
+#     db.refresh(db_log)
+#     return db_log
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

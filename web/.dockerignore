@@ -1,0 +1,8 @@
+# build folder
+node_modules/
+
+.env.local
+.gitignore
+usage.txt
+README.md
+Next-js.bat

@@ -1,0 +1,11 @@
+# build folder
+__pycache__/
+venv/
+HTTPPostSample/
+
+.env
+.gitignore
+curl.sh
+loguser3.db
+pkeylog2.db
+usage.txt
