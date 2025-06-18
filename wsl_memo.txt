@@ -1,0 +1,14 @@
+wsl # wsl の起動
+
+# ==========================================
+code ~/projects/newhotkey # 直接起動
+or
+cd ~/projects/newhotkey # 移動後起動
+code .
+# ==========================================
+
+wsl -l -v ユーザの確認
+wsl -d Ubuntu userの起動
+
+make code
+make up
