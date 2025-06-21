@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BarChart2, PieChart, Calendar } from "lucide-react";
+import BarChartSample from "@/components/barchartsample/BarChartSample"
 
 export default function Dashboard() {
   return (
@@ -49,7 +50,9 @@ export default function Dashboard() {
 
           <TabsContent value="apps">
             <Card>
-              <CardContent className="p-4">[ここに棒グラフ]</CardContent>
+              <CardContent className="p-4">
+                <BarChartSample />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

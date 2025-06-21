@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Dashboard from "@/components/dashboard/Dashboard"
+import App from "@/components/app/App"
 
 type KeyLogEntry = {
     id: number;
@@ -16,7 +16,8 @@ type KeyLogEntry = {
 };
 
 export default function Page() {
-  return <Dashboard />;
+  return <App />;
+  // return <Dashboard />;
   // const [logs, setLogs] = useState<KeyLogEntry[]>([]);
   // useEffect(() => {
   //   const fetchLogs = async () => {

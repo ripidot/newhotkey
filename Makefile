@@ -1,7 +1,7 @@
 # Makefile
 
 build:
-	docker compose up --build
+	docker compose build
 
 up:
 	docker composer up
