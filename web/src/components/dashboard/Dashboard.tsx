@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/src/components/ui/tabs";
 import { BarChart2, PieChart, Calendar } from "lucide-react";
-import BarChartSample from "@/components/barchartsample/BarChartSample"
+import BarChartSample from "@/src/components/barchartsample/BarChartSample"
 
 export default function Dashboard() {
   return (
