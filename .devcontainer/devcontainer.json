@@ -1,7 +1,10 @@
+//devcontainerは1つの環境を再現するためのもの
+//複数の場合にはdocker-composeを利用すべき
 {
-  "name": "Full Stack Dev Container",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "frontend",
+  "name": "Newhotkey-DevContainer",
+  "remoteUser": "root",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
   "workspaceFolder": "/app",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"

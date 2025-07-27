@@ -41,7 +41,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 # DB設定
 # --------------------
 load_dotenv(".env")
-engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
+db_url = os.getenv("DATABASE_URL")
+engine = create_engine(db_url)
+# engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
@@ -65,15 +67,6 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password_hash = Column(String)
     logs = relationship("Log", back_populates="user")
-
-class Log(Base):
-    __tablename__ = "logs"
-    id = Column(Integer, primary_key=True, index=True)
-    message = Column(String, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    user_id = Column(Integer, ForeignKey("users.user_id"))
-
-    user = relationship("User", back_populates="logs")
 
 class KeyLog(Base):
     __tablename__ = "keylogs"
@@ -147,7 +140,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @app.get("/keylogs", response_model=List[KeyLogResponse])
 def read_keylogs(db: Session = Depends(get_db)):
-    return db.query(KeyLog).all()
+    data = db.query(KeyLog)
+    return data.all()
+
+@app.get("/qlogs", response_model=List[KeyLogResponse])
+def read_keylogs(db: Session = Depends(get_db)):
+    data = db.query(KeyLog)
+    return data.filter(KeyLog.process_name == "Explorer.EXE").all()
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

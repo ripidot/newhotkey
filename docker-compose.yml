@@ -4,8 +4,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./web:/app
-      - /app/node_modules  # node_modules は volume でローカルと分離
+      - ./web:/app # bind mount 共有のため
+      - /app/node_modules # volumes mount 分離のため, 保存しない
     environment:
       - CHOKIDAR_USEPOLLING=true
       - NODE_ENV=development
@@ -21,19 +21,19 @@ services:
       - ./server:/app
     env_file:
       - ./server/.env
-    # depends_on:
-    #   - db
+    depends_on:
+      - db
 
-  # db:
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_USER: myuser
-  #     POSTGRES_PASSWORD: mypass
-  #     POSTGRES_DB: mydb
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: mypass
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data # named mount 分離のため, dockerの内部領域に保存
 
-# volumes:
-#   pgdata:
+volumes:
+  dbdata: # named mount宣言に必要

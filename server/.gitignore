@@ -1,5 +1,8 @@
-# build folder
+# python folder
 __pycache__
+*.py[cod]
+*.sqlite3
+venv/
 
 # db
 *.db
@@ -9,3 +12,9 @@ __pycache__
 *.txt
 # 環境変数
 *.env
+
+# VSCode
+.vscode/
+
+# Alembic migrations (optional)
+alembic/versions/*.pyc

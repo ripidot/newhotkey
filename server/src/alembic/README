@@ -1,0 +1,10 @@
+Generic single-database configuration.
+
+モデル変更時の作業
+1. モデル変更
+2. alembic revision --autogenerate -m "ここに説明"
+3. alembic upgrade head
+
+vscodeのroot権限は dev-container: Rebuild and Reopen in Containerをコマンドパレットから選択
+.devContainerでroot権限の場所を選択
+devContainerは一つのコンテナに対するもの
