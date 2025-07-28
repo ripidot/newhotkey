@@ -14,7 +14,7 @@ from models.base import Base
 load_dotenv()
 
 # DB接続情報
-SQLITE_DB_PATH = "sqlite:///./keylog_sample.db"
+SQLITE_DB_PATH = "sqlite:///./keylog.db"
 POSTGRES_DB_URL = os.getenv("DATABASE_URL")
 
 # エンジン作成

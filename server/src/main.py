@@ -14,8 +14,15 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import load_dotenv
-import os
+import time
+from sqlalchemy.exc import OperationalError
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 1))))
+from models.base import Base
+from models.user_model import User
+from models.keylog_model import KeyLog
 
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -42,13 +49,25 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 # --------------------
 load_dotenv(".env")
 db_url = os.getenv("DATABASE_URL")
-engine = create_engine(db_url)
-# engine = create_engine(os.getenv("DATABASE_URL"), connect_args={"check_same_thread": False})
+
+retries = 5
+while retries > 0:
+    try:
+        engine = create_engine(db_url)
+        connection = engine.connect()
+        break
+    except OperationalError:
+        retries -= 1
+        print("connection failed... retry connecting to server")
+        time.sleep(3)
+else:
+    raise Exception("failed to connect to server")
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-Base = declarative_base()
+
 
 # --------------------
-# CORSを許可
+# CORSを許可する
 # --------------------
 
 app.add_middleware(
@@ -61,25 +80,25 @@ app.add_middleware(
 # --------------------
 # DBモデル
 # --------------------
-class User(Base):
-    __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password_hash = Column(String)
-    logs = relationship("Log", back_populates="user")
+# class User(Base):
+#     __tablename__ = "users"
+#     user_id = Column(Integer, primary_key=True, index=True)
+#     username = Column(String, unique=True, index=True)
+#     password_hash = Column(String)
+#     logs = relationship("KeyLog", back_populates="user_id")
 
-class KeyLog(Base):
-    __tablename__ = "keylogs"
+# class KeyLog(Base):
+#     __tablename__ = "keylogs"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    session_id = Column(String, index=True)
-    sequence_id = Column(Integer)
-    timestamp = Column(String)
-    key = Column(String)
-    modifiers = Column(String)
-    window_title = Column(String)
-    process_name = Column(String)
-    user_id = Column(Integer, ForeignKey("users.user_id"), default=1)
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     session_id = Column(String, index=True)
+#     sequence_id = Column(Integer)
+#     timestamp = Column(String)
+#     key = Column(String)
+#     modifiers = Column(String)
+#     window_title = Column(String)
+#     process_name = Column(String)
+#     user_id = Column(Integer, ForeignKey("users.user_id"), default=1)
 
 Base.metadata.create_all(bind=engine)
 
@@ -143,6 +162,16 @@ def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
     return data.all()
 
+@app.get("/testlogs", response_model=int)
+def read_keylogs(db: Session = Depends(get_db)):
+    data = db.query(KeyLog)
+    return data.filter(KeyLog.process_name == "Explorer.EXE").count()
+
+@app.get("/testslogs", response_model=int)
+def read_keylogs(db: Session = Depends(get_db)):
+    data = db.query(KeyLog)
+    return data.count()
+
 @app.get("/qlogs", response_model=List[KeyLogResponse])
 def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
@@ -174,14 +203,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if not user:
         raise credentials_exception
     return user
-
-# @app.post("/logs", response_model=LogResponse)
-# def create_log(log: LogEntry, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-#     db_log = Log(message=log.message, user_id=current_user.user_id)
-#     db.add(db_log)
-#     db.commit()
-#     db.refresh(db_log)
-#     return db_log
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
