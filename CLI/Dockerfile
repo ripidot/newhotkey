@@ -12,7 +12,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # プロジェクト全体をコピー
-COPY . .
+# COPY . .
 
 # ビルドディレクトリを作ってそこに移動し、cmakeとmakeを実行
 RUN mkdir -p build && \

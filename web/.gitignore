@@ -42,6 +42,3 @@ next-env.d.ts
 
 # memo
 devmemo.md
-
-# package-lock.json
-package-lock.json
