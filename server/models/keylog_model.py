@@ -1,5 +1,5 @@
 # keylog_model.py
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from models.base import Base
 from sqlalchemy.orm import relationship
 
@@ -9,7 +9,7 @@ class KeyLog(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_id = Column(String, index=True)
     sequence_id = Column(Integer)
-    timestamp = Column(String)
+    timestamp = Column(DateTime)
     key = Column(String)
     modifiers = Column(String)
     window_title = Column(String)

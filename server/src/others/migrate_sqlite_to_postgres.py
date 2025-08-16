@@ -14,7 +14,7 @@ from models.base import Base
 load_dotenv()
 
 # DB接続情報
-SQLITE_DB_PATH = "sqlite:///./keylog.db"
+SQLITE_DB_PATH = "sqlite:///../db/keylog_bac_1.db"
 POSTGRES_DB_URL = os.getenv("DATABASE_URL")
 
 # エンジン作成
@@ -41,7 +41,7 @@ def main():
     Base.metadata.create_all(bind=postgres_engine)
 
     # 対象テーブルを列挙（順序に注意：外部キー依存がある場合はUser→Logなど順に）
-    for model in [User, KeyLog]:
+    for model in [KeyLog]:
         migrate_table(model)
 
     sqlite_session.close()

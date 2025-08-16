@@ -1,8 +1,8 @@
-# server.py
+# main.py
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from pydantic import BaseModel
-from typing import List, Optional
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from typing import List, Optional, Dict
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
@@ -19,10 +19,11 @@ from sqlalchemy.exc import OperationalError
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 1))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 1)))) # pythonpath設定で解消
 from models.base import Base
 from models.user_model import User
 from models.keylog_model import KeyLog
+
 
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -77,34 +78,21 @@ app.add_middleware(
     allow_methods=["*"],  # 全てのHTTPメソッドを許可
     allow_headers=["*"],  # 全てのHTTPヘッダーを許可
 )
-# --------------------
-# DBモデル
-# --------------------
-# class User(Base):
-#     __tablename__ = "users"
-#     user_id = Column(Integer, primary_key=True, index=True)
-#     username = Column(String, unique=True, index=True)
-#     password_hash = Column(String)
-#     logs = relationship("KeyLog", back_populates="user_id")
 
-# class KeyLog(Base):
-#     __tablename__ = "keylogs"
-
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     session_id = Column(String, index=True)
-#     sequence_id = Column(Integer)
-#     timestamp = Column(String)
-#     key = Column(String)
-#     modifiers = Column(String)
-#     window_title = Column(String)
-#     process_name = Column(String)
-#     user_id = Column(Integer, ForeignKey("users.user_id"), default=1)
-
-Base.metadata.create_all(bind=engine)
 
 # --------------------
 # Pydanticモデル
 # --------------------
+class KeyLogCreate(BaseModel):
+    session_id: Optional[str]
+    sequence_id: Optional[int]
+    timestamp: Optional[datetime]
+    key: Optional[str]
+    modifiers: Optional[str]
+    window_title: Optional[str]
+    process_name: Optional[str]
+    user_id: Optional[int]
+
 class LogEntry(BaseModel):
     message: str
     user_id: int
@@ -124,7 +112,7 @@ class KeyLogResponse(BaseModel):
     id: int
     session_id: Optional[str]
     sequence_id: Optional[int]
-    timestamp: Optional[str]
+    timestamp: Optional[datetime]
     key: Optional[str]
     modifiers: Optional[str]
     window_title: Optional[str]
@@ -133,6 +121,14 @@ class KeyLogResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class WeeklyCountResponse(BaseModel):
+    week_start: str
+    count: int
+
+class SentFlagUpdate(BaseModel):
+    ids: list[int]
+    sent_flag: int
 # --------------------
 # DBsession
 # --------------------
@@ -157,25 +153,90 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+@app.post("/keylogs")
+def create_keylog(item: KeyLogCreate, db: Session = Depends(get_db)):
+    log = KeyLog(
+        session_id=item.session_id, 
+        sequence_id = item.sequence_id,
+        timestamp = item.timestamp,
+        key = item.key,
+        modifiers = item.modifiers,
+        window_title = item.window_title,
+        process_name = item.process_name,
+        user_id = item.user_id
+    )
+    db.add(log)
+    db.commit()
+    return
+
+@app.post("/keylogs/batch")
+def create_keylogs(logs: List[KeyLogCreate], db: Session = Depends(get_db)):
+    db_logs = []
+    for log in logs:
+        db_logs.append(KeyLog(
+            session_id=log.session_id,
+            sequence_id=log.sequence_id,
+            timestamp=log.timestamp,
+            key=log.key,
+            modifiers=log.modifiers,
+            window_title=log.window_title,
+            process_name=log.process_name,
+            user_id=log.user_id
+        ))
+    
+    db.add_all(db_logs)
+    db.commit()
+    return {"inserted": len(db_logs)}
+
+@app.put("/update_sent_flag")
+def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
+    db.query(KeyLog).filter(KeyLog.id.in_(data.ids)) \
+        .update({"sent_flag": data.sent_flag}, synchronize_session=False)
+    db.commit()
+    return {"status": "success", "updated_count": len(data.ids)}
+
 @app.get("/keylogs", response_model=List[KeyLogResponse])
 def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
     return data.all()
-
-@app.get("/testlogs", response_model=int)
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog)
-    return data.filter(KeyLog.process_name == "Explorer.EXE").count()
 
 @app.get("/testslogs", response_model=int)
 def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
     return data.count()
 
-@app.get("/qlogs", response_model=List[KeyLogResponse])
+@app.get("/querytest", response_model=int)
 def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog)
-    return data.filter(KeyLog.process_name == "Explorer.EXE").all()
+    data = db.query(KeyLog).filter(200000 < KeyLog.id).filter(KeyLog.id < 250000).filter(KeyLog.process_name == "Explorer.EXE")
+    return data.count()
+
+@app.get("/querytest2", response_model=int)
+def read_keylogs(db: Session = Depends(get_db)):
+    data = db.query(KeyLog).filter(KeyLog.process_name == "Explorer.EXE")
+    return data.count()
+
+@app.get("/querytest3", response_model=List[KeyLogResponse])
+def read_keylogs(db: Session = Depends(get_db)):
+    data = db.query(KeyLog).filter(KeyLog.id == 200000).all()
+    return data
+
+@app.get("/querytest4", response_model=List[WeeklyCountResponse])
+def read_keylogs(db: Session = Depends(get_db)):
+    results = (
+        db.query(
+            func.date_trunc('week', cast(KeyLog.timestamp, DateTime)).label('week_start'),
+            func.count().label('count')
+        )
+        .filter(KeyLog.process_name == "Explorer.EXE")
+        .group_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
+        .order_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
+        .all()
+    )
+
+    return [
+        {"week_start": week_start.isoformat(), "count": count}
+        for week_start, count in results
+    ]
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

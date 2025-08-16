@@ -8,3 +8,6 @@ Generic single-database configuration.
 vscodeのroot権限は dev-container: Rebuild and Reopen in Containerをコマンドパレットから選択
 .devContainerでroot権限の場所を選択
 devContainerは一つのコンテナに対するもの
+
+
+alembic revision -m "change timestamp column to TIMESTAMP" : model変更例
