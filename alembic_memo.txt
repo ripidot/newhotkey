@@ -9,8 +9,8 @@ vscodeのroot権限は dev-container: Rebuild and Reopen in Containerをコマ�
 .devContainerでroot権限の場所を選択
 devContainerは一つのコンテナに対するもの
 
-
+backendコンテナに入って入力
 alembic revision -m "change timestamp column to TIMESTAMP" : model変更例
 alembic current -v: 接続先確認
 
-select setval('keylogs_id_seq',(select max(id) from keylogs)); : データの直接挿入などでidがずれているとき, コンテナに入り入力
+select setval('keylogs_id_seq',(select max(id) from keylogs)); : データの直接挿入などでidがずれているとき

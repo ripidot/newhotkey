@@ -1,5 +1,5 @@
 # keylog_model.py
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueConstraint
 from models.base import Base
 from sqlalchemy.orm import relationship
 
@@ -16,3 +16,8 @@ class KeyLog(Base):
     process_name = Column(String)
     user_id = Column(Integer, ForeignKey("users.user_id"), default=1)
     user = relationship("User", back_populates="logs")
+
+    __table_args__ = (
+            UniqueConstraint("session_id", "sequence_id", name="keylogs_session_id_sequence_id_key"),
+        )
+

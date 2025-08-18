@@ -1,9 +1,10 @@
 # main.py
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
+from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 import uvicorn
@@ -12,6 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from dotenv import load_dotenv
 import time
@@ -23,7 +25,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..']
 from models.base import Base
 from models.user_model import User
 from models.keylog_model import KeyLog
-
 
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -66,7 +67,6 @@ else:
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-
 # --------------------
 # CORSを許可する
 # --------------------
@@ -84,6 +84,7 @@ app.add_middleware(
 # Pydanticモデル
 # --------------------
 class KeyLogCreate(BaseModel):
+    id: Optional[int]
     session_id: Optional[str]
     sequence_id: Optional[int]
     timestamp: Optional[datetime]
@@ -129,6 +130,11 @@ class WeeklyCountResponse(BaseModel):
 class SentFlagUpdate(BaseModel):
     ids: list[int]
     sent_flag: int
+
+class FailedLog(BaseModel):
+    id: int
+    reason: str
+
 # --------------------
 # DBsession
 # --------------------
@@ -169,24 +175,54 @@ def create_keylog(item: KeyLogCreate, db: Session = Depends(get_db)):
     db.commit()
     return
 
+def make_batch_response(success_ids: list[int], failed: List[FailedLog]) -> JSONResponse:
+    if len(failed) == 0:
+        status_code = 200
+    elif 0 < len(failed):
+        status_code = 400
+    elif all(reason == "duplicate" for reason in (f.reason for f in failed)):
+        status_code = 400
+    else:
+        status_code = 500
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "success_ids": success_ids,
+            "failed": [f.dict() for f in failed],
+            "success_count": len(success_ids),
+            "failed_count": len(failed),
+        }
+    )
+
 @app.post("/keylogs/batch")
 def create_keylogs(logs: List[KeyLogCreate], db: Session = Depends(get_db)):
-    db_logs = []
+    success_ids = []
+    failed: List[FailedLog] = []
     for log in logs:
-        db_logs.append(KeyLog(
-            session_id=log.session_id,
-            sequence_id=log.sequence_id,
-            timestamp=log.timestamp,
-            key=log.key,
-            modifiers=log.modifiers,
-            window_title=log.window_title,
-            process_name=log.process_name,
-            user_id=log.user_id
-        ))
-    
-    db.add_all(db_logs)
-    db.commit()
-    return {"inserted": len(db_logs)}
+        try:
+            db_log = (KeyLog(
+                session_id=log.session_id,
+                sequence_id=log.sequence_id,
+                timestamp=log.timestamp,
+                key=log.key,
+                modifiers=log.modifiers,
+                window_title=log.window_title,
+                process_name=log.process_name,
+                user_id=log.user_id
+            ))
+            db.add(db_log)
+            db.commit()
+            db.refresh(db_log)
+            success_ids.append(log.id)
+
+        except IntegrityError as e:
+            db.rollback()
+            failed.append(FailedLog(id=log.id, reason="duplicate"))
+        except Exception as e:
+            db.rollback()
+            failed.append(FailedLog(id=log.id, reason=str(e)))
+    return make_batch_response(success_ids, failed)
 
 @app.put("/update_sent_flag")
 def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
