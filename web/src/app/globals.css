@@ -1,6 +1,59 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-image: url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* globals.css */
+
+.mosaic-zero-state {
+  background-color: #ffffff00 !important;
+}
+.mosaic-blueprint-theme {
+  background-color: #DBFFFF00 !important;
+}
+
+.mosaic-window{ 
+  background-color: #fff5 !important;
+}
+.mosaic-window-toolbar {
+  background-color: #fff0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important; 
+}
+.mosaic-window-toolbar:hover {
+  background-color: #fff0 !important;
+}
+.mosaic-window-body {
+  background-color: #fff0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-toolbar.draggable:hover,
+.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-toolbar.draggable:hover{
+  background: none !important;
+  background-color: #fff0 !important;
+}
+
+.mosaic-preview {
+  /* display: none !important; */
+  /* border: 10px solid #f00 !important; */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -112,11 +165,4 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+

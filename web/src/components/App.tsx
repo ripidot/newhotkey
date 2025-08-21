@@ -12,10 +12,11 @@ import { Sidebar } from "@/src/components/sidebar/Sidebar";
 import { KeyTimeline } from "@/src/components/panels/Keytimeline";
 import { UserSessions } from "@/src/components/panels/UserSessions";
 import { HeatmapView } from "@/src/components/panels/HeatmapView";
+import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { nanoid } from "nanoid";
 
 type PanelId = string;
-type PanelType = "keyTimeline" | "userSessions" | "heatmapView";
+type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph";
 
 const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
@@ -25,6 +26,8 @@ const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
             return <UserSessions key={id} />;
         case "heatmapView":
             return <HeatmapView key={id} />;
+        case "CircleGraph":
+            return <CircleGraph key={id} />;
         default:
             return <div key={id}>未定義パネル</div>;
     }
@@ -148,21 +151,21 @@ export default function App() {
 
 
     return (
-        <div style={{ display: "flex", height: "100vh" }}>
+        <div style={{display: "flex", height: "100vh"}}>
             <Sidebar onAddPanel={addPanel} />
-            <div style={{ flex: 1 }}>
+            <div style={{flex: 1}}>
                 <Mosaic<PanelId>
                     renderTile={(id, path) => (
                         <MosaicWindow<PanelId>
-                            title={id}
+                            title=""
                             path={path}
                             createNode={() => `${id}-${nanoid(4)}`}
                             toolbarControls={[]}
                             renderToolbar={(props) => {
                                 return(
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <div style={{ paddingLeft: '8px', fontWeight: 'bold' }}>{id}</div>
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', backgroundColor: "#0000" }}>
+                                        <div style={{ paddingLeft: '8px', fontWeight: 'bold', backgroundColor: "#fff0" }}>{id}</div>
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: "#0000" }}>
                                             <SplitButton {...props}/>
                                             <ExpandButton {...props}/>
                                             <RemoveButton {...props}/>

@@ -2,7 +2,8 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast, select
+
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timedelta
@@ -134,7 +135,15 @@ class SentFlagUpdate(BaseModel):
 class FailedLog(BaseModel):
     id: int
     reason: str
-
+class CountResponse(BaseModel):
+    count: int
+class QueryConditions(BaseModel):
+    table: str                      # 対象テーブル
+    select: List[str]               # 欲しいカラム
+    where: Optional[dict] = None    # 条件 (key: column, value: 条件値)
+    group_by: Optional[List[str]] = None
+    order_by: Optional[List[str]] = None
+    limit: Optional[int] = None
 # --------------------
 # DBsession
 # --------------------
@@ -231,6 +240,24 @@ def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "updated_count": len(data.ids)}
 
+@app.post("/api/aggregate")
+def get_count(req: QueryRequest, db: Session = Depends(get_db)):
+    stmt = select(func.count()).select_from(KeyLog)
+
+    # where句を動的に追加
+    if req.where:
+        for field, value in req.where.items():
+            stmt = stmt.where(getattr(KeyLog, field) == value)
+
+    # group_by を動的に追加
+    if req.group_by:
+        stmt = select([getattr(KeyLog, col) for col in req.group_by], func.count()).group_by(
+            *[getattr(KeyLog, col) for col in req.group_by]
+        )
+
+    result = db.execute(stmt).all()
+    return {"result": result}
+
 @app.get("/keylogs", response_model=List[KeyLogResponse])
 def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
@@ -240,21 +267,6 @@ def read_keylogs(db: Session = Depends(get_db)):
 def read_keylogs(db: Session = Depends(get_db)):
     data = db.query(KeyLog)
     return data.count()
-
-@app.get("/querytest", response_model=int)
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog).filter(200000 < KeyLog.id).filter(KeyLog.id < 250000).filter(KeyLog.process_name == "Explorer.EXE")
-    return data.count()
-
-@app.get("/querytest2", response_model=int)
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog).filter(KeyLog.process_name == "Explorer.EXE")
-    return data.count()
-
-@app.get("/querytest3", response_model=List[KeyLogResponse])
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog).filter(KeyLog.id == 200000).all()
-    return data
 
 @app.get("/querytest4", response_model=List[WeeklyCountResponse])
 def read_keylogs(db: Session = Depends(get_db)):
@@ -273,6 +285,11 @@ def read_keylogs(db: Session = Depends(get_db)):
         {"week_start": week_start.isoformat(), "count": count}
         for week_start, count in results
     ]
+
+@app.get("/countall", response_model=CountResponse)
+def read_keylogs(db: Session = Depends(get_db)):
+    count = db.scalar(select(func.count()).select_from(KeyLog))
+    return {"count": count}
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
