@@ -2,7 +2,7 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 
 interface SidebarProps {
-  onAddPanel: (panel: "keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph") => void;
+  onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph") => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel }) => {
@@ -18,8 +18,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel }) => {
         <button onClick={() => onAddPanel("heatmapView")} title="Heatmap">
           🔥
         </button>
-        <button onClick={() => onAddPanel("CircleGraph")} title="Heatmap">
+        <button onClick={() => onAddPanel("CircleGraph")} title="Circlegraph">
           ◎
+        </button>
+        <button onClick={() => onAddPanel("KeyboardHeatmap")} title="KeyboardHeatmap">
+          🔑
         </button>
       </div>
       <div className="delete-area mt-8 text-center text-sm opacity-60">

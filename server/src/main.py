@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast, select
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast, select, asc, desc
 
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
 from sqlalchemy.exc import IntegrityError
@@ -137,12 +137,29 @@ class FailedLog(BaseModel):
     reason: str
 class CountResponse(BaseModel):
     count: int
-class QueryConditions(BaseModel):
+
+class OrderByClause(BaseModel):
+    field: str   # "user_id" や "count"
+    direction: str  # "asc" or "desc"
+class AggregateClause(BaseModel):
+    func: str            # "count", "sum", "avg", "max", "min"
+    field: Optional[str] = None  # count(*) の場合は省略可能
+    alias: str           # API レスポンスのカラム名
+class Reqtest(BaseModel):
+    select: List[str]
+    where: Optional[dict] = None
+    group_by: Optional[List[str]] = None
+    aggregates: Optional[List[AggregateClause]] = None
+    order_by: Optional[List[OrderByClause]] = None
+    limit: Optional[int] = None
+
+class QueryRequest(BaseModel):
     table: str                      # 対象テーブル
     select: List[str]               # 欲しいカラム
     where: Optional[dict] = None    # 条件 (key: column, value: 条件値)
     group_by: Optional[List[str]] = None
-    order_by: Optional[List[str]] = None
+    aggregates: Optional[List[AggregateClause]] = None
+    order_by: Optional[List[OrderByClause]] = None
     limit: Optional[int] = None
 # --------------------
 # DBsession
@@ -239,35 +256,6 @@ def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
         .update({"sent_flag": data.sent_flag}, synchronize_session=False)
     db.commit()
     return {"status": "success", "updated_count": len(data.ids)}
-
-@app.post("/api/aggregate")
-def get_count(req: QueryRequest, db: Session = Depends(get_db)):
-    stmt = select(func.count()).select_from(KeyLog)
-
-    # where句を動的に追加
-    if req.where:
-        for field, value in req.where.items():
-            stmt = stmt.where(getattr(KeyLog, field) == value)
-
-    # group_by を動的に追加
-    if req.group_by:
-        stmt = select([getattr(KeyLog, col) for col in req.group_by], func.count()).group_by(
-            *[getattr(KeyLog, col) for col in req.group_by]
-        )
-
-    result = db.execute(stmt).all()
-    return {"result": result}
-
-@app.get("/keylogs", response_model=List[KeyLogResponse])
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog)
-    return data.all()
-
-@app.get("/testslogs", response_model=int)
-def read_keylogs(db: Session = Depends(get_db)):
-    data = db.query(KeyLog)
-    return data.count()
-
 @app.get("/querytest4", response_model=List[WeeklyCountResponse])
 def read_keylogs(db: Session = Depends(get_db)):
     results = (
@@ -286,9 +274,83 @@ def read_keylogs(db: Session = Depends(get_db)):
         for week_start, count in results
     ]
 
+
+# {
+#   "select": [
+#     "key"
+#   ],
+#   "where": {"process_name" : "Explorer.EXE"},
+#   "group_by": [
+#     "key"
+#   ],
+#   "aggregates": [
+#     {"func": "count", "alias": "cnt"},
+#     {"func": "avg", "field": "id", "alias": "avg_duration"},
+#     {"func": "max", "field": "id", "alias": "max_duration"}
+#   ],
+#   "order_by": [
+#     {
+#       "field": "count",
+#       "direction": "desc"
+#     }
+#   ],
+#   "limit":10
+# }
+
+@app.post("/postall")
+def count_all(req: Reqtest, db: Session = Depends(get_db)):
+    stmt = select(*[getattr(KeyLog, col) for col in req.select]).select_from(KeyLog)
+    count_expr = func.count().label("count")
+
+    agg_exprs = {}
+    if req.aggregates:
+        for agg in req.aggregates:
+            if agg.func == "count":
+                expr = func.count().label(agg.alias)
+            else:
+                col = getattr(KeyLog, agg.field)
+                if agg.func == "sum":
+                    expr = func.sum(col).label(agg.alias)
+                elif agg.func == "avg":
+                    expr = func.avg(col).label(agg.alias)
+                elif agg.func == "max":
+                    expr = func.max(col).label(agg.alias)
+                elif agg.func == "min":
+                    expr = func.min(col).label(agg.alias)
+                else:
+                    raise ValueError(f"Unsupported aggregate: {agg.func}")
+            agg_exprs[agg.alias] = expr
+            stmt = stmt.add_columns(expr)
+
+    if req.where:
+        for field, value in req.where.items():
+            stmt = stmt.where(getattr(KeyLog, field) == value)
+    if req.group_by:
+        stmt = stmt.group_by(*[getattr(KeyLog, col) for col in req.group_by])
+
+    if req.order_by:
+        order_clauses = []
+        for ob in req.order_by:
+            if ob.field == "count":
+                col = count_expr
+            else:
+                col = getattr(KeyLog, ob.field)
+            if ob.direction.lower() == "asc":
+                order_clauses.append(asc(col))
+            else:
+                order_clauses.append(desc(col))
+        stmt = stmt.order_by(*order_clauses)
+    
+    if req.limit:
+        stmt = stmt.limit(req.limit)
+
+    results = db.execute(stmt).all()
+    return {"results": [dict(row._mapping) for row in results]}
+
 @app.get("/countall", response_model=CountResponse)
 def read_keylogs(db: Session = Depends(get_db)):
-    count = db.scalar(select(func.count()).select_from(KeyLog))
+    stmt = select(func.count()).select_from(KeyLog)
+    count = db.scalar(stmt)
     return {"count": count}
 
 @app.post("/token")

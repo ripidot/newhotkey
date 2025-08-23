@@ -13,10 +13,11 @@ import { KeyTimeline } from "@/src/components/panels/Keytimeline";
 import { UserSessions } from "@/src/components/panels/UserSessions";
 import { HeatmapView } from "@/src/components/panels/HeatmapView";
 import { CircleGraph } from "@/src/components/panels/CircleGraph";
+import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 import { nanoid } from "nanoid";
 
 type PanelId = string;
-type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph";
+type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "KeyboardHeatmap" | "CircleGraph";
 
 const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
@@ -28,6 +29,8 @@ const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
             return <HeatmapView key={id} />;
         case "CircleGraph":
             return <CircleGraph key={id} />;
+        case "KeyboardHeatmap":
+            return <KeyboardHeatmap key={id} />;
         default:
             return <div key={id}>未定義パネル</div>;
     }
