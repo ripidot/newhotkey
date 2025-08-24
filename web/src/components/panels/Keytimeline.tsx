@@ -49,25 +49,6 @@ interface QueryResponse {
   records: Record<string, any>[];
 }
 
-// {
-//   "select": [
-//     "key"
-//   ],
-//   "where": {"process_name" : "Explorer.EXE"},
-//   "group_by": [
-//     "key"
-//   ],
-//   "aggregates": [
-//     {"func": "count", "alias": "cnt"},
-//   ],
-//   "order_by": [
-//     {
-//       "field": "count",
-//       "direction": "desc"
-//     }
-//   ],
-//   "limit":10
-// }
 interface QueryRecord {
   key: string;
   count: number;
@@ -99,8 +80,6 @@ export default function Graph() {
       }
       const data = await response.json();
       setQueryData(data.results);
-      // 必要ならステートに保存
-      // setResult(data.result);
     } catch (error) {
       console.error("送信エラー:", error);
     }
