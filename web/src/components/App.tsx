@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
     Mosaic,
     MosaicNode,
@@ -16,50 +16,62 @@ import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 import { nanoid } from "nanoid";
 
-type PanelId = string;
-type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "KeyboardHeatmap" | "CircleGraph";
-
-const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
-    switch (type) {
-        case "keyTimeline":
-            return <KeyTimeline key={id} />;
-        case "userSessions":
-            return <UserSessions key={id} />;
-        case "heatmapView":
-            return <HeatmapView key={id} />;
-        case "CircleGraph":
-            return <CircleGraph key={id} />;
-        case "KeyboardHeatmap":
-            return <KeyboardHeatmap key={id} />;
-        default:
-            return <div key={id}>未定義パネル</div>;
-    }
-};
-
-const removePanelById = (
-    layout: MosaicNode<PanelId> | null,
-    targetId: PanelId
-): MosaicNode<PanelId> | null => {
-    if (!layout) return null;
-    if (layout === targetId) return null;
-    if (typeof layout === "object") {
-        const left = removePanelById(layout.first, targetId);
-        const right = removePanelById(layout.second, targetId);
-
-        if (!left) return right;
-        if (!right) return left;
-
-        return { ...layout, first: left, second: right };
-    }
-    return layout;
-};
-
+var x = 1;
 export default function App() {
+    type PanelId = string;
+    type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "KeyboardHeatmap" | "CircleGraph";
+    const updateCoordsMap = useRef<Map<string, () => void>>(new Map());
+
+    const handleRegisterUpdateCoords = (id: string, fn: () => void) => {
+        updateCoordsMap.current.set(id, fn);
+        console.log(`registered ${id}`);
+    };
+    const handleUnregisterUpdateCoords = (id: string) => {
+        updateCoordsMap.current.delete(id);
+        console.log(`unregistered ${id}`);
+    };
+
+    const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
+        switch (type) {
+            case "keyTimeline":
+                return <KeyTimeline key={id} />;
+            case "userSessions":
+                return <UserSessions key={id} />;
+            case "heatmapView":
+                return <HeatmapView key={id} />;
+            case "CircleGraph":
+                return <CircleGraph key={id} />;
+            case "KeyboardHeatmap":
+                return <KeyboardHeatmap key={id} id={id} registerUpdateCoords={handleRegisterUpdateCoords}
+                unregisterUpdateCoords={handleUnregisterUpdateCoords}/>;
+            default:
+                return <div key={id}>未定義パネル</div>;
+        }
+    };
+
+    const removePanelById = (
+        layout: MosaicNode<PanelId> | null,
+        targetId: PanelId
+    ): MosaicNode<PanelId> | null => {
+        if (!layout) return null;
+        if (layout === targetId) return null;
+        if (typeof layout === "object") {
+            const left = removePanelById(layout.first, targetId);
+            const right = removePanelById(layout.second, targetId);
+
+            if (!left) return right;
+            if (!right) return left;
+
+            return { ...layout, first: left, second: right };
+        }
+        return layout;
+    };
+
     const [mosaicLayout, setMosaicLayout] = useState<MosaicNode<PanelId> | null>(null);
     const [panelMap, setPanelMap] = useState<Record<PanelId, { type: PanelType; element: JSX.Element }>>({});
 
     const addPanel = useCallback((panelType: PanelType) => {
-        if (panelType === "heatmapView") {
+        if (panelType === "heatmapView") { // 複数追加できないビュー
             const existingId = Object.keys(panelMap).find((id) => id.startsWith("heatmap-"));
             if (existingId) {
                 setMosaicLayout((prevLayout) => removePanelById(prevLayout, existingId));
@@ -70,7 +82,7 @@ export default function App() {
                 });
             } else {
                 const uniqueId = `heatmap-${nanoid(6)}`;
-                setMosaicLayout((prevLayout) => {
+                setMosaicLayout((prevLayout) => { // prevLayoutとしているが、一時変数なためprevでも可
                     if (!prevLayout) return uniqueId;
                     return {
                         direction: "row",
@@ -78,7 +90,7 @@ export default function App() {
                         second: uniqueId,
                     };
                 });
-                setPanelMap((prev) => ({
+                setPanelMap((prev) => ({ //<Record<PanelId, { type: PanelType; element: JSX.Element }>> の辞書, mapよりもjsonに適している
                     ...prev,
                     [uniqueId]: {
                         type: panelType,
@@ -108,61 +120,50 @@ export default function App() {
         }));
     }, [panelMap]);
 
-    // 🧠 削除機能（useEffect で DOM を監視）
+
+    const handleLayoutChange = (newLayout: MosaicNode<PanelId> | null) => {
+        console.log("in handleLayoutChange");
+        setMosaicLayout(newLayout);
+        updateCoords();
+        // console.log("map size:", updateCoordsMap.current.size);
+    };
+    const updateCoords = () => {
+        console.log("in updatecoords");
+        updateCoordsMap.current.forEach(fn => fn());
+    }
+
+
+    const countTreeNodes = () => {
+        type MosaicNode<T> = T | { direction: "row" | "column"; first: MosaicNode<T>; second: MosaicNode<T> } | null;
+        function countNodes<T>(node: MosaicNode<T> | null): number {
+            if (!node) return 0;
+
+            // 内部ノードかどうか判定
+            if (typeof node === "object" && "direction" in node) {
+                return countNodes(node.first) + countNodes(node.second);
+            }
+            // 葉ノード
+            return 1;
+        }
+        console.log(countNodes(mosaicLayout));
+    }
+
     useEffect(() => {
-        let draggingPanelId: string | null = null;
+        updateCoords();
 
-        const onMouseDown = (e: MouseEvent) => {
-            const header = (e.target as HTMLElement).closest(".mosaic-window-title");
-            if (header) {
-                const parent = header.closest("[data-react-mosaic-id]");
-                const id = parent?.getAttribute("data-react-mosaic-id");
-                draggingPanelId = id ?? null;
-                console.log("🟡 Drag start from panel:", draggingPanelId);
-            }
-        };
-
-        const onMouseUp = (e: MouseEvent) => {
-            console.log("🔵 in onMouseUp:");
-            if (!draggingPanelId) return;
-
-            const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
-            const dropClass = (dropTarget as HTMLElement)?.className || "";
-            console.log("🔵 Mouse up over:", dropClass);
-
-            if (dropTarget?.classList.contains("delete-area")) {
-                console.log("🔴 Deleting panel:", draggingPanelId);
-                setMosaicLayout((prev) => removePanelById(prev, draggingPanelId!));
-                setPanelMap((prev) => {
-                    const newMap = { ...prev };
-                    delete newMap[draggingPanelId!];
-                    return newMap;
-                });
-            }
-
-            draggingPanelId = null;
-        };
-
-        document.addEventListener("mousedown", onMouseDown);
-        document.addEventListener("mouseup", onMouseUp);
-
-        return () => {
-            document.removeEventListener("mousedown", onMouseDown);
-            document.removeEventListener("mouseup", onMouseUp);
-        };
-    }, []);
-
+        window.addEventListener("resize", updateCoords);
+        return () => window.removeEventListener("resize", updateCoords);
+    }, [mosaicLayout]); // 状態ドリブン,非同期処理に適している, 外部変更のキャッチ
 
     return (
         <div style={{display: "flex", height: "100vh"}}>
-            <Sidebar onAddPanel={addPanel} />
+            <Sidebar onAddPanel={addPanel} onUpdateCoords={updateCoords} onCountTreeNodes={countTreeNodes}/>
             <div style={{flex: 1}}>
                 <Mosaic<PanelId>
                     renderTile={(id, path) => (
                         <MosaicWindow<PanelId>
                             title=""
                             path={path}
-                            createNode={() => `${id}-${nanoid(4)}`}
                             toolbarControls={[]}
                             renderToolbar={(props) => {
                                 return(
@@ -180,8 +181,8 @@ export default function App() {
                             {panelMap[id]?.element || <div>パネルが見つかりません</div>}
                         </MosaicWindow>
                     )}
-                    value={mosaicLayout}
-                    onChange={setMosaicLayout}
+                    value={mosaicLayout} // ツリー構造データ
+                    onChange={setMosaicLayout} // valueに変更があった時に呼ばれる, イベントドリブンなので非同期処理には不向き, 外部変更のキャッチ
                 />
             </div>
         </div>

@@ -153,8 +153,16 @@ const getColor = (value: number, min: number, max: number) => {
   const b = Math.round(255 * (1 - ratio));
   return `rgb(${r},0,${b})`;
 };
-
-export function KeyboardHeatmap() {
+type PanelId = string;
+export function KeyboardHeatmap({
+  id,
+  registerUpdateCoords,
+  unregisterUpdateCoords,
+}: {
+  id: PanelId;
+  registerUpdateCoords: (id: PanelId, fn: () => void) => void;
+  unregisterUpdateCoords: (id: PanelId) => void;
+}) {
   const values = keys.map((k) => k.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -167,7 +175,18 @@ export function KeyboardHeatmap() {
   const updateCoords = () => {
     if (imgRef.current) {
       const rect = imgRef.current.getBoundingClientRect();
-      setCoords({ x: rect.left, y: rect.top, w: rect.width, h: rect.height });
+      setCoords(prev => {
+        if (
+          prev &&
+          prev.x === rect.left &&
+          prev.y === rect.top &&
+          prev.w === rect.width &&
+          prev.h === rect.height
+        ) {
+          return prev;
+        }
+        return { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
+      });
     }
   };
   const fetchData = async () => {
@@ -200,10 +219,13 @@ export function KeyboardHeatmap() {
   };
 
   useEffect(() => {
-    window.addEventListener("resize", updateCoords);
-    return () => window.removeEventListener("resize", updateCoords);
-  }, [coords]);
-  
+    registerUpdateCoords(id, updateCoords);
+    fetchData();
+    return () => {
+      unregisterUpdateCoords(id);
+    };
+  }, [id, registerUpdateCoords, unregisterUpdateCoords]);
+
   function KeyboardImage() {
     return (
       <img
@@ -211,9 +233,8 @@ export function KeyboardHeatmap() {
         src="/keyboard.png"
         alt="keyboard"
         onLoad={() => {
-          updateCoords();
+          updateCoords(); // 画像のロード後
           setLoaded(true);
-          fetchData();
         }}
         style={{
           position: "absolute",

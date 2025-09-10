@@ -3,9 +3,11 @@ import { Trash2 } from "lucide-react";
 
 interface SidebarProps {
   onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph") => void;
+  onUpdateCoords: () => void;
+  onCountTreeNodes: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, onCountTreeNodes}) => {
   return (
     <aside className="w-64 bg-[#222222ff] text-white p-4 space-y-4">
       <div className="text-2xl text-center">
@@ -23,6 +25,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel }) => {
         </button>
         <button onClick={() => onAddPanel("KeyboardHeatmap")} title="KeyboardHeatmap">
           🔑
+        </button>
+      </div>
+      <div className="align text-center">
+        <button onClick={() => onUpdateCoords()} title="Update Coords">
+          ✨
+        </button>
+        <button onClick={() => onCountTreeNodes()} title="Count Nodes">
+          🌲
         </button>
       </div>
       <div className="delete-area mt-8 text-center text-sm opacity-60">

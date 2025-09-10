@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import React from "react";
+import App from "@/src/components/App"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +26,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        {/* StrictMode をここで有効化 or 無効化 */}
+        <React.StrictMode>
+          {children}
+        </React.StrictMode>
+      </body>
     </html>
   );
 }
