@@ -18,10 +18,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, on
           👥
         </button>
         <button onClick={() => onAddPanel("heatmapView")} title="Heatmap">
-          🔥
+          ◎
         </button>
         <button onClick={() => onAddPanel("CircleGraph")} title="Circlegraph">
-          ◎
+          🔥
         </button>
         <button onClick={() => onAddPanel("KeyboardHeatmap")} title="KeyboardHeatmap">
           🔑

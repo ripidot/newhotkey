@@ -256,25 +256,6 @@ def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
         .update({"sent_flag": data.sent_flag}, synchronize_session=False)
     db.commit()
     return {"status": "success", "updated_count": len(data.ids)}
-@app.get("/querytest4", response_model=List[WeeklyCountResponse])
-def read_keylogs(db: Session = Depends(get_db)):
-    results = (
-        db.query(
-            func.date_trunc('week', cast(KeyLog.timestamp, DateTime)).label('week_start'),
-            func.count().label('count')
-        )
-        .filter(KeyLog.process_name == "Explorer.EXE")
-        .group_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
-        .order_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
-        .all()
-    )
-
-    return [
-        {"week_start": week_start.isoformat(), "count": count}
-        for week_start, count in results
-    ]
-
-
 # {
 #   "select": [
 #     "key"
@@ -296,8 +277,26 @@ def read_keylogs(db: Session = Depends(get_db)):
 #   ],
 #   "limit":10
 # }
+@app.get("/querytest4", response_model=List[WeeklyCountResponse])
+def read_keylogs(db: Session = Depends(get_db)):
+    results = (
+        db.query(
+            func.date_trunc('week', cast(KeyLog.timestamp, DateTime)).label('week_start'),
+            func.count().label('count')
+        )
+        .filter(KeyLog.process_name == "Explorer.EXE")
+        .group_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
+        .order_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
+        .all()
+    )
 
-@app.post("/postall")
+    return [
+        {"week_start": week_start.isoformat(), "count": count}
+        for week_start, count in results
+    ]
+
+
+@app.post("/posttest")
 def count_all(req: Reqtest, db: Session = Depends(get_db)):
     stmt = select(*[getattr(KeyLog, col) for col in req.select]).select_from(KeyLog)
     count_expr = func.count().label("count")
@@ -327,7 +326,7 @@ def count_all(req: Reqtest, db: Session = Depends(get_db)):
             stmt = stmt.where(getattr(KeyLog, field) == value)
     if req.group_by:
         stmt = stmt.group_by(*[getattr(KeyLog, col) for col in req.group_by])
-
+# func.date_trunc('week', KeyLog.timestamp)
     if req.order_by:
         order_clauses = []
         for ob in req.order_by:
@@ -346,6 +345,77 @@ def count_all(req: Reqtest, db: Session = Depends(get_db)):
 
     results = db.execute(stmt).all()
     return {"results": [dict(row._mapping) for row in results]}
+
+
+@app.post("/postall")
+def count_all(req: Reqtest, db: Session = Depends(get_db)):
+    special_columns = {
+        "day": func.date_trunc('day', cast(KeyLog.timestamp, DateTime)).label("day"),
+        "week": func.date_trunc('week', cast(KeyLog.timestamp, DateTime)).label("week"),
+        "month": func.date_trunc('month', cast(KeyLog.timestamp, DateTime)).label("month"),        
+        "count": func.count().label("count")
+    }
+
+    select_clauses = []
+    for col in req.select:
+        if col in special_columns:
+            select_clauses.append(special_columns[col]) # select句にspecial_columnsを追加
+        else:
+            select_clauses.append(getattr(KeyLog, col))
+    stmt = select(*select_clauses).select_from(KeyLog)
+
+    agg_exprs = {}
+    if req.aggregates:
+        for agg in req.aggregates:
+            if agg.func == "count":
+                expr = func.count().label(agg.alias)
+            else:
+                col = getattr(KeyLog, agg.field)
+                if agg.func == "sum":
+                    expr = func.sum(col).label(agg.alias)
+                elif agg.func == "avg":
+                    expr = func.avg(col).label(agg.alias)
+                elif agg.func == "max":
+                    expr = func.max(col).label(agg.alias)
+                elif agg.func == "min":
+                    expr = func.min(col).label(agg.alias)
+                else:
+                    raise ValueError(f"Unsupported aggregate: {agg.func}")
+            agg_exprs[agg.alias] = expr
+            stmt = stmt.add_columns(expr)
+
+    if req.where:
+        for field, value in req.where.items():
+            stmt = stmt.where(getattr(KeyLog, field) == value)
+
+    if req.group_by:
+        group_clauses = []
+        for col in req.group_by:
+            if col in special_columns:
+                group_clauses.append(special_columns[col])
+            else:
+                group_clauses.append(getattr(KeyLog, col))
+        stmt = stmt.group_by(*group_clauses)
+
+    if req.order_by:
+        order_clauses = []
+        for ob in req.order_by:
+            if ob.field in special_columns:
+                col = special_columns[ob.field]
+            else:
+                col = getattr(KeyLog, ob.field)
+            if ob.direction.lower() == "asc":
+                order_clauses.append(asc(col))
+            else:
+                order_clauses.append(desc(col))
+        stmt = stmt.order_by(*order_clauses)
+    
+    if req.limit:
+        stmt = stmt.limit(req.limit)
+
+    results = db.execute(stmt).all()
+    return {"results": [dict(row._mapping) for row in results]}
+
 
 @app.get("/countall", response_model=CountResponse)
 def read_keylogs(db: Session = Depends(get_db)):

@@ -63,7 +63,7 @@ export default function Graph() {
       group_by: ["key"],
       aggregates: [{ func: "count", alias: "count" }],
       order_by: [{ field: "count", direction: "desc" }],
-      limit: 5,
+      limit: 20,
     };
 
     try {
@@ -86,9 +86,7 @@ export default function Graph() {
   };
     fetchData();
   }, []);
-  if (queryData != null){console.log("qdata: ", queryData);}
 
-  console.log("bardata: ", barData);
   return (
     <BarChart width={400} height={300} data={queryData}>
       <XAxis dataKey="key" />

@@ -12,11 +12,11 @@
 
 	// The 'service' property is the name of the service for the container that VS Code should
 	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
-	"service": "frontend",
+	"service": "frontend", // どのコンテナにアタッチして開くか
 
 	// The optional 'workspaceFolder' property is the path VS Code should open by default when
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+	"workspaceFolder": "/app",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -25,7 +25,7 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
-	// "runServices": [],
+	"runServices": ["frontend"] // docker-compose up したときにどのサービスを立ち上げるか, 未設定 -> compose.ymlのすべてのサービスが再起動
 
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",

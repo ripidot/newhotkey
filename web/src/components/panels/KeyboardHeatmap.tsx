@@ -123,7 +123,7 @@ const rightmodifierkey = Array.from({ length: 2 }, (_, i) => ({
   label: rightmodifier_label[i], x: rightmodifier_init_x, y: rightmodifier_init_y + rightmodifier_y[i], 
   w: rightmodifier_w + rightmodifier_x * (i), h: rightmodifier_h[i], value: i * 5
 }));
-
+// keys = [{label: , x:, y:, w:, h:, value: }]
 const keys = [...leftmodifierkey, ...functionalkey, ...numerickey, ...rightmodifierkey, ...qwertykey, ...asdfghkey, ...zxcvbnkey, ...modifierkey, ...modifier2key, ...editkey, ...arrowkey];
 
 interface Aggregate {
@@ -147,13 +147,33 @@ interface QueryRecord {
   count: number;
 }
 
+type PanelId = string;
+type KeyData = {
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  value: number;
+};
+type QueryData = {
+  key: string;
+  count: number;
+};
+type Props = {
+  coords: {x: number, y: number, w: number, h: number};
+  keys: KeyData[];
+  queryData: QueryData[];
+  getColor: (value: number, min: number, max: number) => string;
+};
+
 const getColor = (value: number, min: number, max: number) => {
   const ratio = (value - min) / (max - min);
   const r = Math.round(255 * ratio);
   const b = Math.round(255 * (1 - ratio));
   return `rgb(${r},0,${b})`;
 };
-type PanelId = string;
+
 export function KeyboardHeatmap({
   id,
   registerUpdateCoords,
@@ -196,7 +216,7 @@ export function KeyboardHeatmap({
       group_by: ["key"],
       aggregates: [{ func: "count", alias: "count" }],
       order_by: [{ field: "count", direction: "desc" }],
-      limit: 5,
+      limit: 50,
     };
 
     try {
@@ -248,12 +268,13 @@ export function KeyboardHeatmap({
       />
     );
   }
-  function FillColor({coords, queryData}: { 
-    coords: { x: number; y: number; w: number; h: number },
-    queryData: QueryRecord[] }){
-    if (!loaded) return null;
-    if (!coords) return null;
 
+  const HeatmapSvg: React.FC<Props> = ({coords, keys, queryData, getColor }) => {
+    // queryData.key を高速に参照できるように Set 化
+    const queryMap = new Map(queryData.map((q) => [q.key, q.count]));
+    const querymax = Math.max(...queryData.map(q => q.count));
+    const max = 100;
+    const querymin = 0;
     return (
       <svg
         style={{
@@ -266,25 +287,39 @@ export function KeyboardHeatmap({
         }}
         viewBox={`0 0 ${1669} ${660}`} // 元画像サイズでスケーリング
       >
-        {keys.map((key, i) => (
-          <g key={i}>
-            <rect
-              x={key.x}
-              y={key.y}
-              width={key.w}
-              height={key.h}
-              fill={getColor(key.value, min, max)}
-              stroke="#333"
-            />
-          </g>
-        ))}
+        {keys.map((key, i) =>{
+          const count = queryMap.get(key.label)?? 0; // 存在すれば数値、なければ undefined
+          return (count !== 0 && count !== undefined) ? (
+            <g key={i}>
+              <rect
+                x={key.x}
+                y={key.y}
+                width={key.w}
+                height={key.h}
+                fill={getColor(count, querymin, max)}
+                stroke="#333"
+              />
+            </g>
+          ) :
+            <g key={i}>
+              <rect
+                x={key.x}
+                y={key.y}
+                width={key.w}
+                height={key.h}
+                fill={"#333"}
+                stroke="#333"
+              />
+            </g>
+        })}
       </svg>
     );
-  }
+  };
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
     <KeyboardImage/>
-    {coords && queryData && <FillColor coords={coords} queryData={queryData} />}
+    {coords && queryData && <HeatmapSvg coords={coords} keys={keys} queryData={queryData} getColor={getColor} />}
     </div>
   );
 }
