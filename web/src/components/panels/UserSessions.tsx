@@ -76,7 +76,7 @@ export default function Graph() {
 
   return (
     <BarChart width={400} height={300} data={queryData}>
-      <XAxis dataKey="key" />
+      <XAxis dataKey="week" />
       <YAxis />
       <Tooltip />
       <Bar dataKey="count" fill="#8884d8" />

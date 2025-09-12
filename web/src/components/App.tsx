@@ -16,7 +16,6 @@ import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 import { nanoid } from "nanoid";
 
-var x = 1;
 export default function App() {
     type PanelId = string;
     type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "KeyboardHeatmap" | "CircleGraph";
@@ -121,12 +120,12 @@ export default function App() {
     }, [panelMap]);
 
 
-    const handleLayoutChange = (newLayout: MosaicNode<PanelId> | null) => {
-        console.log("in handleLayoutChange");
-        setMosaicLayout(newLayout);
-        updateCoords();
-        // console.log("map size:", updateCoordsMap.current.size);
-    };
+    // const handleLayoutChange = (newLayout: MosaicNode<PanelId> | null) => {
+    //     console.log("in handleLayoutChange");
+    //     setMosaicLayout(newLayout);
+    //     updateCoords();
+    //     // console.log("map size:", updateCoordsMap.current.size);
+    // };
     const updateCoords = () => {
         console.log("in updatecoords");
         updateCoordsMap.current.forEach(fn => fn());

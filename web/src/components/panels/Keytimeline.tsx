@@ -13,14 +13,6 @@ export function KeyTimeline() {
 
 Chart.register(ArcElement, ChartTooltip);
 
-// Recharts用データ
-const barData = [
-  { name: "A", count: 20 },
-  { name: "B", count: 50 },
-  { name: "C", count: 40 },
-  { name: "D", count: 30 },
-  { name: "E", count: 60 },
-];
 // 集約関数の型
 interface Aggregate {
   func: string;  // "count" など
@@ -43,11 +35,6 @@ interface QueryRequest {
   limit?: number;
 }
 
-// レスポンス型はAPI仕様に応じて定義
-interface QueryResponse {
-  // 例: レコードの配列
-  records: Record<string, any>[];
-}
 
 interface QueryRecord {
   key: string;

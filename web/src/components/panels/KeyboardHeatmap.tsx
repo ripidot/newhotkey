@@ -183,13 +183,9 @@ export function KeyboardHeatmap({
   registerUpdateCoords: (id: PanelId, fn: () => void) => void;
   unregisterUpdateCoords: (id: PanelId) => void;
 }) {
-  const values = keys.map((k) => k.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  
   const imgRef = useRef<HTMLImageElement>(null);
   const [coords, setCoords] = useState<{ x: number; y: number; w: number; h: number }>();
-  const [loaded, setLoaded] = useState(false);
+  const [, setLoaded] = useState(false);
   const [queryData, setQueryData] = useState<QueryRecord[]>([]);
 
   const updateCoords = () => {
@@ -272,7 +268,7 @@ export function KeyboardHeatmap({
   const HeatmapSvg: React.FC<Props> = ({coords, keys, queryData, getColor }) => {
     // queryData.key を高速に参照できるように Set 化
     const queryMap = new Map(queryData.map((q) => [q.key, q.count]));
-    const querymax = Math.max(...queryData.map(q => q.count));
+    // const querymax = Math.max(...queryData.map(q => q.count));
     const max = 100;
     const querymin = 0;
     return (
