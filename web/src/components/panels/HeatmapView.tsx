@@ -2,6 +2,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState} from "react";
 
+
 export function HeatmapView() {
   const [count, setCount] = useState<number | null>(null);
 
@@ -30,16 +31,38 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   const numberProgress = useMotionValue(0);
   const gaugeProgress = useMotionValue(0);
 
-  // 表示用（整数に丸め）
-  const displayValue = useTransform(numberProgress, (p) => Math.round(p));
+  //// カウンタ
 
-  const radius = 80;
-  const circumference = 2 * Math.PI * radius;
+  // 数値
+  // const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
+  const displayValue = useTransform(numberProgress, (p) => (Math.round(p) + 234567).toLocaleString("jp-JP"));
+  const keywhite = "#f8f8f8";
 
-  // strokeDashoffset 用に MotionValue を作っておくと型が安定します
+  // 中心座標
+  const countercx = 110;
+  const countercy = 110;
+
+  // 円エフェクト
+  const countereffectradius = 95;
+  const countereffectwidth = 0.5;
+  const countereffectratio = 0.9;
+  const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
+  const countereffectradius2 = 105;
+  const countereffectwidth2 = 1;
+  const countereffectratio2 = 0.9;
+  const effectcircumference2 = 2 * Math.PI * countereffectradius2 * countereffectratio2;
+
+  // 円
+  const countercircleradius = 80;
+  const countercirclewidth = 5;
+  const circumference = 2 * Math.PI * countercircleradius;
   const dashoffset = useTransform(gaugeProgress, (p) =>
     circumference - (p / Math.max(1, max)) * circumference
   );
+
+  // テキスト
+  const countertextheight = 10;
+  const countertextfontsize = 32;
 
   useEffect(() => {
 
@@ -64,34 +87,70 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
 
 return (
     <svg width="400" height="400" viewBox="0 0 200 200">
-      <circle
-        cx="100"
-        cy="100"
-        r={radius}
-        stroke="#eee0"
-        strokeWidth="10"
+      <motion.circle // effect
+        cx={countercx}
+        cy={countercy}
+        r={countereffectradius}
+        stroke={keywhite}
+        strokeWidth={countereffectwidth}
+        fill="transparent"
+        strokeDasharray={effectcircumference}
+        strokeDashoffset="0"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",  // 等速にするため
+          duration: 6      // 1周にかける秒数
+        }}
+        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+      />
+      <motion.circle // effect
+        cx={countercx}
+        cy={countercy}
+        r={countereffectradius2}
+        stroke={keywhite}
+        strokeWidth={countereffectwidth2}
+        fill="transparent"
+        strokeDasharray={effectcircumference2}
+        strokeDashoffset="0"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",  // 等速にするため
+          duration: 2.7      // 1周にかける秒数
+        }}
+        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+      />
+      <circle // shadow
+        cx={countercx}
+        cy={countercy}
+        r={countercircleradius}
+        stroke="#0000"
+        strokeWidth={countercirclewidth}
         fill="transparent"
       />
-      <motion.circle
-        cx="100"
-        cy="100"
-        r={radius}
-        stroke="#6666ff"
-        strokeWidth="10"
+      
+      <motion.circle // main
+        cx={countercx}
+        cy={countercy}
+        r={countercircleradius}
+        stroke={keywhite}
+        strokeWidth={countercirclewidth}
         fill="transparent"
         strokeDasharray={circumference}
         strokeDashoffset={dashoffset}
-        transform="rotate(-90 100 100)" // 上(12時)から時計回りに
+        transform="rotate(-90 {countercx} {countercy})" // 上(12時)から時計回りに
       />
-      <motion.text
-        x="100"
-        y="110"
-        textAnchor="middle"
-        fontSize="24"
-        fill="#333"
-      >
-        {displayValue}
-      </motion.text>
+        <motion.text
+          style={{ fontFamily: "var(--font-sans)"}}
+          fill={keywhite}
+          x={countercx}
+          y={countercy + countertextheight}
+          fontSize={countertextfontsize}
+          textAnchor="middle"
+        >
+          {displayValue}
+        </motion.text>
     </svg>
   );
 }

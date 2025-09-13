@@ -1,5 +1,5 @@
 // src/components/panels/KeyTimeline.tsx
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import { Chart, ArcElement, Tooltip as ChartTooltip } from "chart.js";
 import { useEffect, useState } from "react";
 export function UserSessions() {
@@ -75,11 +75,11 @@ export default function Graph() {
   }, []);
 
   return (
-    <BarChart width={400} height={300} data={queryData}>
+    <LineChart width={400} height={300} data={queryData}>
       <XAxis dataKey="week" />
       <YAxis />
       <Tooltip />
-      <Bar dataKey="count" fill="#8884d8" />
-    </BarChart>
+      <Line type="linear" dataKey="count" stroke="#8884d8" />
+    </LineChart>
   );
 }

@@ -165,9 +165,9 @@ export default function App() {
                             path={path}
                             toolbarControls={[]}
                             renderToolbar={(props) => {
-                                return(
+                                return( // titlebar -> titlename -> icon, justifycontentで左右に分ける
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', backgroundColor: "#0000" }}>
-                                        <div style={{ paddingLeft: '8px', fontWeight: 'bold', backgroundColor: "#fff0" }}>{id}</div>
+                                        <div style={{ paddingLeft: '8px', fontWeight: 'bold', backgroundColor: "#0000" }}>{id}</div>
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: "#0000" }}>
                                             <SplitButton {...props}/>
                                             <ExpandButton {...props}/>
@@ -177,7 +177,9 @@ export default function App() {
                                 );
                             }}
                         >
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: "#0000" }}>
                             {panelMap[id]?.element || <div>パネルが見つかりません</div>}
+                        </div>
                         </MosaicWindow>
                     )}
                     value={mosaicLayout} // ツリー構造データ
