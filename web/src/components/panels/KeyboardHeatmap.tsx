@@ -1,3 +1,5 @@
+import { ELEVATION_0 } from "@blueprintjs/core/lib/esm/common/classes";
+import { M_PLUS_1 } from "next/font/google";
 import React, { useRef, useEffect, useState } from "react";
 
 const functional_w = 90;
@@ -123,7 +125,6 @@ const rightmodifierkey = Array.from({ length: 2 }, (_, i) => ({
   label: rightmodifier_label[i], x: rightmodifier_init_x, y: rightmodifier_init_y + rightmodifier_y[i], 
   w: rightmodifier_w + rightmodifier_x * (i), h: rightmodifier_h[i], value: i * 5
 }));
-// keys = [{label: , x:, y:, w:, h:, value: }]
 const keys = [...leftmodifierkey, ...functionalkey, ...numerickey, ...rightmodifierkey, ...qwertykey, ...asdfghkey, ...zxcvbnkey, ...modifierkey, ...modifier2key, ...editkey, ...arrowkey];
 
 interface Aggregate {
@@ -166,6 +167,98 @@ type Props = {
   queryData: QueryData[];
   getColor: (value: number, min: number, max: number) => string;
 };
+
+const fcolor = "C9F4FF";
+const tcolor = "FFC9C9";
+
+// HEX → RGB
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace(/^#/, "");
+  const bigint = parseInt(clean, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return [r, g, b];
+}
+
+// RGB → HSL
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+  }
+
+  return [h, s * 100, l * 100];
+}
+
+// HSL → RGB
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  s /= 100;
+  l /= 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+
+  if (0 <= h && h < 60) [r, g, b] = [c, x, 0];
+  else if (60 <= h && h < 120) [r, g, b] = [x, c, 0];
+  else if (120 <= h && h < 180) [r, g, b] = [0, c, x];
+  else if (180 <= h && h < 240) [r, g, b] = [0, x, c];
+  else if (240 <= h && h < 300) [r, g, b] = [x, 0, c];
+  else if (300 <= h && h < 360) [r, g, b] = [c, 0, x];
+
+  return [
+    Math.round((r + m) * 255),
+    Math.round((g + m) * 255),
+    Math.round((b + m) * 255),
+  ];
+}
+
+// RGB → HEX
+function rgbToHex(r: number, g: number, b: number): string {
+  return "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+// HEX → HSL
+function hexToHsl(hex: string): [number, number, number] {
+  return rgbToHsl(...hexToRgb(hex));
+}
+
+// 🔹 Hueを360°ラップで最短経路補間する関数
+function interpolateHue(h1: number, h2: number, ratio: number): number {
+  let delta = h2 - h1;
+  if (Math.abs(delta) > 180) {
+    // 例: 350° と 10° → delta = -340° → +20°に補正
+    delta -= Math.sign(delta) * 360;
+  }
+  return (h1 + delta * ratio + 360) % 360;
+}
+
+// HSL補間 + HEX出力（Hueはラップ補間）
+function mixHslHex(hex1: string, hex2: string, ratio: number): string {
+  const [h1, s1, l1] = hexToHsl(hex1);
+  const [h2, s2, l2] = hexToHsl(hex2);
+
+  const h = interpolateHue(h1, h2, ratio);
+  const s = s1 * (1 - ratio) + s2 * ratio;
+  const l = l1 * (1 - ratio) + l2 * ratio;
+
+  const [r, g, b] = hslToRgb(h, s, l);
+  return rgbToHex(r, g, b);
+}
+
 
 const getColor = (value: number, min: number, max: number) => {
   const ratio = (value - min) / (max - min);
@@ -292,7 +385,8 @@ export function KeyboardHeatmap({
                 y={key.y}
                 width={key.w}
                 height={key.h}
-                fill={getColor(count, querymin, max)}
+                fill = {mixHslHex(fcolor, tcolor, Math.min(1, Math.max(0,((count - querymin) / (max - querymin)))))}
+                // fill={getColor(count, querymin, max)}
                 stroke="#333"
               />
             </g>

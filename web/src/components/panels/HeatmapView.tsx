@@ -35,7 +35,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
 
   // 数値
   // const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
-  const displayValue = useTransform(numberProgress, (p) => (Math.round(p) + 234567).toLocaleString("jp-JP"));
+  const displayValue = useTransform(numberProgress, (p) => (Math.round(p) * 10 + 234567).toLocaleString("jp-JP"));
   const keywhite = "#f8f8f8";
 
   // 中心座標
@@ -43,14 +43,32 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   const countercy = 110;
 
   // 円エフェクト
-  const countereffectradius = 95;
+  const countereffectradius = 103;
   const countereffectwidth = 0.5;
   const countereffectratio = 0.9;
   const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
-  const countereffectradius2 = 105;
+  const counteffectdashoffset = useTransform(gaugeProgress, (p) =>
+    effectcircumference - (p / Math.max(1, max)) * effectcircumference
+  );
+  const effectduration = 6;
+
+  const countereffectradius2 = 110;
   const countereffectwidth2 = 1;
   const countereffectratio2 = 0.9;
   const effectcircumference2 = 2 * Math.PI * countereffectradius2 * countereffectratio2;
+  const counteffectdashoffset2 = useTransform(gaugeProgress, (p) =>
+    effectcircumference2 - (p / Math.max(1, max)) * effectcircumference2
+  );
+  const effectduration2 = 2.7;
+  
+  const countereffectradius3 = 80;
+  const countereffectwidth3 = 5;
+  const countereffectratio3 = 0.9;
+  const effectcircumference3 = 2 * Math.PI * countereffectradius3 * countereffectratio3;
+  const counteffectdashoffset3 = useTransform(gaugeProgress, (p) =>
+    effectcircumference3 - (p / Math.max(1, max)) * effectcircumference3
+  );
+  const effectduration3 = 2.5;
 
   // 円
   const countercircleradius = 80;
@@ -61,9 +79,8 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   );
 
   // テキスト
-  const countertextheight = 10;
   const countertextfontsize = 32;
-
+  const countertextheight = 10;
   useEffect(() => {
 
     // 現在値から目的地へ数値アニメーションして、onUpdateでMotionValueへ反映
@@ -86,7 +103,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   }, [value]);
 
 return (
-    <svg width="400" height="400" viewBox="0 0 200 200">
+    <svg width="600" height="600" viewBox="0 0 300 300">
       <motion.circle // effect
         cx={countercx}
         cy={countercy}
@@ -100,7 +117,7 @@ return (
         transition={{
           repeat: Infinity,
           ease: "linear",  // 等速にするため
-          duration: 6      // 1周にかける秒数
+          duration: effectduration     // 1周にかける秒数
         }}
         style={{ originX: "50%", originY: "50%" }} // 中心で回転
       />
@@ -117,10 +134,29 @@ return (
         transition={{
           repeat: Infinity,
           ease: "linear",  // 等速にするため
-          duration: 2.7      // 1周にかける秒数
+          duration: effectduration2      // 1周にかける秒数
         }}
         style={{ originX: "50%", originY: "50%" }} // 中心で回転
       />
+
+      <motion.circle // effect
+        cx={countercx}
+        cy={countercy}
+        r={countereffectradius3}
+        stroke={keywhite}
+        strokeWidth={countereffectwidth3}
+        fill="transparent"
+        strokeDasharray={effectcircumference3}
+        strokeDashoffset="0"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",  // 等速にするため
+          duration: effectduration3      // 1周にかける秒数
+        }}
+        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+      />
+
       <circle // shadow
         cx={countercx}
         cy={countercy}
@@ -130,7 +166,7 @@ return (
         fill="transparent"
       />
       
-      <motion.circle // main
+      {/* <motion.circle // main
         cx={countercx}
         cy={countercy}
         r={countercircleradius}
@@ -139,8 +175,8 @@ return (
         fill="transparent"
         strokeDasharray={circumference}
         strokeDashoffset={dashoffset}
-        transform="rotate(-90 {countercx} {countercy})" // 上(12時)から時計回りに
-      />
+        transform={`rotate(-90 ${countercx} ${countercy})`} // 上(12時)から時計回りに
+      /> */}
         <motion.text
           style={{ fontFamily: "var(--font-sans)"}}
           fill={keywhite}
