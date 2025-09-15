@@ -2,7 +2,7 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 
 interface SidebarProps {
-  onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "heatmapView" | "CircleGraph") => void;
+  onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "Counter" | "CircleGraph") => void;
   onUpdateCoords: () => void;
   onCountTreeNodes: () => void;
 }
@@ -17,7 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, on
         <button onClick={() => onAddPanel("userSessions")} title="User Sessions">
           👥
         </button>
-        <button onClick={() => onAddPanel("heatmapView")} title="Heatmap">
+        <button onClick={() => onAddPanel("Counter")} title="Counter">
           ◎
         </button>
         <button onClick={() => onAddPanel("CircleGraph")} title="Circlegraph">

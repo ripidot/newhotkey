@@ -1,5 +1,3 @@
-import { ELEVATION_0 } from "@blueprintjs/core/lib/esm/common/classes";
-import { M_PLUS_1 } from "next/font/google";
 import React, { useRef, useEffect, useState } from "react";
 
 const functional_w = 90;

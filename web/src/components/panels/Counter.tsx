@@ -1,9 +1,9 @@
-// src/components/panels/HeatmapView.tsx
+// src/components/panels/Counter.tsx
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState} from "react";
 
 
-export function HeatmapView() {
+export function Counter() {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ return (
         cx={countercx}
         cy={countercy}
         r={countereffectradius}
-        stroke={keywhite}
+        // stroke={keywhite}
         strokeWidth={countereffectwidth}
         fill="transparent"
         strokeDasharray={effectcircumference}
@@ -119,13 +119,13 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration     // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+        style={{ originX: "50%", originY: "50%" , stroke: "var(--color-secondary)"}} // 中心で回転
       />
       <motion.circle // effect
         cx={countercx}
         cy={countercy}
         r={countereffectradius2}
-        stroke={keywhite}
+        // stroke={keywhite}
         strokeWidth={countereffectwidth2}
         fill="transparent"
         strokeDasharray={effectcircumference2}
@@ -136,14 +136,13 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration2      // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+        style={{ originX: "50%", originY: "50%"  , stroke: "var(--color-secondary)"}} // 中心で回転
       />
 
       <motion.circle // effect
         cx={countercx}
         cy={countercy}
         r={countereffectradius3}
-        stroke={keywhite}
         strokeWidth={countereffectwidth3}
         fill="transparent"
         strokeDasharray={effectcircumference3}
@@ -154,7 +153,7 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration3      // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%" }} // 中心で回転
+        style={{ originX: "50%", originY: "50%"  , stroke: "var(--color-secondary)"}} // 中心で回転
       />
 
       <circle // shadow
@@ -178,8 +177,7 @@ return (
         transform={`rotate(-90 ${countercx} ${countercy})`} // 上(12時)から時計回りに
       /> */}
         <motion.text
-          style={{ fontFamily: "var(--font-sans)"}}
-          fill={keywhite}
+          style={{ fontFamily: "var(--font-sans)" , fill: "var(--color-secondary)"}}
           x={countercx}
           y={countercy + countertextheight}
           fontSize={countertextfontsize}

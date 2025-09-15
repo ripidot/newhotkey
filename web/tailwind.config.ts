@@ -8,6 +8,13 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors:{
+        brand:{
+          primary: '#a0d9f8',
+          white10: '#f8f8f8',
+          dark: '#333',
+        }
+      },
       fontFamily: {
         sans: ['ui-sans-serif', 'system-ui'], // 標準のサンセリフ
         serif: ['ui-serif', 'Georgia'],       // 標準のセリフ

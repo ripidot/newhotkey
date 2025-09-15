@@ -11,14 +11,17 @@ import { ExpandButton } from "@/src/components/buttons/ExpandButton";
 import { Sidebar } from "@/src/components/sidebar/Sidebar";
 import { KeyTimeline } from "@/src/components/panels/Keytimeline";
 import { UserSessions } from "@/src/components/panels/UserSessions";
-import { HeatmapView } from "@/src/components/panels/HeatmapView";
+import { Counter } from "@/src/components/panels/Counter";
 import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
+
+import Hexagon from "@/src/components/effect/Hexagon"
+
 import { nanoid } from "nanoid";
 
 export default function App() {
     type PanelId = string;
-    type PanelType = "keyTimeline" | "userSessions" | "heatmapView" | "KeyboardHeatmap" | "CircleGraph";
+    type PanelType = "keyTimeline" | "userSessions" | "Counter" | "KeyboardHeatmap" | "CircleGraph";
     const updateCoordsMap = useRef<Map<string, () => void>>(new Map());
 
     const handleRegisterUpdateCoords = (id: string, fn: () => void) => {
@@ -36,8 +39,8 @@ export default function App() {
                 return <KeyTimeline key={id} />;
             case "userSessions":
                 return <UserSessions key={id} />;
-            case "heatmapView":
-                return <HeatmapView key={id} />;
+            case "Counter":
+                return <Counter key={id} />;
             case "CircleGraph":
                 return <CircleGraph key={id} />;
             case "KeyboardHeatmap":
@@ -70,8 +73,8 @@ export default function App() {
     const [panelMap, setPanelMap] = useState<Record<PanelId, { type: PanelType; element: JSX.Element }>>({});
 
     const addPanel = useCallback((panelType: PanelType) => {
-        if (panelType === "heatmapView") { // 複数追加できないビュー
-            const existingId = Object.keys(panelMap).find((id) => id.startsWith("heatmap-"));
+        if (panelType === "Counter") { // 複数追加できないビュー
+            const existingId = Object.keys(panelMap).find((id) => id.startsWith("Counter-"));
             if (existingId) {
                 setMosaicLayout((prevLayout) => removePanelById(prevLayout, existingId));
                 setPanelMap((prev) => {
@@ -80,7 +83,7 @@ export default function App() {
                     return newMap;
                 });
             } else {
-                const uniqueId = `heatmap-${nanoid(6)}`;
+                const uniqueId = `Counter-${nanoid(6)}`;
                 setMosaicLayout((prevLayout) => { // prevLayoutとしているが、一時変数なためprevでも可
                     if (!prevLayout) return uniqueId;
                     return {
@@ -119,13 +122,6 @@ export default function App() {
         }));
     }, [panelMap]);
 
-
-    // const handleLayoutChange = (newLayout: MosaicNode<PanelId> | null) => {
-    //     console.log("in handleLayoutChange");
-    //     setMosaicLayout(newLayout);
-    //     updateCoords();
-    //     // console.log("map size:", updateCoordsMap.current.size);
-    // };
     const updateCoords = () => {
         console.log("in updatecoords");
         updateCoordsMap.current.forEach(fn => fn());
@@ -158,6 +154,7 @@ export default function App() {
         <div style={{display: "flex", height: "100vh"}}>
             <Sidebar onAddPanel={addPanel} onUpdateCoords={updateCoords} onCountTreeNodes={countTreeNodes}/>
             <div style={{flex: 1}}>
+                <Hexagon size={300} fill="transparent" stroke="#000" className="animate-pulse" />
                 <Mosaic<PanelId>
                     renderTile={(id, path) => (
                         <MosaicWindow<PanelId>

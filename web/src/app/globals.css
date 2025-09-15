@@ -1,26 +1,38 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  --color-primary: #a0d9f8;
+  --color-secondary: #f8f8f8;
+  --color-gradation: #efeeff;
+  --color-halfsecondary: #f8f8f880;
+  --color-black: #000;
+  --dashedblackratio:3;
+  --dashedtransratio:2;
+  --dashedbase:6px;
+  --bratio:calc(var(--dashedblackratio) * var(--dashedbase));
+  --tratio:calc(var(--dashedtransratio) * var(--dashedbase));
+  --btlength:calc((var(--dashedblackratio) + var(--dashedtransratio)) * var(--dashedbase))
+}
+
 html, body {
   height: 100%;
   margin: 0;
 }
 
-body {
-  background-image: url('/background_2.png');
+.mosaic-blueprint-theme.mosaic.mosaic-drop-target{
+  background-image: url('/background_5.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: #fff0 !important;
 }
-
-/* globals.css */
-
 .mosaic-zero-state {
-  background-color: #ffffff00 !important;
+  background-color: #fff0 !important;
 }
-.mosaic-blueprint-theme {
+/* .mosaic-blueprint-theme {
   background-color: #DBFFFF00 !important;
-}
+} */
 
 .mosaic-window{ 
   background-color: #fff5 !important;
