@@ -25,7 +25,24 @@ html, body, #__next{
 .hex.glow {
   opacity: 0.4;
 }
+.hextest {
+  fill: var(--color-gradation);
+  stroke: var(--color-gradation);
+  fill-opacity: 0.1;
+  stroke-opacity: 1;
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
 
+  /* アニメーション */
+  animation-name: hextestPulse;
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+
+  /* 遅延は --delay カスタムプロパティで与える */
+  animation-delay: var(--delay, 0s);
+  will-change: opacity; /* パフォーマンスヒント */
+}
 .hex {
   fill: var(--color-gradation);
   stroke: var(--color-gradation);
@@ -50,6 +67,11 @@ html, body, #__next{
   50%      { fill-opacity: 1;   stroke-opacity: 1; }
 }
 
+@keyframes hextestPulse {
+  0%, 100% { fill-opacity: 0.25; stroke-opacity: 0.5; }
+  50%      { fill-opacity: 0.5;   stroke-opacity: 1; }
+}
+
 .hex-fill {
     fill:  var(--color-blue);
 }
@@ -59,6 +81,7 @@ html, body, #__next{
 .hex-stroll{
     stroke: var(--color-blue); /* Tailwind の stroke ユーティリティを適用 */  
     fill:  var(--color-blue);
+    background: transparent;
 }
 .hex-draw {
     stroke: var(--color-gradation); /* Tailwind の stroke ユーティリティを適用 */

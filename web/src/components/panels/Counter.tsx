@@ -165,17 +165,6 @@ return (
         fill="transparent"
       />
       
-      {/* <motion.circle // main
-        cx={countercx}
-        cy={countercy}
-        r={countercircleradius}
-        stroke={keywhite}
-        strokeWidth={countercirclewidth}
-        fill="transparent"
-        strokeDasharray={circumference}
-        strokeDashoffset={dashoffset}
-        transform={`rotate(-90 ${countercx} ${countercy})`} // 上(12時)から時計回りに
-      /> */}
         <motion.text
           style={{ fontFamily: "var(--font-sans)" , fill: "var(--color-secondary)"}}
           x={countercx}

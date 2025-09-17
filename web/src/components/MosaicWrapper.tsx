@@ -1,15 +1,6 @@
-// MosaicWrapper.tsx
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import {
-  Mosaic,
-  MosaicNode,
-  MosaicWindow,
-} from "react-mosaic-component";
-import "react-mosaic-component/react-mosaic-component.css";
-
-import { SplitButton } from "@/src/components/buttons/SplitButton";
-import { RemoveButton } from "@/src/components/buttons/RemoveButton";
-import { ExpandButton } from "@/src/components/buttons/ExpandButton";
+import { MosaicNode } from "react-mosaic-component";
+import { nanoid } from "nanoid";
 
 import { Sidebar } from "@/src/components/sidebar/Sidebar";
 import { KeyTimeline } from "@/src/components/panels/Keytimeline";
@@ -19,8 +10,7 @@ import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 
 import Hexagon from "@/src/components/effect/Hexagon";
-import { nanoid } from "nanoid";
-
+import { MosaicArea } from "@/src/components/mosaic/MosaicArea";
 type PanelId = string;
 type PanelType =
   | "keyTimeline"
@@ -31,7 +21,8 @@ type PanelType =
 
 export default function MosaicWrapper() {
   const updateCoordsMap = useRef<Map<string, () => void>>(new Map());
-
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{width:number, height:number}>({width:0, height:0});
   const handleRegisterUpdateCoords = (id: string, fn: () => void) => {
     updateCoordsMap.current.set(id, fn);
   };
@@ -147,82 +138,43 @@ export default function MosaicWrapper() {
     updateCoordsMap.current.forEach((fn) => fn());
   };
 
-  const countTreeNodes = () => {
-    type MosaicNode<T> =
-      | T
-      | { direction: "row" | "column"; first: MosaicNode<T>; second: MosaicNode<T> }
-      | null;
-    function countNodes<T>(node: MosaicNode<T> | null): number {
-      if (!node) return 0;
-      if (typeof node === "object" && "direction" in node) {
-        return countNodes(node.first) + countNodes(node.second);
-      }
-      return 1;
-    }
-    console.log(countNodes(mosaicLayout));
-  };
-  const checkLog = () => {
-    console.log("panelMap: ", panelMap);
-    console.log("mosaicLayout: ",  mosaicLayout);
-  }
-
   useEffect(() => {
     updateCoords();
     window.addEventListener("resize", updateCoords);
     return () => window.removeEventListener("resize", updateCoords);
   }, [mosaicLayout]);
 
-  return ( // static, relative, absoluteで座標系が構成, null, flag, flag基準の相対座標
-    <div className="flex flex-row h-full">
-      {/* Sideバー */}      
-      <Sidebar
-        onAddPanel={addPanel}
-        onUpdateCoords={updateCoords}
-        onCountTreeNodes={countTreeNodes}
-        onCheckLog={checkLog}
-      />
-
-      {/* Mosaicエリア */}
-      {/* flex-1 ... 残り全部を占める*/}
-      <div className="relative flex-1 h-full">
-        {/* 背景エフェクト */}
-        <Hexagon/>
-        <Mosaic<PanelId>
-          renderTile={(id, path) => (
-            <MosaicWindow<PanelId>
-              title=""
-              path={path}
-              toolbarControls={[]}
-              renderToolbar={(props) => {
-                return (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                      backgroundColor: "#0000",
-                    }}
-                  >
-                    <div style={{ paddingLeft: "8px", fontWeight: "bold" }}>
-                      {id}
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <SplitButton {...props} />
-                      <ExpandButton {...props} />
-                      <RemoveButton {...props} />
-                    </div>
-                  </div>
-                );
-              }}
-            >
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                {panelMap[id]?.element || <div>パネルが見つかりません</div>}
-              </div>
-            </MosaicWindow>
-          )}
-          value={mosaicLayout}
-          onChange={setMosaicLayout}
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        setSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div className="flex flex-row w-full h-full">
+      {/* サイドバー */}
+      <div className="w-64 flex h-full">
+        <Sidebar
+          onAddPanel={addPanel}
+          onUpdateCoords={updateCoords}
+          onCountTreeNodes={() => {}}
+          onCheckLog={() => {}}
+        />
+      </div>
+      {/* Mosaic エリア */}
+      <div ref={containerRef} className="relative flex-1 h-full">
+        <Hexagon size={size}/>
+        <MosaicArea
+          panelMap={panelMap}
+          mosaicLayout={mosaicLayout}
+          setMosaicLayout={setMosaicLayout}
         />
       </div>
     </div>

@@ -9,8 +9,8 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, onCountTreeNodes, onCheckLog}) => {
-  return (
-    <aside className="w-64 bg-[#222222ff] text-white p-4 space-y-4">
+  return ( // aside : 付随的な内容 Margin(自コンテンツのゆとり), Padding(他要素との間隔), space-y-4(子要素同士の間隔)
+    <aside className="bg-[#222222ff] text-white p-4 space-y-4 w-full">
       <div className="text-2xl text-center">
         <button onClick={() => onAddPanel("keyTimeline")} title="Key Timeline">
           🕒
