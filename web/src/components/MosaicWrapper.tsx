@@ -161,6 +161,10 @@ export default function MosaicWrapper() {
     }
     console.log(countNodes(mosaicLayout));
   };
+  const checkLog = () => {
+    console.log("panelMap: ", panelMap);
+    console.log("mosaicLayout: ",  mosaicLayout);
+  }
 
   useEffect(() => {
     updateCoords();
@@ -168,25 +172,21 @@ export default function MosaicWrapper() {
     return () => window.removeEventListener("resize", updateCoords);
   }, [mosaicLayout]);
 
-  return (
-    <div className="flex h-full">
-      {/* 左に固定されるSidebar */}
+  return ( // static, relative, absoluteで座標系が構成, null, flag, flag基準の相対座標
+    <div className="flex flex-row h-full">
+      {/* Sideバー */}      
       <Sidebar
         onAddPanel={addPanel}
         onUpdateCoords={updateCoords}
         onCountTreeNodes={countTreeNodes}
+        onCheckLog={checkLog}
       />
 
       {/* Mosaicエリア */}
-      <div className="relative flex-1">
+      {/* flex-1 ... 残り全部を占める*/}
+      <div className="relative flex-1 h-full">
         {/* 背景エフェクト */}
-        {/* <Hexagon
-          size={300}
-          fill="transparent"
-          stroke="#000"
-          className="absolute inset-0 -z-10 animate-pulse"
-        /> */}
-
+        <Hexagon/>
         <Mosaic<PanelId>
           renderTile={(id, path) => (
             <MosaicWindow<PanelId>

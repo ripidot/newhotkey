@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import 'react-mosaic-component/react-mosaic-component.css';
 
 :root {
   --color-primary: #a0d9f8;
@@ -7,6 +8,7 @@
   --color-gradation: #efeeff;
   --color-halfsecondary: #f8f8f880;
   --color-black: #000;
+  --color-blue: #00f;
   --dashedblackratio:3;
   --dashedtransratio:2;
   --dashedbase:6px;
@@ -15,11 +17,53 @@
   --btlength:calc((var(--dashedblackratio) + var(--dashedtransratio)) * var(--dashedbase))
 }
 
-html, body {
+html, body, #__next{
   height: 100%;
   margin: 0;
 }
 
+.hex.glow {
+  opacity: 0.4;
+}
+
+.hex {
+  fill: var(--color-gradation);
+  stroke: var(--color-gradation);
+  fill-opacity: 0.1;
+  stroke-opacity: 0.1;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+
+  /* アニメーション */
+  animation-name: hexPulse;
+  animation-duration: 3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+
+  /* 遅延は --delay カスタムプロパティで与える */
+  animation-delay: var(--delay, 0s);
+  will-change: opacity; /* パフォーマンスヒント */
+}
+
+@keyframes hexPulse {
+  0%, 100% { fill-opacity: 0.5; stroke-opacity: 0.5; }
+  50%      { fill-opacity: 1;   stroke-opacity: 1; }
+}
+
+.hex-fill {
+    fill:  var(--color-blue);
+}
+.hex-stroke {
+    stroke: var(--color-blue); /* Tailwind の stroke ユーティリティを適用 */
+}
+.hex-stroll{
+    stroke: var(--color-blue); /* Tailwind の stroke ユーティリティを適用 */  
+    fill:  var(--color-blue);
+}
+.hex-draw {
+    stroke: var(--color-gradation); /* Tailwind の stroke ユーティリティを適用 */
+    fill:  var(--color-gradation);
+}
 .mosaic-blueprint-theme.mosaic.mosaic-drop-target{
   background-image: url('/background_5.png');
   background-size: cover;
@@ -30,9 +74,6 @@ html, body {
 .mosaic-zero-state {
   background-color: #fff0 !important;
 }
-/* .mosaic-blueprint-theme {
-  background-color: #DBFFFF00 !important;
-} */
 
 .mosaic-window{ 
   background-color: #fff5 !important;

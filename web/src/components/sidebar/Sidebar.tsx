@@ -5,9 +5,10 @@ interface SidebarProps {
   onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "Counter" | "CircleGraph") => void;
   onUpdateCoords: () => void;
   onCountTreeNodes: () => void;
+  onCheckLog: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, onCountTreeNodes}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, onCountTreeNodes, onCheckLog}) => {
   return (
     <aside className="w-64 bg-[#222222ff] text-white p-4 space-y-4">
       <div className="text-2xl text-center">
@@ -33,6 +34,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, on
         </button>
         <button onClick={() => onCountTreeNodes()} title="Count Nodes">
           🌲
+        </button>
+        <button onClick={() => onCheckLog()} title="Check log">
+          📃
         </button>
       </div>
       <div className="delete-area mt-8 text-center text-sm opacity-60">

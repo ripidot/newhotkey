@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
 import { Orbitron, Audiowide, Exo_2, Inter, Noto_Sans} from "next/font/google";
-import Hexagon from "@/src/components/effect/Hexagon"
 
 export const metadata: Metadata = {
   title: "Visualizaiton for Keylog",
