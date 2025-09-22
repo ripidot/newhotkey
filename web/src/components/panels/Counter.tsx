@@ -2,9 +2,13 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState} from "react";
 
-
+interface QueryRecord {
+  key: string;
+  count: number;
+}
 export function Counter() {
   const [count, setCount] = useState<number | null>(null);
+  const [queryData, setQueryData] = useState<QueryRecord[]>([]);
 
   useEffect(() => {
     // API からデータ取得
@@ -17,7 +21,7 @@ export function Counter() {
   }, []);
 
   return (
-    <div className="p-4 bg-[#ffffff00]">
+    <div>
       {count !== null ? (
         <Gauge value={count} max={count} />
       ) : (
@@ -46,6 +50,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   const countereffectradius = 103;
   const countereffectwidth = 0.5;
   const countereffectratio = 0.9;
+  // const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
   const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
   const counteffectdashoffset = useTransform(gaugeProgress, (p) =>
     effectcircumference - (p / Math.max(1, max)) * effectcircumference
@@ -62,7 +67,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   const effectduration2 = 2.7;
   
   const countereffectradius3 = 80;
-  const countereffectwidth3 = 5;
+  const countereffectwidth3 = 3;
   const countereffectratio3 = 0.9;
   const effectcircumference3 = 2 * Math.PI * countereffectradius3 * countereffectratio3;
   const counteffectdashoffset3 = useTransform(gaugeProgress, (p) =>
@@ -79,7 +84,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   );
 
   // テキスト
-  const countertextfontsize = 32;
+  const countertextfontsize = 28;
   const countertextheight = 10;
   useEffect(() => {
 
@@ -103,7 +108,7 @@ export default function Gauge({ value, max }: { value: number; max: number }) {
   }, [value]);
 
 return (
-    <svg width="600" height="600" viewBox="0 0 300 300">
+    <svg width="400" height="400" viewBox="0 0 300 300">
       <motion.circle // effect
         cx={countercx}
         cy={countercy}
@@ -119,7 +124,7 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration     // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%" , stroke: "var(--color-secondary)"}} // 中心で回転
+        style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
       />
       <motion.circle // effect
         cx={countercx}
@@ -136,7 +141,7 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration2      // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%"  , stroke: "var(--color-secondary)"}} // 中心で回転
+        style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
       />
 
       <motion.circle // effect
@@ -153,7 +158,7 @@ return (
           ease: "linear",  // 等速にするため
           duration: effectduration3      // 1周にかける秒数
         }}
-        style={{ originX: "50%", originY: "50%"  , stroke: "var(--color-secondary)"}} // 中心で回転
+        style={{ transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
       />
 
       <circle // shadow
@@ -164,7 +169,7 @@ return (
         strokeWidth={countercirclewidth}
         fill="transparent"
       />
-      
+
         <motion.text
           style={{ fontFamily: "var(--font-sans)" , fill: "var(--color-secondary)"}}
           x={countercx}

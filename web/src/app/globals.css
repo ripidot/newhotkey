@@ -7,7 +7,9 @@
   --color-secondary: #f8f8f8;
   --color-gradation: #efeeff;
   --color-halfsecondary: #f8f8f880;
-  --color-black: #000;
+  --color-graph: #8884d8;
+  --color-black: #222;
+  --color-gray: #676868;
   --color-blue: #00f;
   --dashedblackratio:3;
   --dashedtransratio:2;
@@ -20,6 +22,17 @@
 html, body, #__next{
   height: 100%;
   margin: 0;
+}
+.line{
+  stroke: var(--color-graph);
+}
+.testbox{
+  font-family:  var(--font-noto_sans);
+  font-weight: 400;
+  color: var(--color-gray);
+}
+.testbox p{
+  white-space: nowrap;
 }
 
 .hex.glow {
@@ -43,6 +56,7 @@ html, body, #__next{
   animation-delay: var(--delay, 0s);
   will-change: opacity; /* パフォーマンスヒント */
 }
+
 .hex {
   fill: var(--color-gradation);
   stroke: var(--color-gradation);

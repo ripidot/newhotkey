@@ -4,8 +4,7 @@ import { Chart, ArcElement, Tooltip as ChartTooltip } from "chart.js";
 import { useEffect, useState } from "react";
 export function KeyTimeline() {
   return (
-    <div className="p-4 grid grid-cols-2 bg-[#ffffff00]">
-      {/* <p className="text-xl font-semibold">Key Frequency</p> */}
+    <div>
       <p><Graph/></p>
     </div>
   );
@@ -42,11 +41,12 @@ interface QueryRecord {
 }
 export default function Graph() {
   const [queryData, setQueryData] = useState<QueryRecord[]>([]);
+  const program_name = "Explorer.EXE";
   useEffect(() => {
   const fetchData = async () => {
     const requestData: QueryRequest = {
       select: ["key"],
-      where: { process_name: "Explorer.EXE" },
+      where: { process_name: program_name },
       group_by: ["key"],
       aggregates: [{ func: "count", alias: "count" }],
       order_by: [{ field: "count", direction: "desc" }],
@@ -75,11 +75,14 @@ export default function Graph() {
   }, []);
 
   return (
-    <BarChart width={400} height={300} data={queryData}>
-      <XAxis dataKey="key" />
-      <YAxis />
-      <Tooltip />
-      <Bar dataKey="count" fill="#8884d8" />
-    </BarChart>
+    <div className="testbox space-y-4">
+      <p>集計プロセス名: {program_name}</p>
+      <BarChart width={300} height={200} data={queryData}>
+        <XAxis dataKey="key" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="count" style={{fill: "var(--color-graph)"}} />
+      </BarChart>
+    </div>
   );
 }

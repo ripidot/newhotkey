@@ -6,7 +6,7 @@ Chart.register(ArcElement, ChartTooltip);
 
 export function CircleGraph() {
   return (
-    <div className="p-4 bg-[#ffffff00]">
+    <div>
     <p className="text-xl font-semibold">Modifier Usage</p>
       <Graph/>
     </div>

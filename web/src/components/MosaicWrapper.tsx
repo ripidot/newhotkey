@@ -29,6 +29,7 @@ export default function MosaicWrapper() {
   const handleUnregisterUpdateCoords = (id: string) => {
     updateCoordsMap.current.delete(id);
   };
+  const uniquePanel = [""]; // 重複を許さないリスト
 
   const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
@@ -74,12 +75,15 @@ export default function MosaicWrapper() {
     null
   );
   const [panelMap, setPanelMap] = useState<
-    Record<PanelId, { type: PanelType; element: JSX.Element }>
+    Record<PanelId, { type: PanelType; render: () => JSX.Element }>
   >({});
+
 
   const addPanel = useCallback(
     (panelType: PanelType) => {
-      if (panelType === "Counter") {
+      if (uniquePanel.includes(panelType)){
+      // if (panelType === "Counter") {
+
         const existingId = Object.keys(panelMap).find((id) =>
           id.startsWith("Counter-")
         );
@@ -102,13 +106,14 @@ export default function MosaicWrapper() {
               second: uniqueId,
             };
           });
-          setPanelMap((prev) => ({
-            ...prev,
-            [uniqueId]: {
-              type: panelType,
-              element: createPanelElement(panelType, uniqueId),
-            },
-          }));
+setPanelMap((prev) => ({
+  ...prev,
+  [uniqueId]: {
+    type: panelType,
+    render: () => createPanelElement(panelType, uniqueId),
+  },
+}));
+
         }
         return;
       }
@@ -123,13 +128,14 @@ export default function MosaicWrapper() {
         };
       });
 
-      setPanelMap((prev) => ({
-        ...prev,
-        [uniqueId]: {
-          type: panelType,
-          element: createPanelElement(panelType, uniqueId),
-        },
-      }));
+setPanelMap((prev) => ({
+  ...prev,
+  [uniqueId]: {
+    type: panelType,
+    render: () => createPanelElement(panelType, uniqueId),
+  },
+}));
+
     },
     [panelMap]
   );

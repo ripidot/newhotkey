@@ -4,7 +4,7 @@ import { Chart, ArcElement, Tooltip as ChartTooltip } from "chart.js";
 import { useEffect, useState } from "react";
 export function UserSessions() {
   return (
-    <div className="p-4 grid grid-cols-2 bg-[#ffffff00]">
+    <div>
       {/* <p className="text-xl font-semibold">Key Frequency</p> */}
       <p><Graph/></p>
     </div>
@@ -42,14 +42,16 @@ interface QueryRecord {
 }
 export default function Graph() {
   const [queryData, setQueryData] = useState<QueryRecord[]>([]);
+  const program_name = "Explorer.EXE";
+  const duration = "week";
   useEffect(() => {
   const fetchData = async () => {
     const requestData: QueryRequest = {
-      select: ["week"],
-      where: { process_name: "Explorer.EXE" },
-      group_by: ["week"],
+      select: [duration],
+      where: { process_name: program_name },
+      group_by: [duration],
       aggregates: [{ func: "count", alias: "count" }],
-      order_by: [{ field: "week", direction: "asc" }],
+      order_by: [{ field: duration, direction: "asc" }],
       limit: 20,
     };
 
@@ -75,11 +77,14 @@ export default function Graph() {
   }, []);
 
   return (
-    <LineChart width={400} height={300} data={queryData}>
-      <XAxis dataKey="week" />
-      <YAxis />
-      <Tooltip />
-      <Line type="linear" dataKey="count" stroke="#8884d8" />
-    </LineChart>
+  <div className="testbox space-y-4">
+    <p>集計期間: {duration} <br/>集計プロセス名: {program_name}</p>
+      <LineChart width={300} height={200} data={queryData}>
+        <XAxis dataKey="week" tickFormatter={(value: string) => value.split("T")[0]}/>
+        <YAxis />
+        <Tooltip />
+        <Line style={{stroke: "var(--color-graph)"}} type="linear" dataKey="count"/>
+      </LineChart>
+    </div>
   );
 }

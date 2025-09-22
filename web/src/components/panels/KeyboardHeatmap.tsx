@@ -278,6 +278,9 @@ export function KeyboardHeatmap({
   const [coords, setCoords] = useState<{ x: number; y: number; w: number; h: number }>();
   const [, setLoaded] = useState(false);
   const [queryData, setQueryData] = useState<QueryRecord[]>([]);
+  const top = 50;
+
+  const program_name = "Explorer.EXE";
 
   const updateCoords = () => {
     if (imgRef.current) {
@@ -299,7 +302,7 @@ export function KeyboardHeatmap({
   const fetchData = async () => {
     const requestData: QueryRequest = {
       select: ["key"],
-      where: { process_name: "Explorer.EXE" },
+      where: { process_name: program_name },
       group_by: ["key"],
       aggregates: [{ func: "count", alias: "count" }],
       order_by: [{ field: "count", direction: "desc" }],
@@ -332,7 +335,13 @@ export function KeyboardHeatmap({
       unregisterUpdateCoords(id);
     };
   }, [id, registerUpdateCoords, unregisterUpdateCoords]);
-
+  
+  useEffect(() => {
+    console.log(`🔵 mounted: ${id}`);
+    return () => {
+      console.log(`🔴 unmounted: ${id}`);
+    };
+  }, [id]);
   function KeyboardImage() {
     return (
       <img
@@ -345,7 +354,7 @@ export function KeyboardHeatmap({
         }}
         style={{
           position: "absolute",
-          top: 0,
+          top: top,
           left: 0,
           width: "100%",
           height: "auto",
@@ -357,7 +366,6 @@ export function KeyboardHeatmap({
   }
 
   const HeatmapSvg: React.FC<Props> = ({coords, keys, queryData, getColor }) => {
-    // queryData.key を高速に参照できるように Set 化
     const queryMap = new Map(queryData.map((q) => [q.key, q.count]));
     // const querymax = Math.max(...queryData.map(q => q.count));
     const max = 100;
@@ -367,10 +375,10 @@ export function KeyboardHeatmap({
         style={{
           position: "absolute",
           left: 0,
-          top: 0,
+          top: top,
           width: coords.w,
           height: coords.h,
-          pointerEvents: "none" // クリックは画像に通す
+          pointerEvents: "none"
         }}
         viewBox={`0 0 ${1669} ${660}`} // 元画像サイズでスケーリング
       >
@@ -406,6 +414,7 @@ export function KeyboardHeatmap({
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <p>集計プロセス名: {program_name}</p>
     <KeyboardImage/>
     {coords && queryData && <HeatmapSvg coords={coords} keys={keys} queryData={queryData} getColor={getColor} />}
     </div>
