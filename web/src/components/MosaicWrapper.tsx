@@ -11,13 +11,8 @@ import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 
 import Hexagon from "@/src/components/effect/Hexagon";
 import { MosaicArea } from "@/src/components/mosaic/MosaicArea";
-type PanelId = string;
-type PanelType =
-  | "keyTimeline"
-  | "userSessions"
-  | "Counter"
-  | "KeyboardHeatmap"
-  | "CircleGraph";
+
+import type { PanelId, PanelType } from "@/src/types/interface";
 
 export default function MosaicWrapper() {
   const updateCoordsMap = useRef<Map<string, () => void>>(new Map());

@@ -5,9 +5,7 @@ import { MosaicContext } from "react-mosaic-component";
 import { MosaicWindowProps } from 'react-mosaic-component';
 import { Button } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
-
-
-type PanelId = string;
+import type { PanelId } from "@/src/types/interface";
 
 type RemoveButtonProps = Pick<MosaicWindowProps<PanelId>, 'path'>;
 

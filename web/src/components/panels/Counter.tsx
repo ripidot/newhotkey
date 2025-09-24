@@ -1,184 +1,142 @@
 // src/components/panels/Counter.tsx
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect, useState} from "react";
+import { useEffect } from "react";
+import { useQueryData } from "@/src/hooks/useQueryData";
+import type { CircleAnimation, CircleText} from "@/src/types/interface";
 
-interface QueryRecord {
-  key: string;
-  count: number;
-}
 export function Counter() {
-  const [count, setCount] = useState<number | null>(null);
-  const [queryData, setQueryData] = useState<QueryRecord[]>([]);
 
-  useEffect(() => {
-    // API からデータ取得
-    fetch("http://localhost:8000/countall")
-      .then((res) => res.json())        // JSONレスポンスを想定（{"count": 123}）
-      .then((data) => setCount(data.count))
-      .catch((err) => {
-        console.error("API error:", err);
-      });
-  }, []);
+  function Graph() {
+    const program_name = "Explorer.EXE";
+    const {queryData, loading, error} = useQueryData(program_name);
 
-  return (
-    <div>
-      {count !== null ? (
-        <Gauge value={count} max={count} />
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
-  );
-}
+    if (loading) { // 非同期処理のためのロード中の処理
+      return <p>Loading...</p>;
+    }
+    if (error) {
+      return <p>Error: {error.message}</p>
+    }
+    return (
+      <div className="testbox space-y-4">
+        {program_name? 
+        (<p>集計プロセス名: {program_name}</p>)
+        : (<p>集計プロセス名: 全て</p>)}
 
-export default function Gauge({ value, max }: { value: number; max: number }) {
-  const numberProgress = useMotionValue(0);
-  const gaugeProgress = useMotionValue(0);
+        {queryData[0].count !== null ? (
+          <Gauge value={queryData[0].count} max={queryData[0].count} />
+        ) : (
+          <p>データを表示できません</p>
+        )}
+      </div>
+    );
+  }
 
-  //// カウンタ
-
-  // 数値
-  // const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
-  const displayValue = useTransform(numberProgress, (p) => (Math.round(p) * 10 + 234567).toLocaleString("jp-JP"));
-  const keywhite = "#f8f8f8";
-
-  // 中心座標
-  const countercx = 110;
-  const countercy = 110;
-
-  // 円エフェクト
-  const countereffectradius = 103;
-  const countereffectwidth = 0.5;
-  const countereffectratio = 0.9;
-  // const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
-  const effectcircumference = 2 * Math.PI * countereffectradius * countereffectratio;
-  const counteffectdashoffset = useTransform(gaugeProgress, (p) =>
-    effectcircumference - (p / Math.max(1, max)) * effectcircumference
-  );
-  const effectduration = 6;
-
-  const countereffectradius2 = 110;
-  const countereffectwidth2 = 1;
-  const countereffectratio2 = 0.9;
-  const effectcircumference2 = 2 * Math.PI * countereffectradius2 * countereffectratio2;
-  const counteffectdashoffset2 = useTransform(gaugeProgress, (p) =>
-    effectcircumference2 - (p / Math.max(1, max)) * effectcircumference2
-  );
-  const effectduration2 = 2.7;
-  
-  const countereffectradius3 = 80;
-  const countereffectwidth3 = 3;
-  const countereffectratio3 = 0.9;
-  const effectcircumference3 = 2 * Math.PI * countereffectradius3 * countereffectratio3;
-  const counteffectdashoffset3 = useTransform(gaugeProgress, (p) =>
-    effectcircumference3 - (p / Math.max(1, max)) * effectcircumference3
-  );
-  const effectduration3 = 2.5;
-
-  // 円
-  const countercircleradius = 80;
-  const countercirclewidth = 5;
-  const circumference = 2 * Math.PI * countercircleradius;
-  const dashoffset = useTransform(gaugeProgress, (p) =>
-    circumference - (p / Math.max(1, max)) * circumference
-  );
-
-  // テキスト
-  const countertextfontsize = 28;
-  const countertextheight = 10;
-  useEffect(() => {
-
-    // 現在値から目的地へ数値アニメーションして、onUpdateでMotionValueへ反映
-    const stopNumber = animate(numberProgress.get(), value, {
-      duration: 1.5,
-      ease: [0.22, 1, 0.36, 1], // easeOutCubic相当（最初速く→最後ゆっくり）
-      onUpdate: (v) => numberProgress.set(v),
-    });
-
-    const stopGauge = animate(gaugeProgress.get(), value, {
-      duration: 2.0,             // 数値より遅らせて「追いつく」演出
-      ease: [0.16, 1, 0.3, 1],   // easeOutExpo風
-      onUpdate: (v) => gaugeProgress.set(v),
-    });
-
-    return () => {
-      stopNumber.stop();
-      stopGauge.stop();
-    };
-  }, [value]);
-
-return (
-    <svg width="400" height="400" viewBox="0 0 300 300">
-      <motion.circle // effect
-        cx={countercx}
-        cy={countercy}
-        r={countereffectradius}
-        // stroke={keywhite}
-        strokeWidth={countereffectwidth}
-        fill="transparent"
-        strokeDasharray={effectcircumference}
-        strokeDashoffset="0"
-        animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",  // 等速にするため
-          duration: effectduration     // 1周にかける秒数
-        }}
-        style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
-      />
-      <motion.circle // effect
-        cx={countercx}
-        cy={countercy}
-        r={countereffectradius2}
-        // stroke={keywhite}
-        strokeWidth={countereffectwidth2}
-        fill="transparent"
-        strokeDasharray={effectcircumference2}
-        strokeDashoffset="0"
-        animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",  // 等速にするため
-          duration: effectduration2      // 1周にかける秒数
-        }}
-        style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
-      />
-
-      <motion.circle // effect
-        cx={countercx}
-        cy={countercy}
-        r={countereffectradius3}
-        strokeWidth={countereffectwidth3}
-        fill="transparent"
-        strokeDasharray={effectcircumference3}
-        strokeDashoffset="0"
-        animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",  // 等速にするため
-          duration: effectduration3      // 1周にかける秒数
-        }}
-        style={{ transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
-      />
-
-      <circle // shadow
-        cx={countercx}
-        cy={countercy}
-        r={countercircleradius}
-        stroke="#0000"
-        strokeWidth={countercirclewidth}
-        fill="transparent"
-      />
-
+  function Gauge({ value, max }: { value: number; max: number }) {
+    // 円エフェクト
+    function createCircleAnimation(
+      cx: number, cy: number,
+      radius: number, width: number,
+      ratio: number, duration: number): CircleAnimation {
+        return{
+          cx: cx,
+          cy: cy,
+          radius : radius,
+          width : width,
+          ratio : ratio,
+          circumference: 2 * Math.PI * radius * ratio,
+          duration : duration
+        };
+    }
+    function DrawCircleAnimation(props : CircleAnimation){
+      return(
+          <motion.circle // effect
+            cx={props.cx}
+            cy={props.cy}
+            r={props.radius}
+            strokeWidth={props.width}
+            fill="transparent"
+            strokeDasharray={props.circumference}
+            strokeDashoffset="0"
+            animate={{ rotate: 360 }}
+            transition={{
+              repeat: Infinity,
+              ease: "linear",  // 等速にするため
+              duration: props.duration     // 1周にかける秒数
+            }}
+            style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
+          />
+      )
+    }
+    function WriteCircleText(props : CircleText) {
+      return (
         <motion.text
           style={{ fontFamily: "var(--font-sans)" , fill: "var(--color-secondary)"}}
-          x={countercx}
-          y={countercy + countertextheight}
-          fontSize={countertextfontsize}
+          x={props.cx}
+          y={props.cy + props.height}
+          fontSize={props.size}
           textAnchor="middle"
         >
-          {displayValue}
+          {props.displayValue}
         </motion.text>
-    </svg>
+      )
+    }
+    //// カウンタ
+    const numberProgress = useMotionValue(0);
+    const gaugeProgress = useMotionValue(0);
+
+    // 中心座標
+    const countercx = 110;
+    const countercy = 110;
+
+    // 数値
+    // const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
+    const displayValue = useTransform(numberProgress, (p) => (Math.round(p) * 10 + 234567).toLocaleString("jp-JP"));
+
+    // テキスト
+    const countertextfontsize = 28;
+    const countertextheight = 10;
+    const e1 = createCircleAnimation(countercx, countercy, 80, 3, 0.9, 2.5);
+    const e2 = createCircleAnimation(countercx, countercy, 103, 0.5, 0.9, 6);
+    const e3 = createCircleAnimation(countercx, countercy, 110, 1, 0.9, 2.7);
+    const c1 : CircleText = {
+      cx : countercx, cy : countercy,
+      height : countertextheight,
+      size : countertextfontsize, displayValue : displayValue
+    };
+
+    useEffect(() => {
+      // 現在値から目的地へ数値アニメーションして、onUpdateでMotionValueへ反映
+      const stopNumber = animate(numberProgress.get(), value, {
+        duration: 1.5,
+        ease: [0.22, 1, 0.36, 1], // easeOutCubic相当（最初速く→最後ゆっくり）
+        onUpdate: (v) => numberProgress.set(v),
+      });
+
+      const stopGauge = animate(gaugeProgress.get(), value, {
+        duration: 2.0,             // 数値より遅らせて「追いつく」演出
+        ease: [0.16, 1, 0.3, 1],   // easeOutExpo風
+        onUpdate: (v) => gaugeProgress.set(v),
+      });
+
+      return () => {
+        stopNumber.stop();
+        stopGauge.stop();
+      };
+    }, [value]);
+
+    return (
+      <svg width="400" height="400" viewBox="0 0 300 300">
+        <DrawCircleAnimation {...e1}/>
+        <DrawCircleAnimation {...e2}/>
+        <DrawCircleAnimation {...e3}/>
+        <WriteCircleText {...c1}/>
+      </svg>
+    );
+  }
+  
+  return (
+    <div>
+      <p><Graph/></p>
+    </div>
   );
 }

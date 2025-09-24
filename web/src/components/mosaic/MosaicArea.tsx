@@ -1,18 +1,12 @@
 import React from "react";
-import { Mosaic, MosaicWindow, MosaicNode } from "react-mosaic-component";
+import { Mosaic, MosaicWindow } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
 
 import { SplitButton } from "@/src/components/buttons/SplitButton";
 import { RemoveButton } from "@/src/components/buttons/RemoveButton";
 import { ExpandButton } from "@/src/components/buttons/ExpandButton";
+import type { PanelId, MosaicAreaProps} from  "@/src/types/interface";
 
-type PanelId = string;
-
-interface MosaicAreaProps {
-  panelMap: Record<PanelId, {render: () => JSX.Element;}>;
-  mosaicLayout: MosaicNode<PanelId> | null;
-  setMosaicLayout: (layout: MosaicNode<PanelId> | null) => void;
-}
 
 export const MosaicArea: React.FC<MosaicAreaProps> = ({
   panelMap,

@@ -35,6 +35,11 @@ services:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data # named mount 分離のため, dockerの内部領域に保存
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   dbdata: # named mount宣言に必要
