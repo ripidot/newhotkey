@@ -15,6 +15,7 @@ export interface OrderBy {
   field: string;
   direction: "asc" | "desc";
 }
+
 // 全体のリクエスト型
 export interface QueryRequest {
   select: string[];
@@ -25,14 +26,21 @@ export interface QueryRequest {
   limit?: number;
 }
 export interface QueryRecord {
-  key: string;
+  [key: string]: string | number;
   count: number;
 }
+
+export type VisualizationType = "graph" | "counter";
+export type QueryRecordKey = "key" | "process_name" | "day" | "week" | "month" | "count";
+export type QueryResult<T extends QueryRecordKey> = {
+  [K in T]: string;
+} & { count: number };
 
 export type PanelId = string;
 export type PanelType =
   | "keyTimeline"
   | "userSessions"
+  | "userSessions_all"
   | "Counter"
   | "KeyboardHeatmap"
   | "CircleGraph";
@@ -49,9 +57,9 @@ export interface KeyPosition extends Position {
 }
 
 export type HeatmapProps = {
+  process_name: string;
   imgcoords: {left: number, top: number, w: number, h: number};
   keys: KeyPosition[];
-  queryRecord: QueryRecord[];
 };
 
 export type MosaicAreaProps = {

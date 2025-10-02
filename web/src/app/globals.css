@@ -3,10 +3,11 @@
 @import 'react-mosaic-component/react-mosaic-component.css';
 
 :root {
-  --color-primary: #a0d9f8;
-  --color-secondary: #f8f8f8;
-  --color-gradation: #efeeff;
-  --color-halfsecondary: #f8f8f880;
+  --color-primary: #f8f8f8;
+  --color-semi_trans_primary: #f8f8f880;
+  --color-primary-hover: #eaeaea;
+  --color-secondary: #a0d9f8;
+  --color-hex: #efeeff;
   --color-graph: #8884d8;
   --color-black: #222;
   --color-gray: #676868;
@@ -23,12 +24,36 @@ html, body, #__next{
   height: 100%;
   margin: 0;
 }
+.countercircle{
+  stroke: var(--color-primary);
+  fill: transparent;
+}
+.countertext{
+  fill : var(--color-primary); /*fill : 色, stroke : 縁*/
+  font-family: var(--font-sans);
+  font-size: 28px;
+  font-weight: 100;
+}
+.sidebar{
+  background-color: var(--color-primary);
+  color: var(--color-black);
+}
+.sidebar_button {
+  background-color: var(--color-primary);
+}
+.sidebar_button:hover {
+  background-color: var(--color-primary-hover);
+}
 .line{
   stroke: var(--color-graph);
 }
+.createinst{
+  font-size: 14px;
+}
 .testbox{
-  font-family:  var(--font-noto_sans);
-  font-weight: 400;
+  font-family: var(--font-noto_sans);
+  font-size: 14px;
+  font-weight: 300;
   color: var(--color-gray);
 }
 .testbox p{
@@ -39,8 +64,8 @@ html, body, #__next{
   opacity: 0.4;
 }
 .hextest {
-  fill: var(--color-gradation);
-  stroke: var(--color-gradation);
+  fill: var(--color-hex);
+  stroke: var(--color-hex);
   fill-opacity: 0.1;
   stroke-opacity: 1;
   opacity: 1;
@@ -58,8 +83,8 @@ html, body, #__next{
 }
 
 .hex {
-  fill: var(--color-gradation);
-  stroke: var(--color-gradation);
+  fill: var(--color-hex);
+  stroke: var(--color-hex);
   fill-opacity: 0.1;
   stroke-opacity: 0.1;
   opacity: 0;
@@ -98,8 +123,8 @@ html, body, #__next{
     background: transparent;
 }
 .hex-draw {
-    stroke: var(--color-gradation); /* Tailwind の stroke ユーティリティを適用 */
-    fill:  var(--color-gradation);
+    stroke: var(--color-hex); /* Tailwind の stroke ユーティリティを適用 */
+    fill:  var(--color-hex);
 }
 .mosaic-blueprint-theme.mosaic.mosaic-drop-target{
   background-image: url('/background_5.png');

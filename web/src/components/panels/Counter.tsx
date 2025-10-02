@@ -1,85 +1,70 @@
 // src/components/panels/Counter.tsx
+
+import { useEffect, useMemo } from "react";
+import type { QueryRequest } from "@/src/types/interface";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect } from "react";
-import { useQueryData } from "@/src/hooks/useQueryData";
+import { useQueryRecord } from "@/src/hooks/useQueryRecord";
 import type { CircleAnimation, CircleText} from "@/src/types/interface";
+import { ReturnProcessName, DrawExcept } from "@/src/lib/utils";
+import type { QueryRecordKey, QueryResult } from "@/src/types/interface";
 
-export function Counter() {
+// CounterGraphをファイル分割しているが、これは再生成を防ぐため
+// react-mosaicがリサイズを検知すると
+// Counter内で定義されている関数を再定義する(再生成)
 
-  function Graph() {
-    const program_name = "Explorer.EXE";
-    const {queryData, loading, error} = useQueryData(program_name);
+// そのため、リサイズをすると、useEffectの依存配列を設定せずとも
+// CounterGraphが再生成されてしまう
 
-    if (loading) { // 非同期処理のためのロード中の処理
-      return <p>Loading...</p>;
-    }
-    if (error) {
-      return <p>Error: {error.message}</p>
-    }
+// Counterの外であればいいため、このファイルで外に定義してもいいが、
+// 可読性のために分割している
+// Counterの外に出すことで再生成を再レンダーに落ち着かせている
+
+// 再レンダー : 仮想DOMの生成
+// 再生成 : アンマウント, マウント
+
+export function Counter({
+  process_name, aggcolumn
+}: {
+  process_name: string;
+  aggcolumn: QueryRecordKey;
+}) {
+
+  return (
+    <div>
+      <p><CounterGraph process_name={process_name} aggcolumn={aggcolumn}/></p>
+    </div>
+  );
+}
+
+export function CounterGraph<T extends QueryRecordKey>({ process_name, aggcolumn }: { process_name: string; aggcolumn: T }) {
+    const baseRequest: QueryRequest = {
+        select: [aggcolumn],
+        aggregates: [{ func: "count", alias: "cnt" }],
+    };
+    const requestData: QueryRequest = {
+        ...baseRequest,
+        ...(process_name && { where: { process_name } }),
+    };
+
+    const {queryRecord, loading, error} = useQueryRecord<{ count: number; cnt: number }>(requestData);
+    if (loading || error)
+        return <DrawExcept loading={loading} error={error}/>
+
     return (
-      <div className="testbox space-y-4">
-        {program_name? 
-        (<p>集計プロセス名: {program_name}</p>)
-        : (<p>集計プロセス名: 全て</p>)}
+        <div className="testbox space-y-4">
+        <ReturnProcessName aggcolumn={aggcolumn} process_name={process_name} vtype={"counter"} />
 
-        {queryData[0].count !== null ? (
-          <Gauge value={queryData[0].count} max={queryData[0].count} />
+        {queryRecord[0].count !== null ? (
+            <Gauge value={queryRecord[0].count} max={queryRecord[0].count} />
         ) : (
-          <p>データを表示できません</p>
+            <p>データを表示できません</p>
         )}
-      </div>
+        </div>
     );
-  }
+}
 
-  function Gauge({ value, max }: { value: number; max: number }) {
-    // 円エフェクト
-    function createCircleAnimation(
-      cx: number, cy: number,
-      radius: number, width: number,
-      ratio: number, duration: number): CircleAnimation {
-        return{
-          cx: cx,
-          cy: cy,
-          radius : radius,
-          width : width,
-          ratio : ratio,
-          circumference: 2 * Math.PI * radius * ratio,
-          duration : duration
-        };
-    }
-    function DrawCircleAnimation(props : CircleAnimation){
-      return(
-          <motion.circle // effect
-            cx={props.cx}
-            cy={props.cy}
-            r={props.radius}
-            strokeWidth={props.width}
-            fill="transparent"
-            strokeDasharray={props.circumference}
-            strokeDashoffset="0"
-            animate={{ rotate: 360 }}
-            transition={{
-              repeat: Infinity,
-              ease: "linear",  // 等速にするため
-              duration: props.duration     // 1周にかける秒数
-            }}
-            style={{transformOrigin: "center center", stroke: "var(--color-secondary)"}} // 中心で回転
-          />
-      )
-    }
-    function WriteCircleText(props : CircleText) {
-      return (
-        <motion.text
-          style={{ fontFamily: "var(--font-sans)" , fill: "var(--color-secondary)"}}
-          x={props.cx}
-          y={props.cy + props.height}
-          fontSize={props.size}
-          textAnchor="middle"
-        >
-          {props.displayValue}
-        </motion.text>
-      )
-    }
+
+function Gauge({ value, max }: { value: number; max: number }) {
     //// カウンタ
     const numberProgress = useMotionValue(0);
     const gaugeProgress = useMotionValue(0);
@@ -89,8 +74,8 @@ export function Counter() {
     const countercy = 110;
 
     // 数値
-    // const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
-    const displayValue = useTransform(numberProgress, (p) => (Math.round(p) * 10 + 234567).toLocaleString("jp-JP"));
+    const displayValue = useTransform(numberProgress, (p) => Math.round(p).toLocaleString("jp-JP"));
+    // const displayValue = useTransform(numberProgress, (p) => (Math.round(p) * 10 + 234567).toLocaleString("jp-JP"));
 
     // テキスト
     const countertextfontsize = 28;
@@ -99,44 +84,83 @@ export function Counter() {
     const e2 = createCircleAnimation(countercx, countercy, 103, 0.5, 0.9, 6);
     const e3 = createCircleAnimation(countercx, countercy, 110, 1, 0.9, 2.7);
     const c1 : CircleText = {
-      cx : countercx, cy : countercy,
-      height : countertextheight,
-      size : countertextfontsize, displayValue : displayValue
+        cx : countercx, cy : countercy,
+        height : countertextheight,
+        size : countertextfontsize, displayValue : displayValue
     };
 
     useEffect(() => {
-      // 現在値から目的地へ数値アニメーションして、onUpdateでMotionValueへ反映
-      const stopNumber = animate(numberProgress.get(), value, {
+        // 現在値から目的地へ数値アニメーションして、onUpdateでMotionValueへ反映
+        const stopNumber = animate(numberProgress.get(), value, {
         duration: 1.5,
-        ease: [0.22, 1, 0.36, 1], // easeOutCubic相当（最初速く→最後ゆっくり）
+        ease: [0.22, 1, 0.36, 1],
         onUpdate: (v) => numberProgress.set(v),
-      });
+        });
 
-      const stopGauge = animate(gaugeProgress.get(), value, {
-        duration: 2.0,             // 数値より遅らせて「追いつく」演出
-        ease: [0.16, 1, 0.3, 1],   // easeOutExpo風
+        const stopGauge = animate(gaugeProgress.get(), value, {
+        duration: 2.0,
+        ease: [0.16, 1, 0.3, 1],
         onUpdate: (v) => gaugeProgress.set(v),
-      });
+        });
 
-      return () => {
+        return () => {
         stopNumber.stop();
         stopGauge.stop();
-      };
+        };
     }, [value]);
 
     return (
-      <svg width="400" height="400" viewBox="0 0 300 300">
+        <svg width="400" height="400" viewBox="0 0 300 300">
         <DrawCircleAnimation {...e1}/>
         <DrawCircleAnimation {...e2}/>
         <DrawCircleAnimation {...e3}/>
         <WriteCircleText {...c1}/>
-      </svg>
+        </svg>
     );
-  }
-  
-  return (
-    <div>
-      <p><Graph/></p>
-    </div>
-  );
+}
+// 円エフェクト
+function createCircleAnimation(
+    cx: number, cy: number,
+    radius: number, width: number,
+    ratio: number, duration: number): CircleAnimation {
+    return{
+        cx: cx,
+        cy: cy,
+        radius : radius,
+        width : width,
+        ratio : ratio,
+        circumference: 2 * Math.PI * radius * ratio,
+        duration : duration
+    };
+}
+function DrawCircleAnimation(props : CircleAnimation){
+    return(
+        <motion.circle // effect
+        className="countercircle"
+        cx={props.cx}
+        cy={props.cy}
+        r={props.radius}
+        strokeWidth={props.width}
+        strokeDasharray={props.circumference}
+        strokeDashoffset="0"
+        animate={{ rotate: 360 }}
+        transition={{
+            repeat: Infinity,
+            ease: "linear",  // 等速にするため
+            duration: props.duration     // 1周にかける秒数
+        }}
+        />
+    )
+}
+function WriteCircleText(props : CircleText) {
+    return (
+    <motion.text
+        className = "countertext"
+        x={props.cx}
+        y={props.cy + props.height}
+        textAnchor="middle"
+    >
+        {props.displayValue}
+    </motion.text>
+    )
 }

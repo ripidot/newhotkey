@@ -29,11 +29,13 @@ export default function MosaicWrapper() {
   const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
       case "keyTimeline":
-        return <KeyTimeline key={id} />;
+        return <KeyTimeline key={id} process_name={"Explorer.EXE"} aggcolumn={"key"}/>;
       case "userSessions":
-        return <UserSessions key={id} />;
+        return <UserSessions key={id} process_name={""} aggcolumn={"week"}/>;
+      case "userSessions_all":
+        return <UserSessions key={id} process_name={"Explorer.EXE"} aggcolumn={"week"}/>;
       case "Counter":
-        return <Counter key={id} />;
+        return <Counter key={id} process_name={"Explorer.EXE"} aggcolumn={"count"}/>;
       case "CircleGraph":
         return <CircleGraph key={id} />;
       case "KeyboardHeatmap":
@@ -43,6 +45,7 @@ export default function MosaicWrapper() {
             id={id}
             registerUpdateCoords={handleRegisterUpdateCoords}
             unregisterUpdateCoords={handleUnregisterUpdateCoords}
+            process_name={"Explorer.EXE"}
           />
         );
       default:
@@ -161,7 +164,7 @@ setPanelMap((prev) => ({
   return (
     <div className="flex flex-row w-full h-full">
       {/* サイドバー */}
-      <div className="w-64 flex h-full">
+      <div className="w-52 flex h-full">
         <Sidebar
           onAddPanel={addPanel}
           onUpdateCoords={updateCoords}

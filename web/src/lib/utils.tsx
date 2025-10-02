@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { VisualizationType } from "@/src/types/interface";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -92,4 +93,65 @@ export function mixHslHex(hex1: string, hex2: string, ratio: number): string {
 
   const [r, g, b] = hslToRgb(h, s, l);
   return rgbToHex(r, g, b);
+}
+
+export function ReturnProcessName({
+  aggcolumn,
+  process_name,
+  vtype
+}: {
+  aggcolumn: string;
+  process_name: string;
+  vtype: VisualizationType;
+}) {
+  const aggLabel =
+    !aggcolumn
+      ? "" // falsyなら空
+      : (aggcolumn === "day" || aggcolumn === "week" || aggcolumn === "month")
+        ? `集計期間: ${aggcolumn}`
+        : `集計データ: ${aggcolumn}`;
+  if (vtype === "graph")
+    return (
+      <p>
+        {aggLabel && <>{aggLabel}<br /></>}
+        集計プロセス名: {process_name ? process_name : "全て"}
+      </p>
+    );
+  else if (vtype === "counter")
+    return (
+      <p>
+        集計プロセス名: {process_name ? process_name : "全て"}
+      </p>
+    );
+}
+
+export function ReturnProcessNameforCounter({
+  aggcolumn,
+  process_name,
+}: {
+  aggcolumn: string;
+  process_name: string;
+}) {
+  const aggLabel =
+    !aggcolumn
+      ? "" // falsyなら空
+      : (aggcolumn === "day" || aggcolumn === "week" || aggcolumn === "month")
+        ? `集計期間: ${aggcolumn}`
+        : `集計データ: ${aggcolumn}`;
+
+  return (
+    <p>
+      {aggLabel && <>{aggLabel}<br /></>}
+      集計プロセス名: {process_name ? process_name : "全て"}
+    </p>
+  );
+}
+
+export function DrawExcept({ loading, error }: { loading: boolean, error: Error | null }){
+  if (loading) { // 非同期処理のためのロード中の処理
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    return <p>Error: {error.message}</p>;
+  }
 }

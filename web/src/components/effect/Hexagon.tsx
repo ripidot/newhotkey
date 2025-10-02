@@ -52,7 +52,6 @@ interface HexagonProps {
         cells.push({ x: cx, y: cy, radius: radius, hexmargin: hexmargin, id: `hex-${row}-${col}` });
       }
     }
-    console.log("length: ", cells.length);
     const interval = setInterval(() => {
       setActiveHex(prev => {
         const newSet = new Set(prev);

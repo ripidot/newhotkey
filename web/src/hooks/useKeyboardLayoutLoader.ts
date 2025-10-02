@@ -26,7 +26,6 @@ export function useKeyboardLayoutLoader(jsonPath: string) {
           })
         );
         setLayout(positions);
-        console.log("positions: ", positions);
       } catch (error) {
         console.error("キーボードレイアウトの読み込みに失敗:", error);
       }

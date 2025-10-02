@@ -1,8 +1,9 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
+import { ConfigPanel } from "@/src/components/sidebar/ConfigPanel";
 
 interface SidebarProps {
-  onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "Counter" | "CircleGraph") => void;
+  onAddPanel: (panel: "KeyboardHeatmap"|"keyTimeline" | "userSessions" | "userSessions_all" | "Counter" | "CircleGraph") => void;
   onUpdateCoords: () => void;
   onCountTreeNodes: () => void;
   onCheckLog: () => void;
@@ -10,13 +11,17 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onUpdateCoords, onCountTreeNodes, onCheckLog}) => {
   return ( // aside : 付随的な内容 Margin(自コンテンツのゆとり), Padding(他要素との間隔), space-y-4(子要素同士の間隔)
-    <aside className="bg-[#222222ff] text-white p-4 space-y-4 w-full">
+    <aside className="sidebar p-4 space-y-4 w-full">
+      <ConfigPanel/>
       <div className="text-2xl text-center">
         <button onClick={() => onAddPanel("keyTimeline")} title="Key Timeline">
           🕒
         </button>
         <button onClick={() => onAddPanel("userSessions")} title="User Sessions">
           👥
+        </button>
+        <button onClick={() => onAddPanel("userSessions_all")} title="User all Sessions">
+          👦
         </button>
         <button onClick={() => onAddPanel("Counter")} title="Counter">
           ◎
