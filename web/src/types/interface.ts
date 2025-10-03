@@ -97,7 +97,9 @@ export interface CircleText {
   size: number;
   displayValue: MotionValue<string>;
 }
-export type Formstring = string | undefined;
+
+// 未選択状態は "" で表す
+export type Formstring = string;
 
 // ?を付けると項目を省略できる category?: stringは似た意味
 export type FormState = {

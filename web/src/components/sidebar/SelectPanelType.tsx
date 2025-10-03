@@ -25,10 +25,10 @@ export function SelectPanelType({ onCreatePanel, onCancel }: {
   ];
 
   const [formState, setFormState] = useState<FormState>({
-    datatype: undefined,
-    charttype: undefined,
-    processname: undefined,
-    duration: undefined
+    datatype: "",
+    charttype: "",
+    processname: "",
+    duration: ""
   });
 
   const filteredItems = formState.datatype
@@ -46,9 +46,9 @@ export function SelectPanelType({ onCreatePanel, onCancel }: {
   }
 
 function isValidFormState(fs: FormState): fs is ValidFormState {
-  return fs.datatype !== undefined &&
-         fs.charttype !== undefined &&
-         fs.processname !== undefined;
+  return fs.datatype !== "" &&
+         fs.charttype !== "" &&
+         fs.processname !== "";
 }
 
   return (
@@ -58,13 +58,13 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
         <label className="text-sm font-medium">表示データ</label>
       <Select
         value={formState.datatype}
-        onValueChange={(val) => {
+        onValueChange={(val : Formstring) => {
           handleChange("datatype", val);
           if (!isItemValidForDatatype(formState.charttype, val, items)) {
-            handleChange("charttype", undefined);
+            handleChange("charttype", "");
           }
           if (val !== "時系列データ"){
-            handleChange("duration", undefined);
+            handleChange("duration", "");
           }
         }}
       >
@@ -87,7 +87,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
         <label className="text-sm font-medium">期間</label>
           <Select
             value={formState.duration}
-            onValueChange={(val) => {
+            onValueChange={(val : Formstring) => {
               handleChange("duration", val);
             }}
           >
@@ -110,7 +110,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
         <label className="text-sm font-medium">グラフ</label>
         <Select 
           value={formState.charttype}
-          onValueChange={(val) => handleChange("charttype", val)}>
+          onValueChange={(val : Formstring) => handleChange("charttype", val)}>
           <SelectTrigger>
             <SelectValue placeholder="グラフを選択" />
           </SelectTrigger>
@@ -131,7 +131,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
         <label className="text-sm font-medium">プロセス名</label>
         <Select 
           value={formState.processname} 
-          onValueChange={(val) => handleChange("processname", val)}>
+          onValueChange={(val : Formstring) => handleChange("processname", val)}>
           <SelectTrigger className="w-full mt-1">
             <SelectValue placeholder="プロセス名を選択" />
           </SelectTrigger>
@@ -148,7 +148,6 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
               const validformstate: ValidFormState = formState;
               onCreatePanel(validformstate)}
             else { console.log("未入力");
-              console.log("type: ", typeof formState.charttype, ", value: ", formState.charttype)
               console.log(formState);
              }}}>
               Create</Button>
