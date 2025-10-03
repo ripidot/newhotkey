@@ -28,9 +28,9 @@ export function ReturnSelectContent(){
 
   return (
     <SelectContent>
-      <SelectItem key={0} value={"0"}>全て</SelectItem>
-      {queryRecord.map((record, index) => (
-        <SelectItem key={record.process_name} value={String(index + 1)}>
+      <SelectItem key={0} value={"全て"}>全て</SelectItem>
+      {queryRecord.map((record) => (
+        <SelectItem key={record.process_name} value={record.process_name}>
           {record.process_name}
         </SelectItem>
       ))}

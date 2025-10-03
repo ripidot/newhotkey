@@ -3,8 +3,8 @@ import { MosaicNode } from "react-mosaic-component";
 import { nanoid } from "nanoid";
 
 import { Sidebar } from "@/src/components/sidebar/Sidebar";
-import { KeyTimeline } from "@/src/components/panels/Keytimeline";
-import { UserSessions } from "@/src/components/panels/UserSessions";
+import { KeyboardBarChart } from "@/src/components/panels/KeyboardBarChart";
+import { KeyboardLineChart } from "@/src/components/panels/KeyboardLineChart";
 import { Counter } from "@/src/components/panels/Counter";
 import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
@@ -12,7 +12,8 @@ import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 import Hexagon from "@/src/components/effect/Hexagon";
 import { MosaicArea } from "@/src/components/mosaic/MosaicArea";
 
-import type { PanelId, PanelType } from "@/src/types/interface";
+import { isQueryRecordKey } from "@/src/lib/utils";
+import type { FormState, PanelId, PanelType, QueryRecordKey, ValidFormState } from "@/src/types/interface";
 
 export default function MosaicWrapper() {
   const updateCoordsMap = useRef<Map<string, () => void>>(new Map());
@@ -25,16 +26,29 @@ export default function MosaicWrapper() {
     updateCoordsMap.current.delete(id);
   };
   const uniquePanel = [""]; // 重複を許さないリスト
+  function FormstateToPanelType(charttype : string){
+    switch(charttype){
+      case "棒グラフ":
+        return "KeyboardBarChart";
+      case "折れ線グラフ":
+        return "KeyboardLineChart";
+      case "カウンター":
+        return "KeyboardCounter";
+      case "キーボードヒートマップ":
+        return "KeyboardHeatmap";
+    }return "Error";
+  }
+
 
   const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
-      case "keyTimeline":
-        return <KeyTimeline key={id} process_name={"Explorer.EXE"} aggcolumn={"key"}/>;
-      case "userSessions":
-        return <UserSessions key={id} process_name={""} aggcolumn={"week"}/>;
+      case "KeyboardBarChart":
+        return <KeyboardBarChart key={id} process_name={"Explorer.EXE"} aggcolumn={"key"}/>;
+      case "KeyboardLineChart":
+        return <KeyboardLineChart key={id} process_name={""} aggcolumn={"week"}/>;
       case "userSessions_all":
-        return <UserSessions key={id} process_name={"Explorer.EXE"} aggcolumn={"week"}/>;
-      case "Counter":
+        return <KeyboardBarChart key={id} process_name={"Explorer.EXE"} aggcolumn={"week"}/>;
+      case "KeyboardCounter":
         return <Counter key={id} process_name={"Explorer.EXE"} aggcolumn={"count"}/>;
       case "CircleGraph":
         return <CircleGraph key={id} />;
@@ -52,7 +66,36 @@ export default function MosaicWrapper() {
         return <div key={id}>未定義パネル</div>;
     }
   };
+  const createPanelElementwithFormState = (type: PanelType, id: PanelId, validformstate: ValidFormState): JSX.Element => {
+      const process_name = (validformstate.processname !== "全て") ? validformstate.processname : "";
+      const aggcolumn: QueryRecordKey  = ((validformstate.duration !== undefined) && (isQueryRecordKey(validformstate.duration)))
+        ? (validformstate.duration) : "key";
+      switch (type) {
+        case "KeyboardBarChart":
+          return <KeyboardBarChart key={id} process_name={ process_name } aggcolumn={aggcolumn}/>;
 
+        case "KeyboardLineChart": // linechartならばdurationを持っている
+          return <KeyboardLineChart key={id} process_name={ process_name } aggcolumn={aggcolumn}/>;
+        
+        case "KeyboardCounter":
+          return <Counter key={id} process_name={ process_name } aggcolumn={"count"}/>;
+        case "CircleGraph":
+          return <CircleGraph key={id} />;
+        case "KeyboardHeatmap":
+          return (
+            <KeyboardHeatmap
+              key={id}
+              id={id}
+              registerUpdateCoords={handleRegisterUpdateCoords}
+              unregisterUpdateCoords={handleUnregisterUpdateCoords}
+              process_name={process_name}
+            />
+          );
+        default:
+          return <div key={id}>未定義パネル</div>;
+      }
+    
+  };
   const removePanelById = (
     layout: MosaicNode<PanelId> | null,
     targetId: PanelId
@@ -80,7 +123,6 @@ export default function MosaicWrapper() {
   const addPanel = useCallback(
     (panelType: PanelType) => {
       if (uniquePanel.includes(panelType)){
-      // if (panelType === "Counter") {
 
         const existingId = Object.keys(panelMap).find((id) =>
           id.startsWith("Counter-")
@@ -104,36 +146,57 @@ export default function MosaicWrapper() {
               second: uniqueId,
             };
           });
-setPanelMap((prev) => ({
-  ...prev,
-  [uniqueId]: {
-    type: panelType,
-    render: () => createPanelElement(panelType, uniqueId),
-  },
-}));
+          setPanelMap((prev) => ({
+            ...prev,
+            [uniqueId]: {
+              type: panelType,
+              render: () => createPanelElement(panelType, uniqueId),
+            },
+          }));
 
         }
         return;
       }
 
       const uniqueId = `${panelType}-${nanoid(6)}`;
-      setMosaicLayout((prevLayout) => {
-        if (!prevLayout) return uniqueId;
-        return {
-          direction: "row",
-          first: prevLayout,
-          second: uniqueId,
-        };
-      });
+        setMosaicLayout((prevLayout) => {
+          if (!prevLayout) return uniqueId;
+          return {
+            direction: "row",
+            first: prevLayout,
+            second: uniqueId,
+          };
+        });
+        setPanelMap((prev) => ({
+          ...prev,
+          [uniqueId]: {
+            type: panelType,
+            render: () => createPanelElement(panelType, uniqueId),
+          },
+        }));
+    },
+    [panelMap]
+  );
 
-setPanelMap((prev) => ({
-  ...prev,
-  [uniqueId]: {
-    type: panelType,
-    render: () => createPanelElement(panelType, uniqueId),
-  },
-}));
-
+  const addPanelwithFormState = useCallback(
+    (validformstate: ValidFormState) => {
+      const panelType : PanelType = FormstateToPanelType(validformstate.charttype);
+      const uniqueId = `${panelType}-${nanoid(6)}`;
+        setMosaicLayout((prevLayout) => {
+          if (!prevLayout) return uniqueId;
+          return {
+            direction: "row",
+            first: prevLayout,
+            second: uniqueId,
+          };
+        });
+        setPanelMap((prev) => ({
+          ...prev,
+          [uniqueId]: {
+            type: panelType,
+            render: () => createPanelElementwithFormState(panelType, uniqueId, validformstate),
+          },
+        }));
     },
     [panelMap]
   );
@@ -161,12 +224,18 @@ setPanelMap((prev) => ({
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const handleCreatePanel = (formstate: FormState) => {
+    // ここで mosaic に追加する処理を行う
+    console.log("データ伝達テスト:", formstate);
+  };
   return (
     <div className="flex flex-row w-full h-full">
       {/* サイドバー */}
       <div className="w-56 flex h-full">
         <Sidebar
           onAddPanel={addPanel}
+          onCreatePanel={addPanelwithFormState}
           onUpdateCoords={updateCoords}
           onCountTreeNodes={() => {}}
           onCheckLog={() => {}}

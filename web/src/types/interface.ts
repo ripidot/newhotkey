@@ -31,20 +31,33 @@ export interface QueryRecord {
 }
 
 export type VisualizationType = "graph" | "counter";
-export type QueryRecordKey = "key" | "process_name" | "day" | "week" | "month" | "count";
+
+
+export const queryRecordKeys = [
+  "key", "process_name", "day", "week", "month", "count"
+] as const;
+
+// ここから型を自動生成
+export type QueryRecordKey = typeof queryRecordKeys[number];
+
+// 型ガード
+export function isQueryRecordKey(fs: string): fs is QueryRecordKey {
+  return (queryRecordKeys as readonly string[]).includes(fs);
+}
+
 export type QueryResult<T extends QueryRecordKey> = {
   [K in T]: string;
 } & { count: number };
 
 export type PanelId = string;
 export type PanelType =
-  | "keyTimeline"
-  | "userSessions"
+  | "KeyboardBarChart"
+  | "KeyboardLineChart"
   | "userSessions_all"
-  | "Counter"
+  | "KeyboardCounter"
   | "KeyboardHeatmap"
-  | "CircleGraph";
-
+  | "CircleGraph"
+  | "Error";
 
 export interface Position {
   x: number;
@@ -88,9 +101,16 @@ export type Formstring = string | undefined;
 
 // ?を付けると項目を省略できる category?: stringは似た意味
 export type FormState = {
-  category: Formstring;
-  item: Formstring;
-  process: Formstring;
+  datatype: Formstring;
+  charttype: Formstring;
+  processname: Formstring;
+  duration?: string;
+};
+export type ValidFormState = {
+  datatype: string;
+  charttype: string;
+  processname: string;
+  duration?: string;
 };
 export type Item = {
   name: string;

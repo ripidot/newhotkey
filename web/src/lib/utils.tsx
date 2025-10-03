@@ -1,12 +1,15 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { VisualizationType } from "@/src/types/interface";
+import { queryRecordKeys, QueryRecordKey, PanelType, Formstring, FormState, VisualizationType } from "@/src/types/interface";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
+// 型ガード関数
+export function isQueryRecordKey(fs: string): fs is QueryRecordKey {
+  return (queryRecordKeys as readonly string[]).includes(fs);
+}
 // HEX → RGB
 function hexToRgb(hex: string): [number, number, number] {
   const clean = hex.replace(/^#/, "");
@@ -155,3 +158,4 @@ export function DrawExcept({ loading, error }: { loading: boolean, error: Error 
     return <p>Error: {error.message}</p>;
   }
 }
+

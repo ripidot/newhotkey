@@ -13,7 +13,6 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({ path }) => {
   const context = useContext(MosaicContext);
 
   const handleClick = () => {
-    console.log(context);
     if (context.mosaicActions && path) {
       context.mosaicActions.remove(path);
     } else {

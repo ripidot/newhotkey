@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { SelectPanelType } from "@/src/components/sidebar/SelectPanelType";
+import type { FormState, ValidFormState } from "@/src/types/interface";
 
-export function ConfigPanel() {
+export function ConfigPanel({ onCreatePanel }: {
+  onCreatePanel: (validformstate: ValidFormState) => void }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,7 +24,7 @@ export function ConfigPanel() {
       >
         <div className="mt-4">
           <label className="items-center">
-            <SelectPanelType onCancel={() => setOpen(false)}/>
+            <SelectPanelType onCreatePanel={onCreatePanel} onCancel={() => setOpen(false)}/>
           </label>
         </div>
       </motion.div>
