@@ -2,8 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { SelectPanelType } from "@/src/components/sidebar/SelectPanelType";
 
-import React from "react";
-
 export function ConfigPanel() {
   const [open, setOpen] = useState(false);
 
@@ -11,7 +9,7 @@ export function ConfigPanel() {
     <div className="p-4 border rounded">
       <button
         onClick={() => setOpen(!open)}
-        className="sidebar_button font-semibold"
+        className="sidebarbutton font-semibold"
       >
         新しいパネル
       </button>
@@ -24,7 +22,7 @@ export function ConfigPanel() {
       >
         <div className="mt-4">
           <label className="items-center">
-            <SelectPanelType/>
+            <SelectPanelType onCancel={() => setOpen(false)}/>
           </label>
         </div>
       </motion.div>

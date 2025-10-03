@@ -84,3 +84,15 @@ export interface CircleText {
   size: number;
   displayValue: MotionValue<string>;
 }
+export type Formstring = string | undefined;
+
+// ?を付けると項目を省略できる category?: stringは似た意味
+export type FormState = {
+  category: Formstring;
+  item: Formstring;
+  process: Formstring;
+};
+export type Item = {
+  name: string;
+  categories: string[];
+};

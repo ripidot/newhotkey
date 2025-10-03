@@ -164,7 +164,7 @@ setPanelMap((prev) => ({
   return (
     <div className="flex flex-row w-full h-full">
       {/* サイドバー */}
-      <div className="w-52 flex h-full">
+      <div className="w-56 flex h-full">
         <Sidebar
           onAddPanel={addPanel}
           onUpdateCoords={updateCoords}
@@ -172,7 +172,7 @@ setPanelMap((prev) => ({
           onCheckLog={() => {}}
         />
       </div>
-      {/* Mosaic エリア */}
+      {/* Mosaic */}
       <div ref={containerRef} className="relative flex-1 h-full">
         <Hexagon size={size}/>
         <MosaicArea

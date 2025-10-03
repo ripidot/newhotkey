@@ -10,6 +10,7 @@
   --color-hex: #efeeff;
   --color-graph: #8884d8;
   --color-black: #222;
+  --color-black-hover: #555;
   --color-gray: #676868;
   --color-blue: #00f;
   --dashedblackratio:3;
@@ -38,11 +39,17 @@ html, body, #__next{
   background-color: var(--color-primary);
   color: var(--color-black);
 }
-.sidebar_button {
+.sidebarbutton {
   background-color: var(--color-primary);
 }
-.sidebar_button:hover {
+.sidebarbutton:hover {
   background-color: var(--color-primary-hover);
+}
+.sidebarbuttonB {
+  background-color: var(--color-black);
+}
+.sidebarbuttonB:hover {
+  background-color: var(--color-black-hover);
 }
 .line{
   stroke: var(--color-graph);
