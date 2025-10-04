@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { queryRecordKeys, QueryRecordKey, PanelType, Formstring, FormState, VisualizationType } from "@/src/types/interface";
+import { log } from "console";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -84,6 +85,11 @@ function interpolateHue(h1: number, h2: number, ratio: number): number {
   }
   return (h1 + delta * ratio + 360) % 360;
 }
+// 🔹 Hueを360°ラップで最短経路補間する関数
+function clockwiseHue(h1: number, h2: number, ratio: number): number {
+  let delta = h2 - h1;
+  return (h1 + delta * ratio + 360) % 360;
+}
 
 // HSL補間 + HEX出力（Hueはラップ補間）
 export function mixHslHex(hex1: string, hex2: string, ratio: number): string {
@@ -97,7 +103,14 @@ export function mixHslHex(hex1: string, hex2: string, ratio: number): string {
   const [r, g, b] = hslToRgb(h, s, l);
   return rgbToHex(r, g, b);
 }
-
+export function normalizing(min: number, max: number, c: number) {
+  const v = Math.min(1, Math.max(0,((c - min) / (max - min))));
+  return v;
+}
+export function logscaling(min: number, max: number, c: number){
+  const v = (Math.log(1 + c) - Math.log(1 + min)) / (Math.log(1 + max) - Math.log(1 + min));
+  return v;
+}
 export function ReturnProcessName({
   aggcolumn,
   process_name,

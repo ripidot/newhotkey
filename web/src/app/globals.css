@@ -32,8 +32,8 @@ html, body, #__next{
 .countertext{
   fill : var(--color-primary); /*fill : 色, stroke : 縁*/
   font-family: var(--font-sans);
-  font-size: 28px;
-  font-weight: 100;
+  font-size: 34px;
+  font-weight: 200;
 }
 .sidebar{
   background-color: var(--color-primary);

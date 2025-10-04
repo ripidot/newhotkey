@@ -3,10 +3,10 @@ import type { QueryRequest } from "@/src/types/interface";
 import type { PanelId, HeatmapProps } from "@/src/types/interface";
 import { useKeyboardLayoutLoader } from "@/src/hooks/useKeyboardLayoutLoader";
 import { useQueryRecord } from "@/src/hooks/useQueryRecord";
-import { mixHslHex, ReturnProcessName, DrawExcept } from "@/src/lib/utils";
+import { logscaling, mixHslHex, ReturnProcessName, DrawExcept } from "@/src/lib/utils";
 
 const fcolor = "C9F4FF";
-const tcolor = "FFC9C9";
+const tcolor = "FFA9A9";
 const top = 50;
 
 export function KeyboardHeatmap({
@@ -86,11 +86,6 @@ export function KeyboardHeatmap({
 
 const HeatmapSvg: React.FC<HeatmapProps> = ({process_name, imgcoords, keys}) => {
 
-  // const querymax = Math.max(...queryRecord.map(q => q.count));
-  const max = 100;
-  const querymin = 0;
-
-  const aggcolumn = "key"
   const baseRequest: QueryRequest = {
     select: ["key"],
     group_by: ["key"],
@@ -104,6 +99,10 @@ const HeatmapSvg: React.FC<HeatmapProps> = ({process_name, imgcoords, keys}) => 
   }
 
   const {queryRecord, loading, error} = useQueryRecord<{ key: string; count: number }>(requestData);
+
+  const querymin = Math.min(...queryRecord.map(q => q.count));
+  const querymax = Math.max(...queryRecord.map(q => q.count));
+
   const queryMap = new Map(queryRecord.map((q) => [q.key, q.count]));
   if (loading || error)
     return <DrawExcept loading={loading} error={error}/>
@@ -129,7 +128,7 @@ const HeatmapSvg: React.FC<HeatmapProps> = ({process_name, imgcoords, keys}) => 
               y={key.y}
               width={key.w}
               height={key.h}
-              fill = {mixHslHex(fcolor, tcolor, Math.min(1, Math.max(0,((count - querymin) / (max - querymin)))))}
+              fill = {mixHslHex(fcolor, tcolor, logscaling(querymin, querymax, count))}
               stroke="#333"
             />
           </g>

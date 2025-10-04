@@ -82,7 +82,7 @@ function Gauge({ value, max }: { value: number; max: number }) {
     const countertextheight = 10;
     const e1 = createCircleAnimation(countercx, countercy, 80, 3, 0.9, 2.5);
     const e2 = createCircleAnimation(countercx, countercy, 103, 0.5, 0.9, 6);
-    const e3 = createCircleAnimation(countercx, countercy, 110, 1, 0.9, 2.7);
+    const e3 = createCircleAnimation(countercx, countercy, 110, 1.5, 0.9, 2.7);
     const c1 : CircleText = {
         cx : countercx, cy : countercy,
         height : countertextheight,
