@@ -1,14 +1,23 @@
 {
   "name": "Frontend DevContainer",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/.git/**": true,
+          "**/build/**": true
+        },
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
   "dockerComposeFile": ["../docker-compose.yml"],
   "service": "frontend",
   "workspaceFolder": "/app",
-  "remoteUser": "root",
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
-  },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
-  ]
+  "remoteUser": "root"
 }

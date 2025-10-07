@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { SelectPanelType } from "@/src/components/sidebar/SelectPanelType";
-import type { FormState, ValidFormState } from "@/src/types/interface";
+import type { ValidFormState } from "@/src/types/interface";
+import { Icon } from "@blueprintjs/core";
 
 export function ConfigPanel({ onCreatePanel }: {
   onCreatePanel: (validformstate: ValidFormState) => void }) {
@@ -11,8 +12,9 @@ export function ConfigPanel({ onCreatePanel }: {
     <div className="p-4 border rounded">
       <button
         onClick={() => setOpen(!open)}
-        className="sidebarbutton font-semibold"
+        className="sidebarbutton"
       >
+        <Icon icon="series-add" className="bp5-icon" />
         新しいパネル
       </button>
 

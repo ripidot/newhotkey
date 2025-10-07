@@ -41,6 +41,11 @@ html, body, #__next{
 }
 .sidebarbutton {
   background-color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 500; /* font-medium */
+  gap: 8px; /* テキストとアイコンの隙間 */
 }
 .sidebarbutton:hover {
   background-color: var(--color-primary-hover);
@@ -55,7 +60,34 @@ html, body, #__next{
   stroke: var(--color-graph);
 }
 .createinst{
+  font-size: 1400px;
+}
+.createlabel{
+  display: inline-flex;
+  align-items: center;
   font-size: 14px;
+  font-weight: 500; /* font-medium */
+  gap: 8px; /* テキストとアイコンの隙間 */
+}
+.sample-button-container{
+  display: flex;
+  flex-direction: column; /* 縦に並べる */
+  gap: 8px; /* ボタンの間隔をあける（任意） */
+
+}
+.sample-button{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* justify-content: flex-start;
+  padding-left: 20px; */
+  font-size: 14px;
+  font-weight: 500; /* font-medium */
+  padding: 10px 10px;
+  gap: 8px; /* テキストとアイコンの隙間 */
+}
+.sample-button:hover {
+  background-color: var(--color-primary-hover);
 }
 .testbox{
   font-family: var(--font-noto_sans);

@@ -55,7 +55,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
     <div className="w-full">
       {/* Datatype */}
       <div className="mb-4">
-        <label className="text-sm font-medium">表示データ</label>
+        <label className="createlabel">表示データ</label>
       <Select
         value={formState.datatype}
         onValueChange={(val : Formstring) => {
@@ -84,7 +84,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
       {/* duration */}
       {(formState.datatype === "時系列データ") && (
       <div className="mb-4">
-        <label className="text-sm font-medium">期間</label>
+        <label className="createlabel">期間</label>
           <Select
             value={formState.duration}
             onValueChange={(val : Formstring) => {
@@ -107,7 +107,9 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
 
       {/* Graph */}
       <div className="mb-4">
-        <label className="text-sm font-medium">グラフ</label>
+        <label className="createlabel">
+          グラフ
+        </label>
         <Select 
           value={formState.charttype}
           onValueChange={(val : Formstring) => handleChange("charttype", val)}>
@@ -128,7 +130,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
 
       {/* Processname */}
       <div className="mb-4">
-        <label className="text-sm font-medium">プロセス名</label>
+        <label className="createlabel">プロセス名</label>
         <Select 
           value={formState.processname} 
           onValueChange={(val : Formstring) => handleChange("processname", val)}>

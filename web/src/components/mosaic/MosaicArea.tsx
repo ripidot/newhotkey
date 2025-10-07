@@ -6,7 +6,7 @@ import { SplitButton } from "@/src/components/buttons/SplitButton";
 import { RemoveButton } from "@/src/components/buttons/RemoveButton";
 import { ExpandButton } from "@/src/components/buttons/ExpandButton";
 import type { PanelId, MosaicAreaProps} from  "@/src/types/interface";
-
+import {RemoveNanoId} from "@/src/lib/utils";
 
 export const MosaicArea: React.FC<MosaicAreaProps> = ({
   panelMap,
@@ -32,7 +32,7 @@ export const MosaicArea: React.FC<MosaicAreaProps> = ({
               }}
             >
               <div style={{ paddingLeft: "8px", fontWeight: "bold" }}>
-                {id}
+                {RemoveNanoId(id)}
               </div>
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <SplitButton {...props} />

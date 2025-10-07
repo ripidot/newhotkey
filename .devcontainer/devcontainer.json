@@ -1,7 +1,11 @@
+//devcontainer.jsonは"service"名を変えても子のdevcontainer.jsonは反映されない
+//全て親に記述するべき
+//特定の子コンテナのみに適応したい設定があったばあいは親のdevcontainer.jsonを恐らく書き換えることになる
+
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-docker-compose
 {
-	"name": "Existing Docker Compose (Extend)",
+	"name": "Fullstack DevContainer",
 
 	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
 	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
@@ -22,10 +26,10 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [3000, 8000, 5432],
 
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
-	"runServices": [] // docker-compose up したときにどのサービスを立ち上げるか, 未設定 -> compose.ymlのすべてのサービスが再起動
+	"runServices": [], // docker-compose up したときにどのサービスを立ち上げるか, 未設定 -> compose.ymlのすべてのサービスが再起動
 
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
@@ -34,8 +38,23 @@
 	// "postCreateCommand": "cat /etc/os-release",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
-
+	"customizations": {
+		"vscode": {
+		"settings": {
+			"files.watcherExclude": {
+			"**/node_modules/**": true,
+			"**/.git/**": true,
+			"**/build/**": true
+			},
+			"terminal.integrated.shell.linux": "/bin/bash"
+		},
+		"extensions": [
+			"dbaeumer.vscode-eslint",
+			"esbenp.prettier-vscode"
+		]
+		}
+	},
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
+	"remoteUser": "root"
 }

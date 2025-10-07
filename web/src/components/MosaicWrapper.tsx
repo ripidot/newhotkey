@@ -43,13 +43,13 @@ export default function MosaicWrapper() {
   const createPanelElement = (type: PanelType, id: PanelId): JSX.Element => {
     switch (type) {
       case "KeyboardBarChart":
-        return <KeyboardBarChart key={id} process_name={"Explorer.EXE"} aggcolumn={"key"}/>;
+        return <KeyboardBarChart key={id} process_name={""} aggcolumn={"key"}/>;
       case "KeyboardLineChart":
         return <KeyboardLineChart key={id} process_name={""} aggcolumn={"week"}/>;
       case "userSessions_all":
-        return <KeyboardBarChart key={id} process_name={"Explorer.EXE"} aggcolumn={"week"}/>;
+        return <KeyboardBarChart key={id} process_name={""} aggcolumn={"week"}/>;
       case "KeyboardCounter":
-        return <Counter key={id} process_name={"Explorer.EXE"} aggcolumn={"count"}/>;
+        return <Counter key={id} process_name={""} aggcolumn={"count"}/>;
       case "CircleGraph":
         return <CircleGraph key={id} />;
       case "KeyboardHeatmap":
@@ -112,12 +112,48 @@ export default function MosaicWrapper() {
     return layout;
   };
 
+  // パネルID配列から、横方向に等間隔配置するツリーを生成
+  function createHorizontalLayout(ids: string[]): any {
+    if (ids.length === 1) return ids[0];
+    const [first, ...rest] = ids;
+    return {
+      direction: "row",
+      first,
+      second: createHorizontalLayout(rest),
+    };
+  }
+
+  function createVerticalLayout(ids: string[]): any {
+    if (ids.length === 1) return ids[0];
+    const [first, ...rest] = ids;
+    return {
+      direction: "column",
+      first,
+      second: createVerticalLayout(rest),
+    };
+  }
+
+  function createGridLayout(ids: string[]): any {
+    if (ids.length === 0) return null;
+    if (ids.length === 1) return ids[0];
+
+    const cols = Math.ceil(Math.sqrt(ids.length));
+    const rows: any[] = [];
+
+    for (let i = 0; i < ids.length; i += cols) {
+      const rowIds = ids.slice(i, i + cols);
+      rows.push(createHorizontalLayout(rowIds));
+    }
+
+    return createVerticalLayout(rows);
+  }
+
   const [mosaicLayout, setMosaicLayout] = useState<MosaicNode<PanelId> | null>(
     null
-  );
+  ); // layout情報(uniqueIDのみで、パネルタイプはわからない)
   const [panelMap, setPanelMap] = useState<
     Record<PanelId, { type: PanelType; render: () => JSX.Element }>
-  >({});
+  >({}); // uniqueIDとpanelの種類の紐づけ
 
 
   const addPanel = useCallback(
@@ -205,6 +241,16 @@ export default function MosaicWrapper() {
     updateCoordsMap.current.forEach((fn) => fn());
   };
 
+  const alignPanel = () => {
+    const ids = Object.keys(panelMap);
+    if (ids.length === 0) return;
+    const newLayout = createGridLayout(ids); // または createVerticalLayout(ids)
+    setMosaicLayout(newLayout);
+  }
+  const checkSomething = () => {
+    console.log(panelMap);
+  }
+
   useEffect(() => {
     updateCoords();
     window.addEventListener("resize", updateCoords);
@@ -225,10 +271,6 @@ export default function MosaicWrapper() {
     return () => observer.disconnect();
   }, []);
 
-  const handleCreatePanel = (formstate: FormState) => {
-    // ここで mosaic に追加する処理を行う
-    console.log("データ伝達テスト:", formstate);
-  };
   return (
     <div className="flex flex-row w-full h-full">
       {/* サイドバー */}
@@ -237,8 +279,8 @@ export default function MosaicWrapper() {
           onAddPanel={addPanel}
           onCreatePanel={addPanelwithFormState}
           onUpdateCoords={updateCoords}
-          onCountTreeNodes={() => {}}
-          onCheckLog={() => {}}
+          onAlignBoard={alignPanel}
+          onCheckLog={checkSomething}
         />
       </div>
       {/* Mosaic */}
