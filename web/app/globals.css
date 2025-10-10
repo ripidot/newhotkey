@@ -4,7 +4,8 @@
 
 :root {
   --color-primary: #f8f8f8;
-  --color-semi_trans_primary: #f8f8f880;
+  --color-semi_trans_primary: #f8f8f840;
+  --color-mosaic-window-bg: #fff5;
   --color-primary-hover: #eaeaea;
   --color-secondary: #a0d9f8;
   --color-hex: #efeeff;
@@ -18,7 +19,10 @@
   --dashedbase:6px;
   --bratio:calc(var(--dashedblackratio) * var(--dashedbase));
   --tratio:calc(var(--dashedtransratio) * var(--dashedbase));
-  --btlength:calc((var(--dashedblackratio) + var(--dashedtransratio)) * var(--dashedbase))
+  --btlength:calc((var(--dashedblackratio) + var(--dashedtransratio)) * var(--dashedbase));
+  --countertextsize:34px;
+  --h1textsize:20px;
+  --h2textsize:16px;
 }
 
 html, body, #__next{
@@ -31,8 +35,8 @@ html, body, #__next{
 }
 .countertext{
   fill : var(--color-primary); /*fill : 色, stroke : 縁*/
-  font-family: var(--font-sans);
-  font-size: 34px;
+  font-family: var(--font-noto_sans);
+  font-size: var(--countertextsize);
   font-weight: 200;
 }
 .sidebar{
@@ -43,7 +47,7 @@ html, body, #__next{
   background-color: var(--color-primary);
   display: inline-flex;
   align-items: center;
-  font-size: 18px;
+  font-size: var(--h1textsize);
   font-weight: 500; /* font-medium */
   gap: 8px; /* テキストとアイコンの隙間 */
 }
@@ -62,17 +66,20 @@ html, body, #__next{
 .createinst{
   font-size: 1400px;
 }
-.createlabel{
+.create-label{
   display: inline-flex;
   align-items: center;
-  font-size: 14px;
+  font-size: var(--h1textsize);
   font-weight: 500; /* font-medium */
   gap: 8px; /* テキストとアイコンの隙間 */
+}
+.create-selection{
+  font-size: var(--h1textsize);
 }
 .sample-button-container{
   display: flex;
   flex-direction: column; /* 縦に並べる */
-  gap: 8px; /* ボタンの間隔をあける（任意） */
+  gap: 4px; /* ボタンの間隔をあける（任意） */
 
 }
 .sample-button{
@@ -81,7 +88,7 @@ html, body, #__next{
   justify-content: center;
   /* justify-content: flex-start;
   padding-left: 20px; */
-  font-size: 14px;
+  font-size: var(--h1textsize);
   font-weight: 500; /* font-medium */
   padding: 10px 10px;
   gap: 8px; /* テキストとアイコンの隙間 */
@@ -89,13 +96,13 @@ html, body, #__next{
 .sample-button:hover {
   background-color: var(--color-primary-hover);
 }
-.testbox{
+.vispanel{
   font-family: var(--font-noto_sans);
-  font-size: 14px;
+  font-size: var(--h2textsize);
   font-weight: 300;
   color: var(--color-gray);
 }
-.testbox p{
+.vispanel p{
   white-space: nowrap;
 }
 
@@ -177,7 +184,7 @@ html, body, #__next{
 }
 
 .mosaic-window{ 
-  background-color: #fff5 !important;
+  background-color: var(--color-semi_trans_primary) !important;
 }
 .mosaic-window-toolbar {
   background-color: #fff0 !important;

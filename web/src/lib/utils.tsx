@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { queryRecordKeys, QueryRecordKey, PanelType, Formstring, FormState, VisualizationType } from "@/src/types/interface";
-import { log } from "console";
+import { Layout, queryRecordKeys, QueryRecordKey, VisualizationType } from "@/src/types/interface";
+import type { LayoutKey } from "@/src/types/interface";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -27,7 +27,8 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
   g /= 255;
   b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0, l = (max + min) / 2;
+  let h = 0, s = 0
+  const l = (max + min) / 2;
 
   if (max !== min) {
     const d = max - min;
@@ -85,11 +86,11 @@ function interpolateHue(h1: number, h2: number, ratio: number): number {
   }
   return (h1 + delta * ratio + 360) % 360;
 }
-// 🔹 Hueを360°ラップで最短経路補間する関数
-function clockwiseHue(h1: number, h2: number, ratio: number): number {
-  let delta = h2 - h1;
-  return (h1 + delta * ratio + 360) % 360;
-}
+// 🔹 Hueを時計回りで最短経路補間する関数
+// function clockwiseHue(h1: number, h2: number, ratio: number): number {
+//   let delta = h2 - h1;
+//   return (h1 + delta * ratio + 360) % 360;
+// }
 
 // HSL補間 + HEX出力（Hueはラップ補間）
 export function mixHslHex(hex1: string, hex2: string, ratio: number): string {
@@ -163,11 +164,11 @@ export function ReturnProcessNameforCounter({
   );
 }
 
-export function DrawExcept({ loading, error }: { loading: boolean, error: Error | null }){
+export function DrawExcept({ loading, error }: { loading: boolean, error: unknown }){
   if (loading) { // 非同期処理のためのロード中の処理
     return <p>Loading...</p>;
   }
-  if (error) {
+  if (error instanceof Error) {
     return <p>Error: {error.message}</p>;
   }
 }
@@ -192,4 +193,23 @@ export const ThinSeriesAdd: React.FC<React.SVGProps<SVGSVGElement>> = (props) =>
 export function RemoveNanoId(uid: string){
   const name = uid.split("-")[0];
   return name;
+}
+// function isLeaf(layout: Layout): layout is string {
+//   return typeof layout === "string";
+// }
+
+export function getLayoutByPath(layout: Layout | null, path: LayoutKey[]): string {
+  if (!layout) throw new Error("invalid input");
+  let current = layout;
+
+  for (const key of path) {
+    console.log("current: ", current, ", key: ", key);
+    if ((typeof current !== "string"))
+      if ((key in current)) {
+        current = current[key]; // ここで安全にアクセスできる
+     }else throw new Error("pass key to leaf")
+  }
+  if (typeof current === "string")
+    return String(current);
+  throw new Error("invalid input");
 }

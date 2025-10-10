@@ -4,7 +4,7 @@ import type { QueryRequest } from "@/src/types/interface";
 export function useQueryRecord<T>(requestData: QueryRequest) {
   const [queryRecord, setQueryRecord] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     console.log("in useEffect");
@@ -26,7 +26,7 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
 
         const data = await response.json();
         setQueryRecord(data.results);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err);
       } finally {
         setLoading(false);

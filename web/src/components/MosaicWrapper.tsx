@@ -13,7 +13,7 @@ import Hexagon from "@/src/components/effect/Hexagon";
 import { MosaicArea } from "@/src/components/mosaic/MosaicArea";
 
 import { isQueryRecordKey } from "@/src/lib/utils";
-import type { FormState, PanelId, PanelType, QueryRecordKey, ValidFormState } from "@/src/types/interface";
+import type { PanelInfo, Layout, PanelId, PanelType, QueryRecordKey, ValidFormState } from "@/src/types/interface";
 
 export default function MosaicWrapper() {
   const updateCoordsMap = useRef<Map<string, () => void>>(new Map());
@@ -112,48 +112,43 @@ export default function MosaicWrapper() {
     return layout;
   };
 
-  // パネルID配列から、横方向に等間隔配置するツリーを生成
-  function createHorizontalLayout(ids: string[]): any {
-    if (ids.length === 1) return ids[0];
-    const [first, ...rest] = ids;
-    return {
-      direction: "row",
-      first,
-      second: createHorizontalLayout(rest),
-    };
+// 横方向に再帰的に並べる
+function createHorizontalLayout(ids: string[]): Layout {
+  if (ids.length === 1) return ids[0];
+  const [first, ...rest] = ids;
+  return { direction: "row", first, second: createHorizontalLayout(rest) };
+}
+
+// 縦方向に再帰的に並べる
+function createVerticalLayout(layouts: Layout[]): Layout {
+  if (layouts.length === 1) return layouts[0];
+  const [first, ...rest] = layouts;
+  return { direction: "column", first, second: createVerticalLayout(rest) };
+}
+
+// グリッド状に配置
+function createGridLayout(ids: string[]): Layout | null {
+  if (ids.length === 0) return null;
+  if (ids.length === 1) return ids[0];
+
+  const cols = Math.ceil(Math.sqrt(ids.length));
+  const rows: Layout[] = [];
+
+  for (let i = 0; i < ids.length; i += cols) {
+    const rowIds = ids.slice(i, i + cols);
+    rows.push(createHorizontalLayout(rowIds));
   }
 
-  function createVerticalLayout(ids: string[]): any {
-    if (ids.length === 1) return ids[0];
-    const [first, ...rest] = ids;
-    return {
-      direction: "column",
-      first,
-      second: createVerticalLayout(rest),
-    };
-  }
+  return createVerticalLayout(rows);
+}
 
-  function createGridLayout(ids: string[]): any {
-    if (ids.length === 0) return null;
-    if (ids.length === 1) return ids[0];
-
-    const cols = Math.ceil(Math.sqrt(ids.length));
-    const rows: any[] = [];
-
-    for (let i = 0; i < ids.length; i += cols) {
-      const rowIds = ids.slice(i, i + cols);
-      rows.push(createHorizontalLayout(rowIds));
-    }
-
-    return createVerticalLayout(rows);
-  }
-
-  const [mosaicLayout, setMosaicLayout] = useState<MosaicNode<PanelId> | null>(
-    null
-  ); // layout情報(uniqueIDのみで、パネルタイプはわからない)
+ // layout情報(uniqueIDのみで、パネルタイプはわからない)
+  const [mosaicLayout, setMosaicLayout] = useState<MosaicNode<PanelId> | null>
+  ( null );
+// uniqueIDとpanelの種類の紐づけ
   const [panelMap, setPanelMap] = useState<
-    Record<PanelId, { type: PanelType; render: () => JSX.Element }>
-  >({}); // uniqueIDとpanelの種類の紐づけ
+    Record<PanelId, PanelInfo>
+  >({});
 
 
   const addPanel = useCallback(
@@ -248,7 +243,8 @@ export default function MosaicWrapper() {
     setMosaicLayout(newLayout);
   }
   const checkSomething = () => {
-    console.log(panelMap);
+    console.log("panelMap: ", panelMap);
+    console.log("mosaicLayout: ", mosaicLayout);
   }
 
   useEffect(() => {
@@ -260,7 +256,7 @@ export default function MosaicWrapper() {
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setSize({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
@@ -274,7 +270,7 @@ export default function MosaicWrapper() {
   return (
     <div className="flex flex-row w-full h-full">
       {/* サイドバー */}
-      <div className="w-56 flex h-full">
+      <div className="w-70 flex h-full">
         <Sidebar
           onAddPanel={addPanel}
           onCreatePanel={addPanelwithFormState}
@@ -288,6 +284,7 @@ export default function MosaicWrapper() {
         <Hexagon size={size}/>
         <MosaicArea
           panelMap={panelMap}
+          setPanelMap={setPanelMap}
           mosaicLayout={mosaicLayout}
           setMosaicLayout={setMosaicLayout}
         />

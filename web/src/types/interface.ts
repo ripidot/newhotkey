@@ -59,15 +59,31 @@ export type PanelType =
   | "CircleGraph"
   | "Error";
 
+export type LayoutKey = "first" | "second";
+
+export type Layout =
+  | string
+  | { direction: "row" | "column"; first: Layout; second: Layout };
+
+export type PanelInfo = {
+  type: PanelType;
+  render: () => JSX.Element;
+};
+
 export interface Position {
   x: number;
   y: number;
   w: number;
   h: number;
 }
+
 export interface KeyPosition extends Position {
   label: string;
 }
+export type ImgCoords = { left: number; top: number; w: number; h: number };
+export type HeatmapLabelProps = {
+  imgcoords: { left: number; top: number; w: number; h: number };
+};
 
 export type HeatmapProps = {
   process_name: string;
@@ -76,11 +92,11 @@ export type HeatmapProps = {
 };
 
 export type MosaicAreaProps = {
-  panelMap: Record<PanelId, {render: () => JSX.Element;}>;
+  panelMap: Record<PanelId, PanelInfo>;
+  setPanelMap: React.Dispatch<React.SetStateAction<Record<PanelId, PanelInfo>>>;
   mosaicLayout: MosaicNode<PanelId> | null;
-  setMosaicLayout: (layout: MosaicNode<PanelId> | null) => void;
+  setMosaicLayout: React.Dispatch<React.SetStateAction<MosaicNode<PanelId> | null>>;
 };
-
 export interface CircleAnimation {
   cx: number;
   cy: number;

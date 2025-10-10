@@ -37,13 +37,33 @@ function Graph<T extends QueryRecordKey>({ process_name, aggcolumn }: { process_
   if (error) return <DrawExcept loading={false} error={error} />;
 
   return (
-  <div className="testbox space-y-4">
+  <div className="vispanel space-y-4">
     <ReturnProcessName aggcolumn={aggcolumn} process_name={process_name} vtype={"graph"} />
       <LineChart width={300} height={200} data={queryRecord}>
-        <XAxis dataKey={aggcolumn} tickFormatter={(value: string) => value.split("T")[0]}/>
+        <XAxis dataKey={aggcolumn} tickFormatter={(value: string) => {
+          if (["day", "week", "month"].includes(aggcolumn)) {
+            const datePart = value.split("T")[0];
+            const [, month, day] = datePart.split("-");
+            return `${month}/${day}`;
+          }
+          return value;
+        }} />
         <YAxis />
-        <Tooltip />
-        <Line style={{stroke: "var(--color-graph)"}} type="linear" dataKey="count"/>
+          <Tooltip
+            labelFormatter={(value: string) => {
+              if (["day", "week", "month"].includes(aggcolumn)) {
+                const datePart = value.split("T")[0];
+                const [, month, day] = datePart.split("-");
+                return `${month}/${day}`;
+              }else if(["process_name", "key"].includes(aggcolumn)){
+                const vkPart = value.replace(/^VK_/, "");
+                return vkPart;
+              }
+              return value;
+            }}
+            formatter={(value: number) => [`${value}回`]}
+          />
+        <Line dataKey="count" style={{stroke: "var(--color-graph)"}} type="linear"/>
       </LineChart>
     </div>
   );

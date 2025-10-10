@@ -55,7 +55,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
     <div className="w-full">
       {/* Datatype */}
       <div className="mb-4">
-        <label className="createlabel">表示データ</label>
+      <label className="create-label">表示データ</label>
       <Select
         value={formState.datatype}
         onValueChange={(val : Formstring) => {
@@ -69,7 +69,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
         }}
       >
         <SelectTrigger>
-          <SelectValue placeholder="カテゴリを選択" />
+          <SelectValue className = "create-selection" placeholder="カテゴリを選択" />
         </SelectTrigger>
         <SelectContent>
           {categories.map((cat) => (
@@ -84,7 +84,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
       {/* duration */}
       {(formState.datatype === "時系列データ") && (
       <div className="mb-4">
-        <label className="createlabel">期間</label>
+        <label className="create-label">期間</label>
           <Select
             value={formState.duration}
             onValueChange={(val : Formstring) => {
@@ -107,7 +107,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
 
       {/* Graph */}
       <div className="mb-4">
-        <label className="createlabel">
+        <label className="create-label">
           グラフ
         </label>
         <Select 
@@ -130,7 +130,7 @@ function isValidFormState(fs: FormState): fs is ValidFormState {
 
       {/* Processname */}
       <div className="mb-4">
-        <label className="createlabel">プロセス名</label>
+        <label className="create-label">プロセス名</label>
         <Select 
           value={formState.processname} 
           onValueChange={(val : Formstring) => handleChange("processname", val)}>

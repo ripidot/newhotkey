@@ -1,12 +1,12 @@
 // src/components/panels/Counter.tsx
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import type { QueryRequest } from "@/src/types/interface";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useQueryRecord } from "@/src/hooks/useQueryRecord";
 import type { CircleAnimation, CircleText} from "@/src/types/interface";
 import { ReturnProcessName, DrawExcept } from "@/src/lib/utils";
-import type { QueryRecordKey, QueryResult } from "@/src/types/interface";
+import type { QueryRecordKey } from "@/src/types/interface";
 
 // CounterGraphをファイル分割しているが、これは再生成を防ぐため
 // react-mosaicがリサイズを検知すると
@@ -51,7 +51,7 @@ export function CounterGraph<T extends QueryRecordKey>({ process_name, aggcolumn
         return <DrawExcept loading={loading} error={error}/>
 
     return (
-        <div className="testbox space-y-4">
+        <div className="vispanel space-y-4">
         <ReturnProcessName aggcolumn={aggcolumn} process_name={process_name} vtype={"counter"} />
 
         {queryRecord[0].count !== null ? (
@@ -64,7 +64,7 @@ export function CounterGraph<T extends QueryRecordKey>({ process_name, aggcolumn
 }
 
 
-function Gauge({ value, max }: { value: number; max: number }) {
+function Gauge({ value }: { value: number; max: number }) {
     //// カウンタ
     const numberProgress = useMotionValue(0);
     const gaugeProgress = useMotionValue(0);

@@ -1,16 +1,13 @@
-import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
-  webpack(config, { isServer }) {
-    // Watch optionsを追加してホットリロードを改善
-    if (!isServer) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
+import type { Configuration as WebpackDevMiddlewareConfig } from 'webpack-dev-middleware'
+
+module.exports = {
+  webpack: (config : WebpackDevMiddlewareConfig) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules'],
+      aggregateTimeout: 300,
+      poll: 5000
     }
     return config;
-  },
-};
-
-export default nextConfig;
+  }
+}

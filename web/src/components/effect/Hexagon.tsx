@@ -21,7 +21,7 @@ interface HexagonProps {
   let cells: HexCell[] = [];
   
   const overlapratio = 1; // hex同士のx方向の重なり具合
-  const radius =  60; // hexのradius
+  const radius =  80; // hexのradius
   const hexmargin = radius / 20; // hex同士のmargin
 
   const initx = - (radius / 2) - Math.ceil(rand.x * (radius) / 2);

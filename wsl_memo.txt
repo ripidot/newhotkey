@@ -12,3 +12,12 @@ wsl -d Ubuntu userの起動
 
 make code
 make up
+
+# WSL Ubuntu 内で
+cd /home/user/newhotkey/web
+sudo chown -R user:user .
+
+# vscode でalphineが選ばれてしまうとき
+wsl --set-default Ubuntu
+Dev Containers: Close Remote Connection
+Connect to WSL

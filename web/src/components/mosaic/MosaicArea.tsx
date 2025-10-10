@@ -5,11 +5,12 @@ import "react-mosaic-component/react-mosaic-component.css";
 import { SplitButton } from "@/src/components/buttons/SplitButton";
 import { RemoveButton } from "@/src/components/buttons/RemoveButton";
 import { ExpandButton } from "@/src/components/buttons/ExpandButton";
-import type { PanelId, MosaicAreaProps} from  "@/src/types/interface";
-import {RemoveNanoId} from "@/src/lib/utils";
+import type { PanelId, MosaicAreaProps} from "@/src/types/interface";
+import { getLayoutByPath, RemoveNanoId } from "@/src/lib/utils";
 
 export const MosaicArea: React.FC<MosaicAreaProps> = ({
   panelMap,
+  setPanelMap,
   mosaicLayout,
   setMosaicLayout,
 }) => {
@@ -37,12 +38,22 @@ export const MosaicArea: React.FC<MosaicAreaProps> = ({
               <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <SplitButton {...props} />
                 <ExpandButton {...props} />
-                <RemoveButton {...props} />
+                <RemoveButton path={path} 
+                onClick={() => {
+                  setPanelMap((prev) => {
+                    const newPanelMap = { ...prev };
+                    console.log("path: ", path);
+                    const uid = getLayoutByPath(mosaicLayout, path);
+                    delete newPanelMap[uid];
+                    return newPanelMap;
+                  });
+                }}
+                />
               </div>
             </div>
           )}
         >
-          <div className="testbox space-y-4 p-4 bg-[#ffffff00]" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <div className="vispanel space-y-4 p-4" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             {panelMap[id]?.render() || <div>パネルが見つかりません</div>}
           </div>
         </MosaicWindow>

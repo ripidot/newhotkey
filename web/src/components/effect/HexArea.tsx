@@ -7,7 +7,7 @@ export default function HexArea() {
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setSize({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
