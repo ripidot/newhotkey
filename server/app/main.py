@@ -28,7 +28,7 @@ app.include_router(query_router.router)
 init_db()
 
 # テスト
-@app.get("/")
+@app.get("/", tags=["Root"])
 def root():
     return {"message": "API is running"}
 
