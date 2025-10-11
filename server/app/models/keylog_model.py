@@ -1,6 +1,6 @@
 # keylog_model.py
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueConstraint
-from models.base import Base
+from .base import Base
 from sqlalchemy.orm import relationship
 
 class KeyLog(Base):

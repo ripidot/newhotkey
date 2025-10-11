@@ -1,31 +1,51 @@
 # main.py
-from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
-from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, func, cast, select, asc, desc
-
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
-from sqlalchemy.exc import IntegrityError
+# ============================================================
+# 標準ライブラリ
+# ============================================================
+import os
+import sys
+import time
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
-import uvicorn
-from werkzeug.security import generate_password_hash, check_password_hash
 
-from jose import JWTError, jwt
+# ============================================================
+# サードパーティ（外部）ライブラリ
+# ============================================================
+from dotenv import load_dotenv
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from werkzeug.security import generate_password_hash, check_password_hash
+from pydantic import BaseModel
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    ForeignKey,
+    func,
+    cast,
+    select,
+    asc,
+    desc,
+)
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
+from sqlalchemy.exc import IntegrityError, OperationalError
+import uvicorn
 
-from dotenv import load_dotenv
-import time
-from sqlalchemy.exc import OperationalError
-
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 1)))) # pythonpath設定で解消
+# ============================================================
+# アプリ内（自作モジュール）
+# ============================================================
 from models.base import Base
 from models.user_model import User
 from models.keylog_model import KeyLog
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 1)))) # pythonpath設定で解消
+
 
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -80,7 +100,6 @@ app.add_middleware(
     allow_headers=["*"],  # 全てのHTTPヘッダーを許可
 )
 
-
 # --------------------
 # Pydanticモデル
 # --------------------
@@ -110,24 +129,6 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
-class KeyLogResponse(BaseModel):
-    id: int
-    session_id: Optional[str]
-    sequence_id: Optional[int]
-    timestamp: Optional[datetime]
-    key: Optional[str]
-    modifiers: Optional[str]
-    window_title: Optional[str]
-    process_name: Optional[str]
-    user_id: Optional[int]
-
-    class Config:
-        orm_mode = True
-
-class WeeklyCountResponse(BaseModel):
-    week_start: str
-    count: int
-
 class SentFlagUpdate(BaseModel):
     ids: list[int]
     sent_flag: int
@@ -135,8 +136,6 @@ class SentFlagUpdate(BaseModel):
 class FailedLog(BaseModel):
     id: int
     reason: str
-class CountResponse(BaseModel):
-    count: int
 
 class OrderByClause(BaseModel):
     field: str   # "user_id" や "count"
@@ -153,14 +152,6 @@ class Reqtest(BaseModel):
     order_by: Optional[List[OrderByClause]] = None
     limit: Optional[int] = None
 
-class QueryRequest(BaseModel):
-    table: str                      # 対象テーブル
-    select: List[str]               # 欲しいカラム
-    where: Optional[dict] = None    # 条件 (key: column, value: 条件値)
-    group_by: Optional[List[str]] = None
-    aggregates: Optional[List[AggregateClause]] = None
-    order_by: Optional[List[OrderByClause]] = None
-    limit: Optional[int] = None
 # --------------------
 # DBsession
 # --------------------
@@ -256,95 +247,6 @@ def update_sent_flag(data: SentFlagUpdate, db: Session = Depends(get_db)):
         .update({"sent_flag": data.sent_flag}, synchronize_session=False)
     db.commit()
     return {"status": "success", "updated_count": len(data.ids)}
-# {
-#   "select": [
-#     "key"
-#   ],
-#   "where": {"process_name" : "Explorer.EXE"},
-#   "group_by": [
-#     "key"
-#   ],
-#   "aggregates": [
-#     {"func": "count", "alias": "cnt"},
-#     {"func": "avg", "field": "id", "alias": "avg_duration"},
-#     {"func": "max", "field": "id", "alias": "max_duration"}
-#   ],
-#   "order_by": [
-#     {
-#       "field": "count",
-#       "direction": "desc"
-#     }
-#   ],
-#   "limit":10
-# }
-@app.get("/querytest4", response_model=List[WeeklyCountResponse])
-def read_keylogs(db: Session = Depends(get_db)):
-    results = (
-        db.query(
-            func.date_trunc('week', cast(KeyLog.timestamp, DateTime)).label('week_start'),
-            func.count().label('count')
-        )
-        .filter(KeyLog.process_name == "Explorer.EXE")
-        .group_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
-        .order_by(func.date_trunc('week', cast(KeyLog.timestamp, DateTime)))
-        .all()
-    )
-
-    return [
-        {"week_start": week_start.isoformat(), "count": count}
-        for week_start, count in results
-    ]
-
-
-@app.post("/posttest")
-def count_all(req: Reqtest, db: Session = Depends(get_db)):
-    stmt = select(*[getattr(KeyLog, col) for col in req.select]).select_from(KeyLog)
-    count_expr = func.count().label("count")
-
-    agg_exprs = {}
-    if req.aggregates:
-        for agg in req.aggregates:
-            if agg.func == "count":
-                expr = func.count().label(agg.alias)
-            else:
-                col = getattr(KeyLog, agg.field)
-                if agg.func == "sum":
-                    expr = func.sum(col).label(agg.alias)
-                elif agg.func == "avg":
-                    expr = func.avg(col).label(agg.alias)
-                elif agg.func == "max":
-                    expr = func.max(col).label(agg.alias)
-                elif agg.func == "min":
-                    expr = func.min(col).label(agg.alias)
-                else:
-                    raise ValueError(f"Unsupported aggregate: {agg.func}")
-            agg_exprs[agg.alias] = expr
-            stmt = stmt.add_columns(expr)
-
-    if req.where:
-        for field, value in req.where.items():
-            stmt = stmt.where(getattr(KeyLog, field) == value)
-    if req.group_by:
-        stmt = stmt.group_by(*[getattr(KeyLog, col) for col in req.group_by])
-# func.date_trunc('week', KeyLog.timestamp)
-    if req.order_by:
-        order_clauses = []
-        for ob in req.order_by:
-            if ob.field == "count":
-                col = count_expr
-            else:
-                col = getattr(KeyLog, ob.field)
-            if ob.direction.lower() == "asc":
-                order_clauses.append(asc(col))
-            else:
-                order_clauses.append(desc(col))
-        stmt = stmt.order_by(*order_clauses)
-    
-    if req.limit:
-        stmt = stmt.limit(req.limit)
-
-    results = db.execute(stmt).all()
-    return {"results": [dict(row._mapping) for row in results]}
 
 
 @app.post("/postall")
@@ -416,12 +318,6 @@ def count_all(req: Reqtest, db: Session = Depends(get_db)):
     results = db.execute(stmt).all()
     return {"results": [dict(row._mapping) for row in results]}
 
-
-@app.get("/countall", response_model=CountResponse)
-def read_keylogs(db: Session = Depends(get_db)):
-    stmt = select(func.count()).select_from(KeyLog)
-    count = db.scalar(stmt)
-    return {"count": count}
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

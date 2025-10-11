@@ -14,7 +14,7 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
       setError(null);
 
       try {
-        const response = await fetch("http://localhost:8000/postall", {
+        const response = await fetch("http://localhost:8000/query/postall", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestData),
