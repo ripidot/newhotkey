@@ -9,6 +9,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",                 # 開発用
     "https://newhotkey-8brf.vercel.app",     # 本番用（Vercelのドメイン）
+    "https://newhotkey.onrender.com",        # renderのドメイン
 ]
 
 app.add_middleware(
@@ -25,6 +26,11 @@ app.include_router(query_router.router)
 
 # DB初期化
 init_db()
+
+# テスト
+@app.get("/")
+def root():
+    return {"message": "API is running"}
 
 # ローカル開発用
 if __name__ == "__main__":
