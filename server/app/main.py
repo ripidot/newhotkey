@@ -7,9 +7,9 @@ app = FastAPI()
 
 # CORS設定
 origins = [
-    "http://localhost:3000",                 # 開発用
-    "https://newhotkey-8brf.vercel.app",     # 本番用（Vercelのドメイン）
-    "https://newhotkey.onrender.com",        # renderのドメイン
+    "http://localhost:3000", # 開発用
+    "https://newhotkey.vercel.app", # vercelのドメイン
+    "https://newhotkey.onrender.com", # renderのドメイン
 ]
 
 app.add_middleware(
