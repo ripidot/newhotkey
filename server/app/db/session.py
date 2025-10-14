@@ -12,7 +12,11 @@ def init_db():
     retries = 5
     while retries > 0:
         try:
-            engine = create_engine(DATABASE_URL)
+            engine = create_engine(
+                DATABASE_URL,
+                pool_pre_ping=True,  # 死んだコネクションを検出して再接続
+                poolclass=NullPool,  # 毎回新しい接続を張る（Neon向け）
+            )
             connection = engine.connect()
             connection.close()
             SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
