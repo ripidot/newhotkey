@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.config import DATABASE_URL
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.pool import NullPool
+from app.core.config import DATABASE_URL
 import time
 
 engine = None
@@ -14,8 +15,8 @@ def init_db():
         try:
             engine = create_engine(
                 DATABASE_URL,
-                pool_pre_ping=True,  # 死んだコネクションを検出して再接続
-                poolclass=NullPool,  # 毎回新しい接続を張る（Neon向け）
+                pool_pre_ping=True,   # 死んだコネクションを検出して再接続
+                poolclass=NullPool,   # 毎回新しい接続を張る（Neon向け）
             )
             connection = engine.connect()
             connection.close()
