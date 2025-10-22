@@ -166,7 +166,7 @@ export function ReturnProcessNameforCounter({
 
 export function DrawExcept({ loading, error }: { loading: boolean, error: unknown }){
   if (loading) { // 非同期処理のためのロード中の処理
-    return <p>Loading...</p>;
+    return <p>Loading...しばらく待って更新されない場合はページをリロードしてください。</p>;
   }
   if (error instanceof Error) {
     return <p>Error: {error.message}</p>;

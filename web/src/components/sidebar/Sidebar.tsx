@@ -42,13 +42,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onCreatePanel, onU
       </div>
       <div className="align text-center">
         <button onClick={() => onUpdateCoords()} title="Update Coords">
-          ✨
         </button>
         <button onClick={() => onAlignBoard()} title="Count Nodes">
-          🔑
         </button>
         <button onClick={() => onCheckLog()} title="Check log">
-          📃
         </button>
       </div>
     </aside>
