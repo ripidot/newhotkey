@@ -24,8 +24,8 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        setQueryRecord(data.results);
+        const jresponse = await response.json();
+        setQueryRecord(jresponse.data);
       } catch (err: unknown) {
         setError(err);
       } finally {
