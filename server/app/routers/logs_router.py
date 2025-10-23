@@ -116,5 +116,5 @@ def count_all(req: Reqtest, db: Session = Depends(get_db)):
     try: 
         data = db.execute(stmt).all()
     except Exception as e:
-        return {"success": False, "data" : null, "error": str(e)}
-    return {"success": True, "data": [dict(row._mapping) for row in data], "error": null}
+        return {"success": False, "data" : None, "error": str(e)}
+    return {"success": True, "data": [dict(row._mapping) for row in data], "error": None}
