@@ -14,7 +14,7 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
       setError(null);
 
       try {
-        const response = await fetch("https://newhotkey.onrender.com/query/postall", {
+        const response = await fetch("https://newhotkey.onrender.com/logs/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestData),

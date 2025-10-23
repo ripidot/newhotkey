@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import init_db
-from app.routers import user_router, keylog_router, query_router
+from app.routers import user_router, logs_router
 
 app = FastAPI()
 
@@ -21,8 +21,7 @@ app.add_middleware(
 )
 # ルータ登録
 app.include_router(user_router.router)
-app.include_router(keylog_router.router)
-app.include_router(query_router.router)
+app.include_router(logs_router.router)
 
 # DB初期化
 init_db()
