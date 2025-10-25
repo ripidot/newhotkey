@@ -22,7 +22,9 @@
   <a href="https://nextjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" height="50px;" /></a>
   <a href="https://ja.reactjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" height="50px;" /></a>
   <a href="https://vercel.com/"><img src="https://user-images.githubusercontent.com/65433193/118944114-3b393980-b98f-11eb-84a5-fc9a1db8ea6b.png" height="50px;" /></a
-</p><br />
+</p>
+
+<br/>
 
 ## Concept
 普段なにげなく使っているキーボードですが、<br/>
@@ -31,7 +33,8 @@
 保存した押下ログを可視化するwebサイトです。<br/>
 
 どのアプリでどのキーをよく使っていたか、<br/>
-キーの押下ログと共に過去の自分を振り返ることができます。<br/>
+キーの押下ログと共に過去の自分を振り返ることができます。
+<br/>
 
 ## DataFlow
 ![DFDコピー](https://github.com/user-attachments/assets/cf47daa4-8571-4175-a9ba-766c3e713554)
@@ -44,6 +47,7 @@
 - フロントエンドでのユーザー入力に応じた、FastAPIでの動的な集計系クエリ生成
 - Docker composeを用いたフロントエンド/バックエンド/DBの一元管理
 - Vercelでフロントエンド、RenderでFastAPI、NeonでDBをホスト
+<br/>
   
 ## 開発全体で悩んだ点
 - TypeScriptでよく使われる関数式の使い方
@@ -52,6 +56,7 @@
 - 使用メモリを削減しつつDockerでコンテナを立てるための環境設定
 - SQLインジェクション対策と動的なクエリ生成の両立
 - I/OスパイクによるDBレコードの消失と復元、原因の特定
+<br/>
 
 ## 今後の改善点
 https://github.com/ripidot/newhotkey/issues/14
