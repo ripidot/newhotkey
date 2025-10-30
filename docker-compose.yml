@@ -16,8 +16,8 @@ services:
       # - NODE_ENV=development # next.jsが開発モードで起動
       - NODE_ENV=production # next.jsが本番モードで起動
       - NODE_OPTIONS=--max-old-space-size=2048 # memoryサイズの制御
-    command: npm run dev
-    # command: sh -c "npm run build && npm run start"
+    # command: npm run dev
+    command: sh -c "npm run build && npm run start"
     # depends_on:
     #   - backend
 
