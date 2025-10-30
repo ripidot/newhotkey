@@ -16,10 +16,10 @@ services:
       # - NODE_ENV=development # next.jsが開発モードで起動
       - NODE_ENV=production # next.jsが本番モードで起動
       - NODE_OPTIONS=--max-old-space-size=2048 # memoryサイズの制御
-    # command: npm run dev
-    command: sh -c "npm run build && npm run start"
-    depends_on:
-      - backend
+    command: npm run dev
+    # command: sh -c "npm run build && npm run start"
+    # depends_on:
+    #   - backend
 
   backend:
     build: ./server
@@ -50,6 +50,6 @@ services:
   #       max-file: "3"
 
 volumes:
-  dbdata: # named mount宣言に必要
+  # dbdata: # named mount宣言に必要
   next_next:
   next_node_modules:

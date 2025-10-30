@@ -1,9 +1,18 @@
 FROM node:18
 
 WORKDIR /app
+ARG BUILD_ENV=development
+# ARG BUILD_ENV=production
 
-# package.json, package-lock.json だけを先にコピーしてキャッシュを活用
 COPY package*.json ./
+
+
+# RUN if [ "${BUILD_ENV}" = "development" ]; then \
+#         npm install; \
+#     else \
+#         npm install; \
+#     fi
+
 RUN npm install
 
 # 開発環境のみ
