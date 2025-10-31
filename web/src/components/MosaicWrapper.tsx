@@ -6,7 +6,6 @@ import { Sidebar } from "@/src/components/sidebar/Sidebar";
 import { KeyboardBarChart } from "@/src/components/panels/KeyboardBarChart";
 import { KeyboardLineChart } from "@/src/components/panels/KeyboardLineChart";
 import { Counter } from "@/src/components/panels/Counter";
-import { CircleGraph } from "@/src/components/panels/CircleGraph";
 import { KeyboardHeatmap } from "@/src/components/panels/KeyboardHeatmap";
 
 import Hexagon from "@/src/components/effect/Hexagon";
@@ -50,8 +49,6 @@ export default function MosaicWrapper() {
         return <KeyboardBarChart key={id} process_name={""} aggcolumn={"week"}/>;
       case "KeyboardCounter":
         return <Counter key={id} process_name={""} aggcolumn={"count"}/>;
-      case "CircleGraph":
-        return <CircleGraph key={id} />;
       case "KeyboardHeatmap":
         return (
           <KeyboardHeatmap
@@ -79,8 +76,6 @@ export default function MosaicWrapper() {
         
         case "KeyboardCounter":
           return <Counter key={id} process_name={ process_name } aggcolumn={"count"}/>;
-        case "CircleGraph":
-          return <CircleGraph key={id} />;
         case "KeyboardHeatmap":
           return (
             <KeyboardHeatmap
