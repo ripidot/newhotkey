@@ -1,0 +1,13 @@
+python server.py でserverを起動
+client.pyでリクエストを送信 or git bashから利用 or docsから操作
+
+# token取得
+# curl -s -X POST http://127.0.0.1:8000/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=saburo&password=pass123"
+
+# post
+# curl -s -X POST "http://127.0.0.1:8000/logs" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWJ1cm8iLCJleHAiOjE3NTM0NDU2NzN9.2X4E5paEKO_VSEoQTnTwFQscWR1uWz5XgMCCEwGkZes" -H "Content-Type: application/json" -d '{"message": "send after loggin", "user_id": 3}'
+
+# http://127.0.0.1:8000/docs にアクセス
+
+登録されているuser情報は同ディレクトリのdbファイルから確認
+登録は/userで行う

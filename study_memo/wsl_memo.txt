@@ -1,0 +1,23 @@
+wsl # wsl の起動
+
+# ==========================================
+code ~/projects/newhotkey # 直接起動
+or
+cd ~/projects/newhotkey # 移動後起動
+code .
+# ==========================================
+
+wsl -l -v ユーザの確認
+wsl -d Ubuntu userの起動
+
+make code
+make up
+
+# WSL Ubuntu 内で
+cd /home/user/newhotkey/web
+sudo chown -R user:user .
+
+# vscode でalphineが選ばれてしまうとき
+wsl --set-default Ubuntu
+Dev Containers: Close Remote Connection
+Connect to WSL

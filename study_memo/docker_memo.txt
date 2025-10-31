@@ -1,0 +1,40 @@
+Dockerfileと.dockerignoreはビルド時に参照するファイル
+.dockerignoreはDockerfileのCOPYやADDコマンドの対象から制限する
+
+docker-compose.ymlはボリュームのマウント時に参照するファイル
+ファイル内のマウント設定に沿ってマウントする
+
+commandに関してもDockerfileは優先度が低く、docker-compose.ymlは優先度が高い
+
+docker compose exec -it frontend bash: bashでfrontendへ入る
+
+docker compose exec db psql -U user -d mydb: userでmydbに入りsql操作
+
+docker compose down -v: cacheなしで停止
+docker compose up --build: cacheなしビルド
+
+docker exec -it newhotkey-db-1 pg_dump -U user -d mydb -F c -f /tmp/backup.dump: バックアップの作成, コンテナ内のtmpフォルダに作成
+docker exec -it newhotkey-db-1 pg_restore -U user -d mydb_restore /tmp/backup.dump: バックアップを基にした復元
+
+docker exec -it newhotkey-db-1 psql -U user -d mydb -c "\du": DBのユーザー一覧などの確認
+docker exec -it newhotkey-db-1 psql -U user -d mydb -c "\l": dbの一覧
+ =Tc/user: その他のユーザはT,c
+ user=CTc/user: userはC,T,c
+
+
+docker exec -it newhotkey-db-1 psql -U user -d mydb_restore -c "\dt": テーブルの表示
+docker exec -it newhotkey-db-1 psql -U user -d mydb_restore -c "SELECT COUNT(*) FROM keylogs;": テーブルの件数表示
+
+docker compose up -d backend db: backendとdbのデーモンでの起動
+dev container: reopen... frontendコンテナへ入る
+  runServices: ["frontend"]: frontendコンテナの自動起動
+docker compose exec -it frontend bash: bashでfrontendへ入る
+npm run dev: サーバーの起動
+
+****DUMPFILEの生成方法****
+docker exec -it newhotkey-db-1 bash
+pg_dump -U user -d [復元元DB名] -Fc -f /backup5.dump // container内
+docker cp newhotkey-db-1:/backup5.dump ./backup5.dump
+
+docker exec -i newhotkey-db-1 createdb -U user [復元先DB名]
+docker exec -it newhotkey-db-1 pg_restore -U user -d [復元先DB名] /backup5.dump

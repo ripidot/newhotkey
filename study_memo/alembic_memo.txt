@@ -1,0 +1,16 @@
+Generic single-database configuration.
+
+モデル変更時の作業
+1. モデル変更
+2. alembic revision --autogenerate -m "ここに説明"
+3. alembic upgrade head テーブルを作成する
+
+vscodeのroot権限は dev-container: Rebuild and Reopen in Containerをコマンドパレットから選択
+.devContainerでroot権限の場所を選択
+devContainerは一つのコンテナに対するもの
+
+backendコンテナに入って入力
+alembic revision -m "change timestamp column to TIMESTAMP" : model変更例
+alembic current -v: 接続先確認
+
+select setval('keylogs_id_seq',(select max(id) from keylogs)); : データの直接挿入などでidがずれているとき

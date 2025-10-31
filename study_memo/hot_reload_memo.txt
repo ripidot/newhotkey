@@ -1,0 +1,31 @@
+ファイルを編集
+     ↓
+chokidar が変更を検知
+     ↓
+webpack が変更をビルド
+     ↓
+ブラウザに反映（ホットリロード）
+
+webpack は変更があると再ビルドするため、chokidar の通知が遅いと再ビルドも遅延 → ホットリロードが重くなる
+webpackには監視機能もあるが、docker/wsl環境ではchokidarの方が安定しやすい
+
+next.js15系までは内部的にはwebpackが使われている
+Turbopackのログをみると...https://nextjs.org/docs/15/app/api-reference/turbopack
+
+Version Changes
+Version	Changes
+v15.5.0	Turbopack support for build beta
+v15.3.0	Experimental support for build
+v15.0.0	Turbopack for dev stable
+
+15系ではTurbopackは試験段階
+
+16系からTurbopackに切り替わったhttps://nextjs.org/docs/app/api-reference/turbopack
+webpackに切り替えたいならば
+{
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "select": ["count"],
+  "group_by": ["key"],
+  "order_by": [{"field": "count", "direction": "desc"}],
+  "limit": 10
+}
