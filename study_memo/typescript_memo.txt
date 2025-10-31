@@ -1,0 +1,20 @@
+const requestData: QueryRequest = {
+...baseRequest,
+...(process_name ? { where: { process_name } } : {}),
+};
+
+process_name ? ...とすると、
+...( { where: { process_name: "Explorer.EXE" } } )が展開される
+
+react-mosaicがリサイズを検知すると
+Counter内で定義されている関数を再定義する(再生成)
+
+そのため、リサイズをすると、useEffectの依存配列を設定せずとも
+CounterGraphが再生成されてしまう
+
+Counterの外であればいいため、このファイルで外に定義してもいいが、
+可読性のために分割している
+Counterの外に出すことで再生成を再レンダーに落ち着かせている
+
+再レンダー : 仮想DOMの生成
+再生成 : アンマウント, マウント

@@ -13,10 +13,10 @@ import type { FormState, Formstring, Item ,  ValidFormState} from "@/src/types/i
 export function SelectPanelType({ onCreatePanel, onCancel }: { 
   onCreatePanel: (validformstate: ValidFormState) => void; 
   onCancel: () => void }) {
-  // カテゴリ一覧
+
   const categories = ["キー種別データ", "時系列データ", "総量データ"];
   const durations = ["day", "week", "month"];
-  // 全アイテム
+
   const items = [
     { name: "棒グラフ", categories: ["キー種別データ", "時系列データ"] },
     { name: "折れ線グラフ", categories: ["時系列データ"] },
@@ -35,7 +35,7 @@ export function SelectPanelType({ onCreatePanel, onCancel }: {
     ? items.filter((item) => item.categories.includes(String(formState.datatype)))
     : [];
 
-  // 入力更新用
+
   const handleChange = (key: keyof typeof formState, value: Formstring) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };

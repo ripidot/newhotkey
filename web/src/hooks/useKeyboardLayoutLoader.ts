@@ -1,4 +1,3 @@
-// KeyboardLayoutLoader.tsx
 import { useEffect, useState } from "react";
 import type { Position, KeyPosition } from  "@/src/types/interface";
 
@@ -7,7 +6,6 @@ export function useKeyboardLayoutLoader(jsonPath: string) {
 
 
   useEffect(() => {
-    // console.log("im in useEffect");
     const loadLayout = async () => {
       try {
         const response = await fetch(jsonPath);

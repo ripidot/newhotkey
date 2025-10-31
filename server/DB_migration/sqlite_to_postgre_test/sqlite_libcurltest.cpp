@@ -1,4 +1,3 @@
-
 #define NOMINMAX
 #include <iostream>
 #include <string>

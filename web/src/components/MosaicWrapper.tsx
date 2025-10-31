@@ -74,7 +74,7 @@ export default function MosaicWrapper() {
         case "KeyboardBarChart":
           return <KeyboardBarChart key={id} process_name={ process_name } aggcolumn={aggcolumn}/>;
 
-        case "KeyboardLineChart": // linechartならばdurationを持っている
+        case "KeyboardLineChart":
           return <KeyboardLineChart key={id} process_name={ process_name } aggcolumn={aggcolumn}/>;
         
         case "KeyboardCounter":

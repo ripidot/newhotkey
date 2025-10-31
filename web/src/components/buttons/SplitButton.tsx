@@ -1,5 +1,3 @@
-// import 'blueprintjs/core/lib/css/blueprint.css';
-// import 'blueprintjs/icons/lib/css/blueprint-icons.css';
 import React, { useContext } from "react";
 import { MosaicWindowContext } from "react-mosaic-component";
 import { MosaicWindowProps } from 'react-mosaic-component';

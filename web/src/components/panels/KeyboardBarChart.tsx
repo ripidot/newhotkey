@@ -17,9 +17,6 @@ export function KeyboardBarChart({
     );
 }
 function Graph<T extends QueryRecordKey>({ process_name, aggcolumn }: { process_name: string; aggcolumn: T }) {
-  // const aggcolumn = "key";
-  // const process_name = "Explorer.EXE";
-
   const baseRequest: QueryRequest = {
     select: [aggcolumn],
     group_by: [aggcolumn],
@@ -27,7 +24,7 @@ function Graph<T extends QueryRecordKey>({ process_name, aggcolumn }: { process_
     order_by: [{ field: "count", direction: "desc" }],
     limit: 20,
   };
-// ...( { where: { process_name: "Explorer.EXE" } } )が展開される
+
   const requestData: QueryRequest = {
     ...baseRequest,
     ...(process_name ? { where: { process_name } } : {}),
