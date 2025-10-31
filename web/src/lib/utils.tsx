@@ -112,6 +112,40 @@ export function logscaling(min: number, max: number, c: number){
   const v = (Math.log(1 + c) - Math.log(1 + min)) / (Math.log(1 + max) - Math.log(1 + min));
   return v;
 }
+
+// export function printcomment(hex1: string, hex2: string, ratio: number): string {
+//   const [h1, s1, l1] = hexToHsl(hex1);
+//   const [h2, s2, l2] = hexToHsl(hex2);
+
+//   const h = interpolateHue(h1, h2, ratio);
+//   const s = s1 * (1 - ratio) + s2 * ratio;
+//   const l = l1 * (1 - ratio) + l2 * ratio;
+
+//   const [r, g, b] = hslToRgb(h, s, l);
+//   return rgbToHex(r, g, b);
+// }
+// export function printcomment(hex1: string, hex2: string, ratio: number): string {
+//   const [h1, s1, l1] = hexToHsl(hex1);
+//   const [h2, s2, l2] = hexToHsl(hex2);
+
+//   const h = interpolateHue(h1, h2, ratio);
+//   const s = s1 * (1 - ratio) + s2 * ratio;
+//   const l = l1 * (1 - ratio) + l2 * ratio;
+
+//   const [r, g, b] = hslToRgb(h, s, l);
+//   return rgbToHex(r, g, b);
+// }// export function printcomment(hex1: string, hex2: string, ratio: number): string {
+//   const [h1, s1, l1] = hexToHsl(hex1);
+//   const [h2, s2, l2] = hexToHsl(hex2);
+
+//   const h = interpolateHue(h1, h2, ratio);
+//   const s = s1 * (1 - ratio) + s2 * ratio;
+//   const l = l1 * (1 - ratio) + l2 * ratio;
+
+//   const [r, g, b] = hslToRgb(h, s, l);
+//   return rgbToHex(r, g, b);
+// }
+
 export function ReturnProcessName({
   aggcolumn,
   process_name,
@@ -158,7 +192,7 @@ export function ReturnProcessNameforCounter({
 
   return (
     <p>
-      {aggLabel && <>{aggLabel}<br /></>}
+      {aggLabel && <>{aggLabel}<br/></>}
       集計プロセス名: {process_name ? process_name : "全て"}
     </p>
   );
@@ -166,7 +200,7 @@ export function ReturnProcessNameforCounter({
 
 export function DrawExcept({ loading, error }: { loading: boolean, error: unknown }){
   if (loading) { // 非同期処理のためのロード中の処理
-    return <div><p>Loading...しばらく待って更新されない場合はページをリロードしてください。</p><p>初回接続時には1分ほどサーバーの起動に時間がかかる場合がございます。</p></div>;
+    return <div><p>初回接続時には1分ほどサーバーの起動に時間がかかる場合がございます。</p><p>Loading...しばらく待って更新されない場合はページをリロードしてください。</p></div>;
   }
   if (error instanceof Error) {
     return <p>Error: {error.message}</p>;
@@ -194,9 +228,6 @@ export function RemoveNanoId(uid: string){
   const name = uid.split("-")[0];
   return name;
 }
-// function isLeaf(layout: Layout): layout is string {
-//   return typeof layout === "string";
-// }
 
 export function getLayoutByPath(layout: Layout | null, path: LayoutKey[]): string {
   if (!layout) throw new Error("invalid input");
