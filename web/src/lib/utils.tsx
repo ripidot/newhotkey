@@ -113,39 +113,6 @@ export function logscaling(min: number, max: number, c: number){
   return v;
 }
 
-// export function printcomment(hex1: string, hex2: string, ratio: number): string {
-//   const [h1, s1, l1] = hexToHsl(hex1);
-//   const [h2, s2, l2] = hexToHsl(hex2);
-
-//   const h = interpolateHue(h1, h2, ratio);
-//   const s = s1 * (1 - ratio) + s2 * ratio;
-//   const l = l1 * (1 - ratio) + l2 * ratio;
-
-//   const [r, g, b] = hslToRgb(h, s, l);
-//   return rgbToHex(r, g, b);
-// }
-// export function printcomment(hex1: string, hex2: string, ratio: number): string {
-//   const [h1, s1, l1] = hexToHsl(hex1);
-//   const [h2, s2, l2] = hexToHsl(hex2);
-
-//   const h = interpolateHue(h1, h2, ratio);
-//   const s = s1 * (1 - ratio) + s2 * ratio;
-//   const l = l1 * (1 - ratio) + l2 * ratio;
-
-//   const [r, g, b] = hslToRgb(h, s, l);
-//   return rgbToHex(r, g, b);
-// }// export function printcomment(hex1: string, hex2: string, ratio: number): string {
-//   const [h1, s1, l1] = hexToHsl(hex1);
-//   const [h2, s2, l2] = hexToHsl(hex2);
-
-//   const h = interpolateHue(h1, h2, ratio);
-//   const s = s1 * (1 - ratio) + s2 * ratio;
-//   const l = l1 * (1 - ratio) + l2 * ratio;
-
-//   const [r, g, b] = hslToRgb(h, s, l);
-//   return rgbToHex(r, g, b);
-// }
-
 export function ReturnProcessName({
   aggcolumn,
   process_name,

@@ -1,9 +1,7 @@
-// src/components/panels/KeyTimeline.tsx
 import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import type { QueryRequest, QueryRecordKey, QueryResult } from "@/src/types/interface";
 import { useQueryRecord } from "@/src/hooks/useQueryRecord";
 import { ReturnProcessName, DrawExcept } from "@/src/lib/utils";
-// src/components/panels/KeyTimeline.tsx
 
 export function KeyboardLineChart({
   process_name, aggcolumn
@@ -18,7 +16,6 @@ export function KeyboardLineChart({
     );
 }
 function Graph<T extends QueryRecordKey>({ process_name, aggcolumn }: { process_name: string; aggcolumn: T }) {
-  // const aggcolumn = "week";
   const baseRequest: QueryRequest = {
     select: [aggcolumn],
     group_by: [aggcolumn],

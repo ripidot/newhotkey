@@ -1,4 +1,3 @@
-// Chart.js用データ
 import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip as ChartTooltip } from "chart.js";
 

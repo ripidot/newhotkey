@@ -13,8 +13,6 @@ load_dotenv(".env")
 db_url = os.getenv("DATABASE_URL")
 engine = create_engine(db_url)
 
-# engine = create_engine("postgresql+psycopg2://user:mypass@db:5432/mydb", echo = True)
-
 Base.metadata.create_all(bind=engine)
 
 print("tables created successfully")

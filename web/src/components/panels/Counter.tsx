@@ -1,5 +1,3 @@
-// src/components/panels/Counter.tsx
-
 import { useEffect } from "react";
 import type { QueryRequest } from "@/src/types/interface";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
@@ -7,20 +5,6 @@ import { useQueryRecord } from "@/src/hooks/useQueryRecord";
 import type { CircleAnimation, CircleText} from "@/src/types/interface";
 import { ReturnProcessName, DrawExcept } from "@/src/lib/utils";
 import type { QueryRecordKey } from "@/src/types/interface";
-
-// CounterGraphをファイル分割しているが、これは再生成を防ぐため
-// react-mosaicがリサイズを検知すると
-// Counter内で定義されている関数を再定義する(再生成)
-
-// そのため、リサイズをすると、useEffectの依存配列を設定せずとも
-// CounterGraphが再生成されてしまう
-
-// Counterの外であればいいため、このファイルで外に定義してもいいが、
-// 可読性のために分割している
-// Counterの外に出すことで再生成を再レンダーに落ち着かせている
-
-// 再レンダー : 仮想DOMの生成
-// 再生成 : アンマウント, マウント
 
 export function Counter({
   process_name, aggcolumn

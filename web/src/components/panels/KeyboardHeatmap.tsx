@@ -22,8 +22,6 @@ export function KeyboardHeatmap({
   const imgRef = useRef<HTMLImageElement>(null);
   const [imgcoords, setImgCoords] = useState<{ left: number; top: number; w: number; h: number }>();
   const [, setLoaded] = useState(false);
-  // const [queryRecord, setqueryRecord] = useState<QueryRecord[]>([]);
-
   const layout = useKeyboardLayoutLoader("/keyboard_layout.json");
 
   const updateCoords = () => {
@@ -51,7 +49,7 @@ export function KeyboardHeatmap({
         src="/keyboard.png"
         alt="keyboard"
         onLoad={() => {
-          updateCoords(); // 画像のロード後
+          updateCoords();
           setLoaded(true);
         }}
         style={{
