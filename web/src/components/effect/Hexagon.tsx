@@ -41,9 +41,6 @@ interface HexagonProps {
   }
 
   useEffect(() => {
-    // console.log("im in useEffect");
-    // console.log("cols, rows: ", cols, ",", rows)
-    // console.log("size.h, size.w : ", size.height, size.width);
     cells = [];
     for(let row=0; row<rows; row++){
       for(let col=0; col<cols; col++){

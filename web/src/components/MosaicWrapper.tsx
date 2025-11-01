@@ -45,8 +45,6 @@ export default function MosaicWrapper() {
         return <KeyboardBarChart key={id} process_name={""} aggcolumn={"key"}/>;
       case "KeyboardLineChart":
         return <KeyboardLineChart key={id} process_name={""} aggcolumn={"week"}/>;
-      case "userSessions_all":
-        return <KeyboardBarChart key={id} process_name={""} aggcolumn={"week"}/>;
       case "KeyboardCounter":
         return <Counter key={id} process_name={""} aggcolumn={"count"}/>;
       case "KeyboardHeatmap":

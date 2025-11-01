@@ -53,10 +53,8 @@ export type PanelId = string;
 export type PanelType =
   | "KeyboardBarChart"
   | "KeyboardLineChart"
-  | "userSessions_all"
   | "KeyboardCounter"
   | "KeyboardHeatmap"
-  | "CircleGraph"
   | "Error";
 
 export type LayoutKey = "first" | "second";

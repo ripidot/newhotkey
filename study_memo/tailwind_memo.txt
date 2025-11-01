@@ -1,0 +1,8 @@
+// aside : 付随的な内容 Margin(自コンテンツのゆとり), Padding(他要素との間隔), space-y-4(子要素同士の間隔)
+
+m: margin, p: padding, w: width, h: height
+flex: 自動でいい感じのレイアウトに
+flex-row: 横を合わせる
+w-full: widthをfullで使う h-full: heightをfullで使う
+bg-gray-200: backgroundをgrayの20%にする
+align text-center: textをcenterに
