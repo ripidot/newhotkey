@@ -13,7 +13,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onAddPanel, onCreatePanel, onUpdateCoords, onAlignBoard, onCheckLog}) => {
-  return ( // aside : 付随的な内容 Margin(自コンテンツのゆとり), Padding(他要素との間隔), space-y-4(子要素同士の間隔)
+  return (
     <aside className="sidebar p-4 space-y-4 w-full">
       <ConfigPanel onCreatePanel={onCreatePanel}/>
       <div className="sample-button-container">
