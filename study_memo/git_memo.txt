@@ -1,0 +1,42 @@
+# 1. すべてのローカル変更を破棄（未追跡ファイルも含めて）
+git reset --hard (リモートのmainを完全にローカルに反映)
+git clean -fd (未追跡ファイルを削除 (例: study_memo/tailwind_memo.txt))
+
+# 2. リモートの最新情報を取得
+git fetch origin
+
+# 3. リモートmainの内容でローカルmainを上書き
+git checkout main
+git reset --hard origin/main
+
+
+pull = fetch + merge
+git reset HEAD^ 直前のコミットとaddを取り消す(HEAD~3は直近3つをなかったことに, HEAD~1 = HEAD^)
+
+--soft: HEADだけ動かす, ファイルはそのままで、変更はステージングに残る
+--mixed: ファイルはそのままで、ステージングが解除される(デフォルトの設定)
+--hard: ファイル内容も戻る(ワーキングディレクトリが上書き)
+
+mergeとrebaseの違い
+時系列的に
+Aさん: 1, 3
+Bさん: 2, 4
+の順にコミットをしていたとき、
+mergeだと
+[main]---1-----3---M---
+          \       /
+           2-----4
+
+のように分岐ができる
+
+rebaseだと
+[main]---1---3---2---4---M
+のように一直線になる
+
+git stash: いったん作業内容を消す
+git stash pop: 作業内容を戻す
+いつ使う？ : 作業branchを間違えたときなど
+git stash
+git switch xxx
+git stash pop
+のようにすることで作業branchを間違えた場合にも移動が可能
