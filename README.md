@@ -32,6 +32,7 @@
 | 環境構築 | Docker |
 | CI/CD | Vercel |
 | インフラ | Vercel / Render / Neon |
+| その他 | Linter: ESLinter / テスト: jest |
 
 <br/>
 
@@ -56,6 +57,7 @@
 - フロントエンドでのユーザー入力に応じた、FastAPIでの動的な集計系クエリ生成
 - Docker composeを用いたフロントエンド/バックエンド/DBの一元管理
 - Vercelでフロントエンド、RenderでFastAPI、NeonでDBをホスト
+- xssやSQLインジェクションなどセキュリティを意識した設計、開発
 <br/>
   
 ## 開発全体で悩んだ点
