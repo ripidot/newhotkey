@@ -7,8 +7,10 @@
 ## URL
 [webページ](https://newhotkey.vercel.app)
 - こちらよりアクセスが可能です。
-- サンプルボタンはワンクリックでチャートが表示されます。
+- アクセス時には私のキーログを基に、チャートが表示されます。
+
 - 新しいパネルボタンからはオリジナルにカスタマイズしたチャートを表示することができます。
+- サンプルボタンはワンクリックでチャートが表示されます。
 
 [Figma 設計図(DFD/システム構成図/etc...)](https://www.figma.com/design/1mnWRrs2KoO3GsV7ktOTae/keylogvisualization?node-id=0-1&p=f&t=1hmgQ5UvnzGZv1Qs-0)
 
@@ -16,6 +18,25 @@
 
 <br/>
 
+## Concept
+普段なにげなく使っているキーボードですが、<br/>
+どのアプリでどのくらい使っているのかわかりやすく体感するために制作しました。<br/>
+付属のCLIキーロガーを使用することでキーの押下ログを保存できます。<br/>
+保存した押下ログを可視化するwebサイトです。<br/>
+<br/>
+
+## DB設計
+| DB識別子 | カラム名 | 例 | 説明 |
+|-|-|-|-|
+| PK | id | 1 | レコードを一意に識別するためのインクリメントされるid |
+| | session_id | 1_20251101T0101_1234 | (累積セッション回数)\_(年月日T時分)\_(アプリ起動時に決定されるランダムな4桁整数) |
+| | sequence_id | 1 | セッション内で1からインクリメントされるid |
+| | key | A | 入力されたキー |
+| | modifiers | shift | 入力された修飾子 |
+| | window_title | C:\WINDOWS\system32\cmd.exe | アクティブウィンドウのタイトル |
+| | process_name | WindowsTerminal | アクティブウィンドウのプロセス名 |
+| FK | user_id | 1 | ユーザ毎に割り当てられたid |
+ 
 ## Technologies
 <p align="left">
   <a href="https://www.typescriptlang.org/"><img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" height="50px;" /></a>
@@ -34,16 +55,6 @@
 | インフラ | Vercel / Render / Neon |
 | その他 | Linter: ESLinter / テスト: jest |
 
-<br/>
-
-## Concept
-普段なにげなく使っているキーボードですが、<br/>
-どのアプリでどのくらい使っているのかわかりやすく体感するために制作しました。<br/>
-付属のCLIキーロガーを使用することでキーの押下ログを保存できます。<br/>
-保存した押下ログを可視化するwebサイトです。<br/>
-
-どのアプリでどのキーをよく使っていたか、<br/>
-キーの押下ログと共に過去の自分を振り返ることができます。
 <br/>
 
 ## DataFlow
