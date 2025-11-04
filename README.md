@@ -11,11 +11,6 @@
 
 - 新しいパネルボタンからはオリジナルにカスタマイズしたチャートを表示することができます。
 - サンプルボタンはワンクリックでチャートが表示されます。
-
-[Figma 設計図(DFD/システム構成図/etc...)](https://www.figma.com/design/1mnWRrs2KoO3GsV7ktOTae/keylogvisualization?node-id=0-1&p=f&t=1hmgQ5UvnzGZv1Qs-0)
-
-[API 設計図](/api.md)
-
 <br/>
 
 ## Concept
@@ -36,6 +31,10 @@
 | | window_title | C:\WINDOWS\system32\cmd.exe | アクティブウィンドウのタイトル |
 | | process_name | WindowsTerminal | アクティブウィンドウのプロセス名 |
 | FK | user_id | 1 | ユーザ毎に割り当てられたid |
+
+## API設計
+[API 設計図](/api.md) <br/>
+REST APIに倣って設計をしました。
  
 ## Technologies
 <p align="left">
@@ -78,6 +77,10 @@
 - 使用メモリを削減しつつDockerでコンテナを立てるための環境設定
 - SQLインジェクション対策と動的なクエリ生成の両立
 - I/OスパイクによるDBレコードの消失と復元、原因の特定
+<br/>
+
+## 設計資料など
+[Figma 設計図(DFD/システム構成図/etc...)](https://www.figma.com/design/1mnWRrs2KoO3GsV7ktOTae/keylogvisualization?node-id=0-1&p=f&t=1hmgQ5UvnzGZv1Qs-0) <br/>
 <br/>
 
 ## 今後の改善点
