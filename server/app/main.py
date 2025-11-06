@@ -6,11 +6,12 @@ from app.routers import user_router, logs_router
 app = FastAPI()
 
 # CORS設定
-origins = [
-    "http://localhost:3000", # 開発用
-    "https://newhotkey.vercel.app", # vercelのドメイン
-    "https://newhotkey.onrender.com", # renderのドメイン
-]
+# origins = [
+#     "http://localhost:3000", # 開発用
+#     "https://newhotkey.vercel.app", # vercelのドメイン
+#     "https://newhotkey.onrender.com", # renderのドメイン
+# ]
+origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
 
 app.add_middleware(
     CORSMiddleware,
