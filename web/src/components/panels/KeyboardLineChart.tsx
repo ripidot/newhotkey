@@ -1,3 +1,5 @@
+"use client";
+
 import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import type { QueryRequest, QueryRecordKey, QueryResult } from "@/src/types/interface";
 import { useQueryRecord } from "@/src/hooks/useQueryRecord";

@@ -1,4 +1,5 @@
-// src/components/panels/KeyTimeline.tsx
+"use client";
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import type { QueryRequest, QueryRecordKey, QueryResult } from "@/src/types/interface";
 import { ReturnProcessName, DrawExcept } from "@/src/lib/utils";
