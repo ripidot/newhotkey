@@ -29,7 +29,9 @@ export interface QueryRecord {
   [key: string]: string | number;
   count: number;
 }
-
+export interface ApiResponse<T> {
+  data: T[];
+}
 export type VisualizationType = "graph" | "counter";
 
 
