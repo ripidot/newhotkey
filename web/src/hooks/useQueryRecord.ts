@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { QueryRequest } from "@/src/types/interface";
+import type { ApiResponse, QueryRequest } from "@/src/types/interface";
 
 export function useQueryRecord<T>(requestData: QueryRequest) {
   const [queryRecord, setQueryRecord] = useState<T[]>([]);
@@ -14,7 +14,8 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
       setError(null);
 
       try {
-        const response = await fetch("https://newhotkey.onrender.com/logs/search", {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${API_URL}/logs/search`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestData),
@@ -24,7 +25,8 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const jresponse = await response.json();
+        const jresponse: ApiResponse<T> = await response.json();
+        // const jresponse = await response.json();
         setQueryRecord(jresponse.data);
       } catch (err: unknown) {
         setError(err);
