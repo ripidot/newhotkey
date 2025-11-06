@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import type { QueryRequest } from "@/src/types/interface";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";

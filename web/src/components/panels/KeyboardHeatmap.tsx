@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useEffect, useState } from "react";
 import type { QueryRequest, PanelId, HeatmapProps, HeatmapLabelProps } from "@/src/types/interface";
 import { useKeyboardLayoutLoader } from "@/src/hooks/useKeyboardLayoutLoader";
