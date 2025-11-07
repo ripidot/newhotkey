@@ -23,13 +23,13 @@ export function useQueryRecord<T>(requestData: QueryRequest) {
           body: JSON.stringify(requestData),
         });
 
-        if (!response.ok) {
+        if (!response.ok) { // res.okはstatusが200~299の時にtrue
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const jresponse: ApiResponse<T> = await response.json();
-        // const jresponse = await response.json();
         setQueryRecord(jresponse.data);
+
       } catch (err: unknown) {
         setError(err);
       } finally {
