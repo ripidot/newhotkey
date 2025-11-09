@@ -1,0 +1,10 @@
+commandの優先度
+docker-compose.ymlのcommand > DockerfileのCMD
+
+Dockerfileが実行され、imageがビルド
+-> docker-compose.ymlでコンテナが起動
+
+よって、
+Dockerfileのコマンド
+-> docker-compose.ymlのbuild, environment, volumes, command
+の順で実行される
