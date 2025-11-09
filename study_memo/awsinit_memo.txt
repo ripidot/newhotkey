@@ -1,0 +1,65 @@
+============EC2ssh通信初回セットアップ============
+
+~/.sshでpemファイルを準備しておく 
+ssh -i newhotkey-key.pem ec2-user@35.77.40.91
+
+# container clear
+sudo docker system prune -a --volumes
+
+sudo usermod -aG docker ec2-user
+(権限を与える, sudoなし)
+
+sudo yum update -y
+
+(sudo amazon-linux-extras install docker -y): 古いコマンド, amazon linux2
+=> (sudo dnf install docker -y): amazon linux 2023
+
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo systemctl status docker
+sudo usermod -aG docker ec2-user    # 非rootでdocker使えるように
+
+# Docker Compose (v2 以降は docker compose)
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# git (必要なら)
+sudo yum install -y git
+
+# nginx (リバースプロキシ用)
+sudo yum install -y nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+# awscli（S3操作のため）
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip /tmp/awscliv2.zip -d /tmp
+sudo /tmp/aws/install
+
+============デプロイ============
+# EC2上
+cd /home/ec2-user
+git clone https://github.com/<your-org>/newhotkey.git
+cd newhotkey/web
+# 環境変数を .env.production に置く vi .env.xxxで作るだけ
+sudo docker build -t newhotkey-frontend:latest .
+sudo docker run -d --name newhotkey-frontend -p 3000:3000 -e NEXT_PUBLIC_API_URL=https:/
+/newhotkey.onrender.com newhotkey-frontend:latest
+
+
+# 最新版を取得
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo curl -SL https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 -o /usr/local/lib/docker/cli-plugins/docker-buildx
+
+# 実行権限を付与
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+
+# 動作確認
+docker compose version
+docker buildx version
+
+sudo docker build -t newhotkey-frontend:latest .
+sudo docker run -d --name newhotkey-frontend -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://onrender.com newhotkey-frontend:latest
