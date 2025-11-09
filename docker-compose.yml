@@ -4,20 +4,15 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /home/user/newhotkey/web:/app # bind mount 共有のため
+      - ./web:/app # bind mount 共有のため
       - next_next:/app/.next
       - next_node_modules:/app/node_modules # volumes mount 分離のため, 保存しない
     environment:
-      # - WATCHPACK_POLLING=true # next15系ではwatchpackが標準なため、chokidarは効かない
-      # - WATCHPACK_POLLING=false
-      # - CHOKIDAR_USEPOLLING=false
-      # - TURBOPACK=1
-      # - WATCHPACK_POLLING_INTERVAL=3000
       # - NODE_ENV=development # next.jsが開発モードで起動
       - NODE_ENV=production # next.jsが本番モードで起動
       - NODE_OPTIONS=--max-old-space-size=2048 # memoryサイズの制御
-    # command: npm run dev
-    command: sh -c "npm run build && npm run start"
+      - HOST=0.0.0.0
+    command: ["npm", "start"]
     # depends_on:
     #   - backend
 
@@ -26,9 +21,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /home/user/newhotkey/server:/app
+      - ./server:/app
     env_file:
-      - /home/user/newhotkey/server/.env
+      - ./server/.env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     # depends_on:
     #   - db
