@@ -1,0 +1,19 @@
+newhotkey.service
+==========================
+[Unit]
+Description=newhotkey frontend
+After=docker.service
+Requires=docker.service
+
+[Service]
+User=ec2-user
+Restart=always
+ExecStartPre=-/usr/bin/docker rm -f newhotkey-frontend
+ExecStart=/usr/bin/docker run --rm --name newhotkey-frontend -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://newhotkey.onrender.com newhotkey-frontend:latest
+ExecStop=/usr/bin/docker stop -t 10 newhotkey-frontend
+ExecStopPost=-/usr/bin/docker rm -f newhotkey-frontend
+
+[Install]
+WantedBy=multi-user.target
+
+==========================

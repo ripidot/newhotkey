@@ -63,3 +63,9 @@ docker buildx version
 
 sudo docker build -t newhotkey-frontend:latest .
 sudo docker run -d --name newhotkey-frontend -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://onrender.com newhotkey-frontend:latest
+
+# systemdの起動(コンテナが落ちていなければならない)
+sudo systemctl daemon-reload
+sudo systemctl enable newhotkey.service
+sudo systemctl start newhotkey.service
+sudo systemctl status newhotkey.service
