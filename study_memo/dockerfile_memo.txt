@@ -2,9 +2,19 @@ commandの優先度
 docker-compose.ymlのcommand > DockerfileのCMD
 
 Dockerfileが実行され、imageがビルド
--> docker-compose.ymlでコンテナが起動
+DockerfileのCMDまたはdocker-compose.ymlのcommandでコンテナが起動
+
+=================================
+RUN: イメージビルド時に一度だけ実行
+イメージの中にファイルを追加/ビルドして永続的に残す
+npm run buildなど
+
+CMD: コンテナ起動時に毎回実行
+npm startなど
+=================================
 
 よって、
 Dockerfileのコマンド
--> docker-compose.ymlのbuild, environment, volumes, command
+-> docker-compose.ymlのbuild, ports, environment, volumes, command
 の順で実行される
+ports: - "3000:3000" コンテナの3000をホストの3000に転送する
