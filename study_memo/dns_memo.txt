@@ -1,0 +1,20 @@
+(ユーザー)
+   ↓ 1. このドメインのDNSはどこ？
+(レジストラのWhois情報 or DNSキャッシュ)
+   ↓ 2. Cloudflare が DNS 担当だと分かる
+(Cloudflare DNS)
+   ↓ 3. Aレコード / CNAME を見て答える
+   - Proxied = CloudflareのIPを返す
+(ユーザー)
+   ↓ 4. CloudflareのIPにアクセス
+(Cloudflare)
+   ↓ 5. Cloudflareが裏側のEC2 (35.77.40.91) に接続
+(EC2)
+   ↓ 6. EC2 の nginx が応答する
+   ↓ 7. Webページを返す
+
+127.0.0.1: ループバックアドレス
+自身のマシン宛のアドレスのこと, TCP/IPであればそのように解釈される
+
+listen: サーバが自分のポートで待ち受ける行為, 通信の終端としての役割
+proxy: 受け取ったリクエストを別のサーバに転送する行為

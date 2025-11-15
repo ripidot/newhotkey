@@ -1,0 +1,3 @@
+webブラウザはhttp://example.comなどにアクセスする。
+一般ユーザーはhttp://example.com:3000などにはアクセスしない
+そのため、nginxでhttp://example.comとhttp://example.com:3000の橋渡しをしている
