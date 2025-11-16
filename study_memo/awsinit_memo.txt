@@ -69,3 +69,39 @@ sudo systemctl daemon-reload
 sudo systemctl enable newhotkey.service
 sudo systemctl start newhotkey.service
 sudo systemctl status newhotkey.service
+
+============Let's Encryptのクライアントインストール============
+sudo dnf install -y certbot python3-certbot-nginx
+# timerの作成
+sudo nano /etc/systemd/system/certbot-renew.timer 
+/*
+[Unit]
+Description=Run certbot twice daily
+
+[Timer]
+OnCalendar=*-*-* 03:00,15:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+*/
+
+# serviceの作成
+sudo nano /etc/systemd/system/certbot-renew.service
+/*
+[Unit]
+Description=Renew Let's Encrypt certificates
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/certbot renew --quiet
+*/
+# 有効化
+sudo systemctl daemon-reload
+sudo systemctl enable --now certbot-renew.timer
+
+# 動作テスト
+# timerがあればログが出力
+systemctl list-timers | grep certbot
+# エラーがでなければ正常
+sudo certbot renew --dry-run
