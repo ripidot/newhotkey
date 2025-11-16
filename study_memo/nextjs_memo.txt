@@ -6,3 +6,5 @@ App Router: Next.js13以降のルーティング方式
 fetch()を直接使う(getServerSidePropsなどは廃止)
 use clientを宣言することでCSRを行う
 デフォルトはSSR
+
+publicディレクトリが公開されるため、public内に.envなどを置くとそこから漏洩する
