@@ -41,12 +41,12 @@
   最小限の許可範囲で安全に通信できるよう設計
 
 ## Technologies
-<p align="left">
-  <a href="https://www.typescriptlang.org/"><img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" height="50px;" /></a>
-  <a href="https://nextjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" height="50px;" /></a>
-  <a href="https://ja.reactjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" height="50px;" /></a>
-  <a href="https://aws.amazon.com/"><img src="https://cdn.worldvectorlogo.com/logos/aws-2.svg" height="50px;" /></a>
-</p>
+<div style="display:flex; gap:10px; align-items:center;">
+  <a href="https://www.typescriptlang.org/"><img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://nextjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://ja.reactjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://aws.amazon.com/"><img src="https://cdn.worldvectorlogo.com/logos/aws-2.svg" style="height:50px; width:50px;" /></a>
+</div>
 
 | カテゴリ | 技術 |
 |-----------|----------------|
