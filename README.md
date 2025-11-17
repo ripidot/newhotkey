@@ -1,11 +1,11 @@
 ![Videotogif (1)](https://github.com/user-attachments/assets/89569549-72fb-475f-8449-eba26335fed8)
 
 <br/>
-<h1 align="center">🔑 <a href="https://newhotkey.vercel.app">KeylogVisualization</a></h1><br/>
+<h1 align="center">🔑 <a href="https://keylogvisualization.com/">KeylogVisualization</a></h1><br/>
 <p align="center">キーボードの押下ログの可視化サイトです。</p><br/>
 
 ## URL
-[webページ](https://newhotkey.vercel.app)
+[webページ](https://keylogvisualization.com/)
 - こちらよりアクセスが可能です。
 - アクセス時には私のキーログを基に、チャートが表示されます。
 
@@ -19,6 +19,50 @@
 付属のCLIキーロガーを使用することでキーの押下ログを保存できます。<br/>
 保存した押下ログを可視化するwebサイトです。<br/>
 <br/>
+
+## Point
+本アプリは開発だけでなくセキュリティ面にも配慮をしています。
+以下はこだわったポイントです。
+
+- AWS EC2上でのデプロイ<br/>
+  Nginxリバースプロキシを用いた構成により安定した稼働を実現
+
+- SQLインジェクション対策<br/>
+  外部入力をプレースホルダで扱い、安全なアクセスを実現
+
+- XSS対策としてCSPを設定<br/>
+  不正スクリプトの実行を防ぐため、適切なCSPを設定
+
+- MITM対策として通信経路の完全なhttps化<br/>
+  Cloudflare -> Nginx -> アプリ間を含む全区間でhttpsを使用
+
+- CORSの設定<br/>
+  Next.js フロントエンドと FastAPI バックエンドの連携に合わせ、<br/>
+  最小限の許可範囲で安全に通信できるよう設計
+
+## Technologies
+<div style="display:flex; gap:10px; align-items:center;">
+  <a href="https://www.typescriptlang.org/"><img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://nextjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://ja.reactjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" style="height:50px; width:50px;" /></a>
+  <a href="https://aws.amazon.com/"><img src="https://cdn.worldvectorlogo.com/logos/aws-2.svg" style="height:50px; width:50px;" /></a>
+</div>
+
+| カテゴリ | 技術 |
+|-----------|----------------|
+| フロントエンド | Next.js 15.0.3 / React 18.3.1/ TypeScript 5 |
+| バックエンド | Python 3.13.9 |
+| データベース | PostgreSQL 15.5 |
+| 開発環境 | ubuntu |
+| 環境構築 | Docker |
+| CI/CD | Vercel |
+| インフラ | AWS(EC2) / Render / Neon |
+| その他 | Cloudflare / nginx / ESLint  |
+
+<br/>
+
+## DataFlow
+![DFDコピー](https://github.com/user-attachments/assets/cf47daa4-8571-4175-a9ba-766c3e713554)
 
 ## DB設計
 | DB識別子 | カラム名 | 例 | 説明 |
@@ -36,28 +80,6 @@
 [API 設計図](/api.md) <br/>
 REST APIに倣って設計をしました。
  
-## Technologies
-<p align="left">
-  <a href="https://www.typescriptlang.org/"><img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" height="50px;" /></a>
-  <a href="https://nextjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" height="50px;" /></a>
-  <a href="https://ja.reactjs.org/"><img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" height="50px;" /></a>
-  <a href="https://vercel.com/"><img src="https://user-images.githubusercontent.com/65433193/118944114-3b393980-b98f-11eb-84a5-fc9a1db8ea6b.png" height="50px;" /></a
-</p>
-
-| カテゴリ | 技術 |
-|-----------|----------------|
-| フロントエンド | Next.js 15.0.3 / React 18.3.1/ TypeScript 5 |
-| バックエンド | Python 3.13.9 |
-| データベース | PostgreSQL 15.5 |
-| 環境構築 | Docker |
-| CI/CD | Vercel |
-| インフラ | Vercel / Render / Neon |
-| その他 | Linter: ESLinter / テスト: jest |
-
-<br/>
-
-## DataFlow
-![DFDコピー](https://github.com/user-attachments/assets/cf47daa4-8571-4175-a9ba-766c3e713554)
 
 ## 技術的な挑戦
 - フロントエンドから、バックエンド、インフラ構築、DB設計まで一貫しての開発
